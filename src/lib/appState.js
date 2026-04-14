@@ -24,7 +24,9 @@ export function readStateFromUrl() {
   const variable = params.get('variable')
   const model = params.get('model')
   const ensemble = params.get('ensemble')
+  const temporalMode = params.get('temporalMode')
   const date = params.get('date')
+  const datetime = params.get('datetime')
   const layers = params.get('layers')
 
   if (BASEMAPS.some((item) => item.id === basemapId)) {
@@ -67,8 +69,16 @@ export function readStateFromUrl() {
     nextState.raster.ensemble = ensemble
   }
 
+  if (temporalMode === 'date' || temporalMode === 'datetime') {
+    nextState.raster.temporalMode = temporalMode
+  }
+
   if (date) {
     nextState.raster.date = date
+  }
+
+  if (datetime) {
+    nextState.raster.datetime = datetime
   }
 
   if (layers) {
@@ -93,7 +103,9 @@ export function writeStateToUrl(state) {
   params.set('variable', state.raster.variable)
   params.set('model', state.raster.model)
   params.set('ensemble', state.raster.ensemble)
+  params.set('temporalMode', state.raster.temporalMode)
   params.set('date', state.raster.date)
+  params.set('datetime', state.raster.datetime)
   params.set(
     'layers',
     MAP_LAYERS.filter((layer) => state.layers[layer.id])
@@ -126,6 +138,45 @@ export function parseNumericValue(value, fallback) {
 export function parseIsoDate(dateText) {
   const matchedDate = /^\d{4}-\d{2}-\d{2}$/.test(dateText) ? new Date(`${dateText}T00:00:00`) : null
   return matchedDate && !Number.isNaN(matchedDate.getTime()) ? matchedDate : null
+}
+
+export function getTemporalModeForTimestep(timestep) {
+  const matched = /^(\d+)(hour|day|month)$/.exec(timestep)
+  if (!matched) {
+    return 'date'
+  }
+
+  const [, amountText, unit] = matched
+  const amount = Number.parseInt(amountText, 10)
+
+  if (!Number.isFinite(amount)) {
+    return 'date'
+  }
+
+  return unit === 'hour' && amount < 24 ? 'datetime' : 'date'
+}
+
+export function parseTimestep(timestep) {
+  const matched = /^(\d+)(hour|day|month)$/.exec(timestep)
+  if (!matched) {
+    return { amount: 1, unit: 'day' }
+  }
+
+  const [, amountText, unit] = matched
+  const amount = Number.parseInt(amountText, 10)
+
+  if (!Number.isFinite(amount)) {
+    return { amount: 1, unit: 'day' }
+  }
+
+  return { amount, unit }
+}
+
+export function parseIsoDateTime(datetimeText) {
+  const matchedDateTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(datetimeText)
+    ? new Date(`${datetimeText}:00`)
+    : null
+  return matchedDateTime && !Number.isNaN(matchedDateTime.getTime()) ? matchedDateTime : null
 }
 
 export function formatCoordinate(value) {
@@ -171,4 +222,24 @@ export function shiftIsoMonth(dateText, months) {
   ).getDate()
   currentDate.setDate(Math.min(originalDay, lastDayOfTargetMonth))
   return currentDate.toISOString().slice(0, 10)
+}
+
+export function formatIsoDateTimeLocal(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
+
+export function shiftIsoDateTime(datetimeText, days = 0, hours = 0) {
+  const currentDate = parseIsoDateTime(datetimeText)
+  if (!currentDate) {
+    return datetimeText
+  }
+
+  currentDate.setHours(currentDate.getHours() + hours)
+  currentDate.setDate(currentDate.getDate() + days)
+  return formatIsoDateTimeLocal(currentDate)
 }

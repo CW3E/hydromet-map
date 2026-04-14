@@ -4,7 +4,13 @@ import 'react-datepicker/dist/react-datepicker.css'
 import './App.css'
 import { BASEMAPS, DEFAULT_STATE, RASTER_VARIABLES } from './config/mapConfig'
 import MapCanvas from './components/map/MapCanvas'
-import { parseCenter, parseNumericValue, readStateFromUrl, writeStateToUrl } from './lib/appState'
+import {
+  getTemporalModeForTimestep,
+  parseCenter,
+  parseNumericValue,
+  readStateFromUrl,
+  writeStateToUrl,
+} from './lib/appState'
 
 function App() {
   const [appState, setAppState] = useState(() => readStateFromUrl())
@@ -57,6 +63,7 @@ function App() {
 
   const selectedBasemap = BASEMAPS.find((item) => item.id === appState.basemapId) ?? BASEMAPS[0]
   const selectedVariable = RASTER_VARIABLES[appState.raster.variable] ?? RASTER_VARIABLES.precipitation
+  const temporalMode = getTemporalModeForTimestep(selectedVariable.timestep)
   const center = parseCenter(appState.view.center)
   const viewState = {
     longitude: center.longitude,
@@ -68,6 +75,20 @@ function App() {
   const terrainEnabled = selectedBasemap.terrainAvailable && appState.terrainEnabled
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(bookmarkUrl)}`
 
+  useEffect(() => {
+    setAppState((current) =>
+      current.raster.temporalMode === temporalMode
+        ? current
+        : {
+            ...current,
+            raster: {
+              ...current.raster,
+              temporalMode,
+            },
+          },
+    )
+  }, [temporalMode])
+
   function updateTopLevel(key, value) {
     setAppState((current) => ({
       ...current,
@@ -76,13 +97,22 @@ function App() {
   }
 
   function updateRaster(key, value) {
-    setAppState((current) => ({
-      ...current,
-      raster: {
+    setAppState((current) => {
+      const nextRaster = {
         ...current.raster,
         [key]: value,
-      },
-    }))
+      }
+
+      if (key === 'variable') {
+        const nextVariable = RASTER_VARIABLES[value] ?? RASTER_VARIABLES.precipitation
+        nextRaster.temporalMode = getTemporalModeForTimestep(nextVariable.timestep)
+      }
+
+      return {
+        ...current,
+        raster: nextRaster,
+      }
+    })
   }
 
   function toggleLayer(layerId) {

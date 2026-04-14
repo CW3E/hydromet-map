@@ -6,7 +6,16 @@ import {
   RASTER_MODELS,
   RASTER_VARIABLES,
 } from '../../config/mapConfig'
-import { parseIsoDate, shiftIsoDate, shiftIsoMonth } from '../../lib/appState'
+import {
+  formatIsoDateTimeLocal,
+  getTemporalModeForTimestep,
+  parseIsoDate,
+  parseIsoDateTime,
+  parseTimestep,
+  shiftIsoDate,
+  shiftIsoDateTime,
+  shiftIsoMonth,
+} from '../../lib/appState'
 
 export default function MapHud({
   appState,
@@ -20,6 +29,11 @@ export default function MapHud({
   updateTopLevel,
   toggleLayer,
 }) {
+  const selectedRasterVariable = RASTER_VARIABLES[appState.raster.variable] ?? RASTER_VARIABLES.precipitation
+  const isDateTimeMode = getTemporalModeForTimestep(selectedRasterVariable.timestep) === 'datetime'
+  const shortStep = parseTimestep(selectedRasterVariable.timestep)
+  const shortStepLabel = `${shortStep.amount} ${shortStep.unit}${shortStep.amount === 1 ? '' : 's'}`
+
   return (
     <div className="map-canvas__overlay">
       <div className="scene-tools">
@@ -88,69 +102,143 @@ export default function MapHud({
         </div>
 
         <div className="date-row date-row--map">
-          <button
-            className="date-icon-button"
-            type="button"
-            aria-label="One month before"
-            title="-1 month"
-            onClick={() => {
-              updateRaster('date', shiftIsoMonth(appState.raster.date, -1))
-            }}
-          >
-            <span aria-hidden="true">{'<<'}</span>
-          </button>
+          {isDateTimeMode ? (
+            <>
+              <button
+                className="date-icon-button date-icon-button--day"
+                type="button"
+                aria-label="Previous day"
+                title="-1 day"
+                onClick={() => {
+                  updateRaster('datetime', shiftIsoDateTime(appState.raster.datetime, -1, 0))
+                }}
+              >
+                <span aria-hidden="true">{'<<'}</span>
+              </button>
 
-          <button
-            className="date-icon-button"
-            type="button"
-            aria-label="Previous day"
-            title="-1 day"
-            onClick={() => {
-              updateRaster('date', shiftIsoDate(appState.raster.date, -1))
-            }}
-          >
-            <span aria-hidden="true">{'<'}</span>
-          </button>
+              <button
+                className="date-icon-button date-icon-button--hour"
+                type="button"
+                aria-label="Previous hour"
+                title={`-${shortStepLabel}`}
+                onClick={() => {
+                  updateRaster('datetime', shiftIsoDateTime(appState.raster.datetime, 0, -shortStep.amount))
+                }}
+              >
+                <span aria-hidden="true">{'<'}</span>
+              </button>
 
-          <label className="date-field">
-            <DatePicker
-              calendarClassName="hydromet-datepicker__calendar"
-              className="hydromet-datepicker__input"
-              dateFormat="yyyy-MM-dd"
-              placeholderText="YYYY-MM-DD"
-              popperPlacement="bottom-start"
-              selected={parseIsoDate(appState.raster.date)}
-              onChange={(date) => {
-                if (date) {
-                  updateRaster('date', date.toISOString().slice(0, 10))
-                }
-              }}
-            />
-          </label>
+              <label className="date-field date-field--datetime">
+                <DatePicker
+                  calendarClassName="hydromet-datepicker__calendar"
+                  className="hydromet-datepicker__input"
+                  dateFormat="yyyy-MM-dd HH:mm"
+                  placeholderText="YYYY-MM-DD HH:mm"
+                  popperPlacement="bottom-start"
+                  selected={parseIsoDateTime(appState.raster.datetime)}
+                  showTimeSelect
+                  timeCaption="Time"
+                  timeFormat="HH:mm"
+                  timeIntervals={60}
+                  onChange={(date) => {
+                    if (date) {
+                      updateRaster('datetime', formatIsoDateTimeLocal(date))
+                    }
+                  }}
+                />
+              </label>
 
-          <button
-            className="date-icon-button"
-            type="button"
-            aria-label="Next day"
-            title="+1 day"
-            onClick={() => {
-              updateRaster('date', shiftIsoDate(appState.raster.date, 1))
-            }}
-          >
-            <span aria-hidden="true">{'>'}</span>
-          </button>
+              <button
+                className="date-icon-button date-icon-button--hour-next"
+                type="button"
+                aria-label="Next hour"
+                title={`+${shortStepLabel}`}
+                onClick={() => {
+                  updateRaster('datetime', shiftIsoDateTime(appState.raster.datetime, 0, shortStep.amount))
+                }}
+              >
+                <span aria-hidden="true">{'>'}</span>
+              </button>
 
-          <button
-            className="date-icon-button"
-            type="button"
-            aria-label="One month after"
-            title="+1 month"
-            onClick={() => {
-              updateRaster('date', shiftIsoMonth(appState.raster.date, 1))
-            }}
-          >
-            <span aria-hidden="true">{'>>'}</span>
-          </button>
+              <button
+                className="date-icon-button date-icon-button--day-next"
+                type="button"
+                aria-label="Next day"
+                title="+1 day"
+                onClick={() => {
+                  updateRaster('datetime', shiftIsoDateTime(appState.raster.datetime, 1, 0))
+                }}
+              >
+                <span aria-hidden="true">{'>>'}</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="date-icon-button"
+                type="button"
+                aria-label="One month before"
+                title="-1 month"
+                onClick={() => {
+                  updateRaster('date', shiftIsoMonth(appState.raster.date, -1))
+                }}
+              >
+                <span aria-hidden="true">{'<<'}</span>
+              </button>
+
+              <button
+                className="date-icon-button"
+                type="button"
+                aria-label="Previous day"
+                title="-1 day"
+                onClick={() => {
+                  updateRaster('date', shiftIsoDate(appState.raster.date, -1))
+                }}
+              >
+                <span aria-hidden="true">{'<'}</span>
+              </button>
+
+              <label className="date-field">
+                <DatePicker
+                  calendarClassName="hydromet-datepicker__calendar"
+                  className="hydromet-datepicker__input"
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="YYYY-MM-DD"
+                  popperPlacement="bottom-start"
+                  selected={parseIsoDate(appState.raster.date)}
+                  onChange={(date) => {
+                    if (date) {
+                      updateRaster('date', date.toISOString().slice(0, 10))
+                    }
+                  }}
+                />
+              </label>
+
+              <button
+                className="date-icon-button"
+                type="button"
+                aria-label="Next day"
+                title="+1 day"
+                onClick={() => {
+                  updateRaster('date', shiftIsoDate(appState.raster.date, 1))
+                }}
+              >
+                <span aria-hidden="true">{'>'}</span>
+              </button>
+
+              <button
+                className="date-icon-button"
+                type="button"
+                aria-label="One month after"
+                title="+1 month"
+                onClick={() => {
+                  updateRaster('date', shiftIsoMonth(appState.raster.date, 1))
+                }}
+              >
+                <span aria-hidden="true">{'>>'}</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 

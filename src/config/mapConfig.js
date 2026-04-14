@@ -56,6 +56,7 @@ export const RASTER_VARIABLES = {
   precipitation: {
     label: 'Precipitation',
     units: 'mm',
+    timestep: '3hour',
     palette: [
       { value: '0', color: '#f7fbff' },
       { value: '5', color: '#cfe1f2' },
@@ -67,6 +68,7 @@ export const RASTER_VARIABLES = {
   temperature: {
     label: 'Temperature',
     units: 'deg C',
+    timestep: '1day',
     palette: [
       { value: '-10', color: '#2b6cb0' },
       { value: '0', color: '#90cdf4' },
@@ -78,6 +80,7 @@ export const RASTER_VARIABLES = {
   wind: {
     label: 'Wind Gust',
     units: 'm/s',
+    timestep: '1hour',
     palette: [
       { value: '0', color: '#f0fdf4' },
       { value: '8', color: '#86efac' },
@@ -91,6 +94,7 @@ export const RASTER_VARIABLES = {
 export const RASTER_MODELS = ['GFS', 'ECMWF', 'WRF']
 export const ENSEMBLE_TRACES = ['Control', 'Mean', 'P10', 'P50', 'P90']
 export const DEFAULT_DATE = '2026-04-13'
+export const DEFAULT_DATETIME = '2026-04-13T12:00'
 export const TERRAIN_SOURCE_ID = 'terrain-dem'
 export const TERRAIN_SPEC = { source: TERRAIN_SOURCE_ID, exaggeration: 1.15 }
 
@@ -115,7 +119,9 @@ export const DEFAULT_STATE = {
     variable: 'precipitation',
     model: 'GFS',
     ensemble: 'Mean',
+    temporalMode: 'date',
     date: DEFAULT_DATE,
+    datetime: DEFAULT_DATETIME,
   },
 }
 
