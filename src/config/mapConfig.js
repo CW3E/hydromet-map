@@ -1,21 +1,21 @@
 export const BASEMAPS = [
   {
-    id: 'streets',
-    label: 'Streets',
-    description: 'Balanced reference style for day-to-day hydromet browsing.',
+    id: 'flat',
+    label: 'Flat',
+    description: 'Flat and minimalistic.',
+    terrainAvailable: false,
+  },
+  {
+    id: 'terrain',
+    label: 'Terrain',
+    description: 'Terrain enabled.',
     terrainAvailable: true,
   },
   {
     id: 'satellite',
     label: 'Satellite',
-    description: 'Imagery-forward basemap for terrain and storm context.',
+    description: 'Satellite imagery with terrain enabled.',
     terrainAvailable: true,
-  },
-  {
-    id: 'minimal',
-    label: 'Minimal',
-    description: 'Low-clutter style for emphasizing overlays and legends.',
-    terrainAvailable: false,
   },
 ]
 
@@ -95,8 +95,8 @@ export const RASTER_MODELS = ['GFS', 'ECMWF', 'WRF']
 export const ENSEMBLE_TRACES = ['Control', 'Mean', 'P10', 'P50', 'P90']
 export const DEFAULT_DATE = '2026-04-13'
 export const DEFAULT_DATETIME = '2026-04-13T12:00'
-export const TERRAIN_SOURCE_ID = 'terrain-dem'
-export const TERRAIN_SPEC = { source: TERRAIN_SOURCE_ID, exaggeration: 1.15 }
+export const TERRAIN_SOURCE_ID = 'terrain_source'
+export const TERRAIN_SPEC = { source: TERRAIN_SOURCE_ID, exaggeration: 1 }
 
 export const DEFAULT_STATE = {
   view: {
@@ -105,9 +105,9 @@ export const DEFAULT_STATE = {
     bearing: '0',
     pitch: '30',
   },
-  basemapId: 'streets',
+  basemapId: 'flat',
   terrainEnabled: true,
-  projection: 'globe',
+  projection: 'mercator',
   layers: {
     watersheds: true,
     rivers: true,
@@ -125,101 +125,8 @@ export const DEFAULT_STATE = {
   },
 }
 
-const terrainSource = {
-  type: 'raster-dem',
-  url: 'https://demotiles.maplibre.org/terrain-tiles/tiles.json',
-  tileSize: 256,
-}
-
 export const BASEMAP_STYLES = {
-  streets: {
-    version: 8,
-    sources: {
-      osm: {
-        type: 'raster',
-        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-        tileSize: 256,
-        attribution: '&copy; OpenStreetMap contributors',
-      },
-      [TERRAIN_SOURCE_ID]: terrainSource,
-    },
-    layers: [
-      {
-        id: 'background',
-        type: 'background',
-        paint: {
-          'background-color': '#dfeaf0',
-        },
-      },
-      {
-        id: 'osm',
-        type: 'raster',
-        source: 'osm',
-      },
-    ],
-  },
-  satellite: {
-    version: 8,
-    sources: {
-      imagery: {
-        type: 'raster',
-        tiles: [
-          'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        ],
-        tileSize: 256,
-        attribution: 'Tiles &copy; Esri',
-      },
-      [TERRAIN_SOURCE_ID]: terrainSource,
-    },
-    layers: [
-      {
-        id: 'background',
-        type: 'background',
-        paint: {
-          'background-color': '#0f1f2d',
-        },
-      },
-      {
-        id: 'imagery',
-        type: 'raster',
-        source: 'imagery',
-      },
-    ],
-  },
-  minimal: {
-    version: 8,
-    sources: {
-      cartoLight: {
-        type: 'raster',
-        tiles: [
-          'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-          'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-          'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-          'https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-        ],
-        tileSize: 256,
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-      },
-      [TERRAIN_SOURCE_ID]: terrainSource,
-    },
-    layers: [
-      {
-        id: 'background',
-        type: 'background',
-        paint: {
-          'background-color': '#f4f7f8',
-        },
-      },
-      {
-        id: 'cartoLight',
-        type: 'raster',
-        source: 'cartoLight',
-        paint: {
-          'raster-saturation': -0.75,
-          'raster-contrast': -0.1,
-          'raster-brightness-max': 0.98,
-        },
-      },
-    ],
-  },
+  flat: 'https://cw3e.ucsd.edu/hydro/styles/positron.json',
+  terrain: 'https://cw3e.ucsd.edu/hydro/styles/terrain_maptiler.json',
+  satellite: 'https://cw3e.ucsd.edu/hydro/styles/satellite_maptiler.json',
 }

@@ -41,14 +41,11 @@ function App() {
   }, [copyStatus])
 
   useEffect(() => {
-    if (!bookmarkOpen && !layerMenuOpen) {
+    if (!layerMenuOpen) {
       return undefined
     }
 
     function handlePointerDown(event) {
-      if (!bookmarkWidgetRef.current?.contains(event.target)) {
-        setBookmarkOpen(false)
-      }
       if (!layerMenuRef.current?.contains(event.target)) {
         setLayerMenuOpen(false)
       }
@@ -59,7 +56,7 @@ function App() {
     return () => {
       window.removeEventListener('pointerdown', handlePointerDown)
     }
-  }, [bookmarkOpen, layerMenuOpen])
+  }, [layerMenuOpen])
 
   const selectedBasemap = BASEMAPS.find((item) => item.id === appState.basemapId) ?? BASEMAPS[0]
   const selectedVariable = RASTER_VARIABLES[appState.raster.variable] ?? RASTER_VARIABLES.precipitation

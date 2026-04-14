@@ -20,12 +20,9 @@ export default function GlobeProjectionControl({ onProjectionChange }) {
       callbackRef.current(projectionType)
     }
 
-    mapInstance.on('styledata', syncProjection)
     mapInstance.on('projectiontransition', syncProjection)
-    syncProjection()
 
     return () => {
-      mapInstance.off('styledata', syncProjection)
       mapInstance.off('projectiontransition', syncProjection)
     }
   }, [map])

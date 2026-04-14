@@ -1,5 +1,5 @@
 import Map, { Layer, NavigationControl, Popup, ScaleControl, Source } from 'react-map-gl/maplibre'
-import { BASEMAP_STYLES, TERRAIN_SPEC } from '../../config/mapConfig'
+import { BASEMAP_STYLES } from '../../config/mapConfig'
 import {
   FORECAST_GEOJSON,
   RADAR_GEOJSON,
@@ -81,7 +81,6 @@ export default function MapCanvas({
         mapStyle={BASEMAP_STYLES[appState.basemapId]}
         projection={appState.projection}
         reuseMaps
-        terrain={terrainEnabled ? TERRAIN_SPEC : null}
         onClick={handleMapClick}
         onMouseMove={onMouseMove}
         onMove={handleMapMove}

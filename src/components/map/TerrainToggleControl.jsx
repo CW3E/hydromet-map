@@ -21,7 +21,6 @@ export default function TerrainToggleControl({ enabled, onTerrainChange }) {
     }
 
     mapInstance.on('terrain', syncTerrain)
-    syncTerrain()
 
     return () => {
       mapInstance.off('terrain', syncTerrain)
@@ -34,11 +33,27 @@ export default function TerrainToggleControl({ enabled, onTerrainChange }) {
     }
 
     const mapInstance = map.getMap()
-    if (enabled && !mapInstance.getTerrain()) {
-      mapInstance.setTerrain(TERRAIN_SPEC)
+
+    const syncDesiredTerrain = () => {
+      const terrainSourceExists = Boolean(mapInstance.getSource(TERRAIN_SPEC.source))
+
+      if (enabled) {
+        if (terrainSourceExists && !mapInstance.getTerrain()) {
+          mapInstance.setTerrain(TERRAIN_SPEC)
+        }
+        return
+      }
+
+      if (mapInstance.getTerrain()) {
+        mapInstance.setTerrain(null)
+      }
     }
-    if (!enabled && mapInstance.getTerrain()) {
-      mapInstance.setTerrain(null)
+
+    syncDesiredTerrain()
+    mapInstance.on('styledata', syncDesiredTerrain)
+
+    return () => {
+      mapInstance.off('styledata', syncDesiredTerrain)
     }
   }, [enabled, map])
 

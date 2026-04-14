@@ -1,3 +1,5 @@
+import { createPortal } from 'react-dom'
+
 export default function BookmarkControl({
   bookmarkOpen,
   bookmarkWidgetRef,
@@ -27,28 +29,34 @@ export default function BookmarkControl({
         </svg>
       </button>
 
-      {bookmarkOpen ? (
-        <div className="bookmark-popup">
-          <div className="bookmark-popup__header">
-            <div>
-              <p className="map-canvas__eyebrow">Bookmark</p>
-              <strong>Share this map view</strong>
-            </div>
-            <button className="bookmark-popup__close" type="button" onClick={onClose}>
-              x
-            </button>
-          </div>
+      {bookmarkOpen
+        ? createPortal(
+            <>
+              <div className="bookmark-backdrop" onClick={onClose} />
+              <div className="bookmark-popup" role="dialog" aria-modal="true" aria-label="Share this map view">
+                <div className="bookmark-popup__header">
+                  <div>
+                    <p className="map-canvas__eyebrow">Bookmark</p>
+                    <strong>Share map view</strong>
+                  </div>
+                  <button className="bookmark-popup__close" type="button" onClick={onClose}>
+                    x
+                  </button>
+                </div>
 
-          <div className="bookmark-popup__body">
-            <img alt="QR code for current map bookmark" src={qrCodeUrl} />
-            <div className="bookmark-popup__content">
-              <button type="button" onClick={onCopy}>
-                {copyStatus}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+                <div className="bookmark-popup__body">
+                  <img alt="QR code for current map bookmark" src={qrCodeUrl} />
+                  <div className="bookmark-popup__content">
+                    <button type="button" onClick={onCopy}>
+                      {copyStatus}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </>,
+            document.body,
+          )
+        : null}
     </div>
   )
 }

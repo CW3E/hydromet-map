@@ -250,7 +250,7 @@ export default function MapHud({
         >
           {Object.entries(RASTER_VARIABLES).map(([value, item]) => (
             <option key={value} value={value}>
-              {item.label}
+              {`${item.label} (${item.timestep})`}
             </option>
           ))}
         </select>
