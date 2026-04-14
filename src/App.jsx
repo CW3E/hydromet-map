@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import DatePicker from 'react-datepicker'
 import Map, {
   Layer,
   NavigationControl,
@@ -9,6 +10,7 @@ import Map, {
   useMap,
 } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import 'react-datepicker/dist/react-datepicker.css'
 import './App.css'
 
 const BASEMAPS = [
@@ -478,12 +480,37 @@ function parseNumericValue(value, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback
 }
 
+function parseIsoDate(dateText) {
+  const matchedDate = /^\d{4}-\d{2}-\d{2}$/.test(dateText) ? new Date(`${dateText}T00:00:00`) : null
+  return matchedDate && !Number.isNaN(matchedDate.getTime()) ? matchedDate : null
+}
+
 function formatCoordinate(value) {
   return value.toFixed(4)
 }
 
 function formatViewValue(value, digits = 2) {
   return value.toFixed(digits)
+}
+
+function shiftIsoDate(dateText, days) {
+  const currentDate = new Date(`${dateText}T00:00:00`)
+  currentDate.setDate(currentDate.getDate() + days)
+  return currentDate.toISOString().slice(0, 10)
+}
+
+function shiftIsoMonth(dateText, months) {
+  const currentDate = new Date(`${dateText}T00:00:00`)
+  const originalDay = currentDate.getDate()
+  currentDate.setDate(1)
+  currentDate.setMonth(currentDate.getMonth() + months)
+  const lastDayOfTargetMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() + 1,
+    0,
+  ).getDate()
+  currentDate.setDate(Math.min(originalDay, lastDayOfTargetMonth))
+  return currentDate.toISOString().slice(0, 10)
 }
 
 function PanelSection({ title, eyebrow, children }) {
@@ -579,6 +606,8 @@ function App() {
   const [copyStatus, setCopyStatus] = useState('Copy URL')
   const [selectedStation, setSelectedStation] = useState(null)
   const [bookmarkOpen, setBookmarkOpen] = useState(false)
+  const [basemapMenuOpen, setBasemapMenuOpen] = useState(false)
+  const bookmarkWidgetRef = useRef(null)
 
   useEffect(() => {
     setBookmarkUrl(writeStateToUrl(appState))
@@ -595,6 +624,24 @@ function App() {
 
     return undefined
   }, [copyStatus])
+
+  useEffect(() => {
+    if (!bookmarkOpen) {
+      return undefined
+    }
+
+    function handlePointerDown(event) {
+      if (!bookmarkWidgetRef.current?.contains(event.target)) {
+        setBookmarkOpen(false)
+      }
+    }
+
+    window.addEventListener('pointerdown', handlePointerDown)
+
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDown)
+    }
+  }, [bookmarkOpen])
 
   const selectedBasemap = BASEMAPS.find((item) => item.id === appState.basemapId) ?? BASEMAPS[0]
   const selectedVariable = RASTER_VARIABLES[appState.raster.variable]
@@ -698,7 +745,69 @@ function App() {
             </div>
           </details>
 
-          <div className="form-grid form-grid--stacked">
+          <div className="date-row">
+            <button
+              className="date-icon-button"
+              type="button"
+              aria-label="One month before"
+              onClick={() => {
+                updateRaster('date', shiftIsoMonth(appState.raster.date, -1))
+              }}
+            >
+              <span aria-hidden="true">◀◀</span>
+            </button>
+
+            <button
+              className="date-icon-button"
+              type="button"
+              aria-label="Previous day"
+              onClick={() => {
+                updateRaster('date', shiftIsoDate(appState.raster.date, -1))
+              }}
+            >
+              <span aria-hidden="true">◀</span>
+            </button>
+
+            <label className="date-field">
+              <DatePicker
+                calendarClassName="hydromet-datepicker__calendar"
+                className="hydromet-datepicker__input"
+                dateFormat="yyyy-MM-dd"
+                placeholderText="YYYY-MM-DD"
+                popperPlacement="bottom-start"
+                selected={parseIsoDate(appState.raster.date)}
+                onChange={(date) => {
+                  if (date) {
+                    updateRaster('date', date.toISOString().slice(0, 10))
+                  }
+                }}
+              />
+            </label>
+
+            <button
+              className="date-icon-button"
+              type="button"
+              aria-label="Next day"
+              onClick={() => {
+                updateRaster('date', shiftIsoDate(appState.raster.date, 1))
+              }}
+            >
+              <span aria-hidden="true">▶</span>
+            </button>
+
+            <button
+              className="date-icon-button"
+              type="button"
+              aria-label="One month after"
+              onClick={() => {
+                updateRaster('date', shiftIsoMonth(appState.raster.date, 1))
+              }}
+            >
+              <span aria-hidden="true">▶▶</span>
+            </button>
+          </div>
+
+          <div className="form-grid">
             <label>
               Variable
               <select
@@ -741,37 +850,6 @@ function App() {
               </select>
             </label>
 
-            <label>
-              Date
-              <input
-                type="date"
-                value={appState.raster.date}
-                onChange={(event) => updateRaster('date', event.target.value)}
-              />
-            </label>
-          </div>
-
-          <div className="date-actions">
-            <button
-              type="button"
-              onClick={() => {
-                const currentDate = new Date(`${appState.raster.date}T00:00:00`)
-                currentDate.setDate(currentDate.getDate() - 1)
-                updateRaster('date', currentDate.toISOString().slice(0, 10))
-              }}
-            >
-              Previous Day
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const currentDate = new Date(`${appState.raster.date}T00:00:00`)
-                currentDate.setDate(currentDate.getDate() + 1)
-                updateRaster('date', currentDate.toISOString().slice(0, 10))
-              }}
-            >
-              Next Day
-            </button>
           </div>
 
         </PanelSection>
@@ -941,23 +1019,39 @@ function App() {
           </Map>
 
           <div className="map-canvas__overlay">
-            <div className="button-grid button-grid--map">
-              {BASEMAPS.map((basemap) => (
-                <button
-                  key={basemap.id}
-                  className={basemap.id === appState.basemapId ? 'choice-card is-active' : 'choice-card'}
-                  onClick={() => {
-                    updateTopLevel('basemapId', basemap.id)
-                    if (!basemap.terrainAvailable && appState.terrainEnabled) {
-                      updateTopLevel('terrainEnabled', false)
-                    }
-                  }}
-                  type="button"
-                  title={basemap.description}
-                >
-                  <strong>{basemap.label}</strong>
-                </button>
-              ))}
+            <div
+              className={basemapMenuOpen ? 'basemap-switcher is-open' : 'basemap-switcher'}
+              title={selectedBasemap.description}
+              onMouseEnter={() => setBasemapMenuOpen(true)}
+              onMouseLeave={() => setBasemapMenuOpen(false)}
+            >
+              <button
+                className="choice-card choice-card--current is-active"
+                type="button"
+                aria-label={`Current basemap: ${selectedBasemap.label}`}
+              >
+                <strong>{selectedBasemap.label}</strong>
+              </button>
+
+              <div className="basemap-switcher__menu">
+                {BASEMAPS.map((basemap) => (
+                  <button
+                    key={basemap.id}
+                    className={basemap.id === appState.basemapId ? 'choice-card is-active' : 'choice-card'}
+                    onClick={() => {
+                      updateTopLevel('basemapId', basemap.id)
+                      if (!basemap.terrainAvailable && appState.terrainEnabled) {
+                        updateTopLevel('terrainEnabled', false)
+                      }
+                      setBasemapMenuOpen(false)
+                    }}
+                    type="button"
+                    title={basemap.description}
+                  >
+                    <strong>{basemap.label}</strong>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -984,7 +1078,7 @@ function App() {
             </div>
           </div>
 
-          <div className="bookmark-widget">
+          <div ref={bookmarkWidgetRef} className="bookmark-widget">
             <button
               className="bookmark-trigger"
               type="button"
@@ -1022,7 +1116,6 @@ function App() {
                 <div className="bookmark-popup__body">
                   <img alt="QR code for current map bookmark" src={qrCodeUrl} />
                   <div className="bookmark-popup__content">
-                    <input readOnly value={bookmarkUrl} />
                     <button type="button" onClick={handleCopyBookmark}>
                       {copyStatus}
                     </button>

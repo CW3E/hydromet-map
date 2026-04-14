@@ -61,11 +61,6 @@
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
 }
 
-.button-grid--map {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.3rem;
-}
-
 .choice-card {
   border: 1px solid rgba(74, 113, 137, 0.2);
   background: #f5f9fb;
@@ -95,6 +90,7 @@
 }
 
 .date-actions,
+.date-row,
 .bookmark-popup__body,
 .bookmark-popup__content {
   display: flex;
@@ -103,10 +99,6 @@
 
 .form-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.form-grid--stacked {
-  margin-top: 1rem;
 }
 
 .layer-list {
@@ -171,6 +163,7 @@ button {
 }
 
 input[type='date'],
+input[type='text'],
 select,
 .bookmark-popup__content input {
   width: 100%;
@@ -179,6 +172,127 @@ select,
   padding: 0.38rem 0.56rem;
   background: #fff;
   color: #10222f;
+}
+
+.date-row {
+  align-items: end;
+  margin-bottom: 0.85rem;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  min-height: 42px;
+}
+
+.date-field {
+  width: 122px;
+  display: block;
+  align-self: end;
+}
+
+.date-field input[type='date'],
+.date-field input[type='text'] {
+  min-width: 0;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.date-icon-button {
+  min-width: 30px;
+  width: 30px;
+  height: 32px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  position: relative;
+}
+
+.date-icon-button span {
+  display: none;
+}
+
+.date-icon-button::before,
+.date-icon-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform: translateY(-50%);
+}
+
+.date-icon-button[aria-label='Previous day']::before,
+.date-icon-button[aria-label='One month before']::before,
+.date-icon-button[aria-label='One month before']::after {
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 6px solid currentColor;
+}
+
+.date-icon-button[aria-label='Next day']::before,
+.date-icon-button[aria-label='One month after']::before,
+.date-icon-button[aria-label='One month after']::after {
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 6px solid currentColor;
+}
+
+.date-icon-button[aria-label='Previous day']::before {
+  left: 11px;
+}
+
+.date-icon-button[aria-label='Next day']::before {
+  left: 13px;
+}
+
+.date-icon-button[aria-label='One month before']::before {
+  left: 8px;
+}
+
+.date-icon-button[aria-label='One month before']::after {
+  left: 13px;
+}
+
+.date-icon-button[aria-label='One month after']::before {
+  left: 8px;
+}
+
+.date-icon-button[aria-label='One month after']::after {
+  left: 13px;
+}
+
+.hydromet-datepicker__input,
+.react-datepicker-wrapper,
+.react-datepicker__input-container {
+  width: 100%;
+}
+
+.hydromet-datepicker__calendar {
+  border: 1px solid rgba(74, 113, 137, 0.16);
+  border-radius: 14px;
+  box-shadow: 0 18px 32px rgba(38, 73, 89, 0.14);
+  font-family: inherit;
+}
+
+.react-datepicker-popper {
+  z-index: 20;
+}
+
+.react-datepicker {
+  border: 1px solid rgba(74, 113, 137, 0.16);
+  border-radius: 14px;
+  overflow: hidden;
+  font-family: inherit;
+}
+
+.react-datepicker__header {
+  background: #edf4f7;
+  border-bottom: 1px solid rgba(74, 113, 137, 0.12);
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background: #1d6996;
+}
 }
 
 input[type='checkbox'] {
@@ -260,18 +374,57 @@ button:disabled {
   position: absolute;
   top: 0.85rem;
   left: 0.85rem;
-  z-index: 2;
-  width: min(260px, calc(100% - 1.7rem));
-  padding: 0.4rem;
+  z-index: 3;
+  width: auto;
+  padding: 0;
   border-radius: 18px;
-  background: rgba(16, 34, 47, 0.36);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(8px);
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
 }
 
-.map-canvas__overlay .choice-card {
+.basemap-switcher {
+  position: relative;
+  width: 92px;
+}
+
+.choice-card--current {
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.basemap-switcher__menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 92px;
+  padding: 2rem 0.28rem 0.28rem;
+  display: grid;
+  gap: 0.24rem;
+  border-radius: 14px;
+  background: rgba(16, 34, 47, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.basemap-switcher.is-open .basemap-switcher__menu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.map-canvas__overlay .choice-card,
+.basemap-switcher__menu .choice-card {
+  width: 100%;
   min-height: 100%;
-  padding: 0.26rem 0.42rem;
+  padding: 0.24rem 0.4rem;
   background: rgba(244, 249, 252, 0.88);
   color: #10222f;
 }
@@ -378,6 +531,7 @@ button:disabled {
 .bookmark-popup__body {
   margin-top: 0.9rem;
   align-items: center;
+  flex-direction: column;
 }
 
 .bookmark-popup__body img {
@@ -389,18 +543,18 @@ button:disabled {
 }
 
 .bookmark-popup__content {
-  flex: 1;
-  min-width: 0;
   flex-direction: column;
+  justify-content: center;
+  width: 100%;
 }
 
 .bookmark-popup__content button {
-  align-self: start;
+  align-self: center;
 }
 
 .map-legend {
   position: absolute;
-  top: 4.85rem;
+  top: 5.9rem;
   left: 0.85rem;
   z-index: 2;
   width: 118px;
@@ -449,22 +603,26 @@ button:disabled {
     padding: 1rem;
   }
 
-  .form-grid,
-  .button-grid--map {
+  .form-grid {
     grid-template-columns: 1fr;
   }
 
   .date-actions,
+  .date-row,
   .bookmark-popup__body {
     flex-direction: column;
+  }
+
+  .date-field {
+    width: 100%;
   }
 
   .map-canvas {
     min-height: 430px;
   }
 
-  .map-canvas__overlay {
-    width: calc(100% - 1.6rem);
+  .basemap-switcher {
+    width: 88px;
   }
 
   .map-legend {
