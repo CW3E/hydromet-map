@@ -493,6 +493,16 @@ function formatViewValue(value, digits = 2) {
   return value.toFixed(digits)
 }
 
+function formatLatLon(value) {
+  return value.toFixed(4)
+}
+
+function formatCoordinateLabel(value, positiveLabel, negativeLabel) {
+  const absoluteValue = Math.abs(value)
+  const direction = value >= 0 ? positiveLabel : negativeLabel
+  return `${formatLatLon(absoluteValue)}°${direction}`
+}
+
 function shiftIsoDate(dateText, days) {
   const currentDate = new Date(`${dateText}T00:00:00`)
   currentDate.setDate(currentDate.getDate() + days)
@@ -608,6 +618,7 @@ function App() {
   const [bookmarkOpen, setBookmarkOpen] = useState(false)
   const [basemapMenuOpen, setBasemapMenuOpen] = useState(false)
   const [layerMenuOpen, setLayerMenuOpen] = useState(false)
+  const [mouseCoordinates, setMouseCoordinates] = useState(null)
   const bookmarkWidgetRef = useRef(null)
   const layerMenuRef = useRef(null)
 
@@ -715,6 +726,13 @@ function App() {
       variable: clickedFeature.properties.variable,
       longitude: clickedFeature.geometry.coordinates[0],
       latitude: clickedFeature.geometry.coordinates[1],
+    })
+  }
+
+  function handleMapMouseMove(event) {
+    setMouseCoordinates({
+      longitude: event.lngLat.lng,
+      latitude: event.lngLat.lat,
     })
   }
 
@@ -852,6 +870,7 @@ function App() {
             reuseMaps
             terrain={terrainEnabled ? TERRAIN_SPEC : null}
             onClick={handleMapClick}
+            onMouseMove={handleMapMouseMove}
             onMove={handleMapMove}
             style={{ width: '100%', height: '100%' }}
           >
@@ -1176,26 +1195,39 @@ function App() {
             </div>
           </div>
 
-          <div className="map-legend">
-            <div className="legend-card legend-card--map">
-              <div className="legend-card__header legend-card__header--map">
-                <span>{selectedVariable.units}</span>
-              </div>
-              <div className="legend-scale legend-scale--vertical">
-                {selectedVariable.palette
-                  .slice()
-                  .reverse()
-                  .map((entry) => (
-                    <div
-                      key={`${selectedVariable.label}-${entry.value}`}
-                      className="legend-scale__stop legend-scale__stop--vertical"
-                    >
-                      <span style={{ backgroundColor: entry.color }} />
-                      <small>{entry.value}</small>
-                    </div>
-                  ))}
+          {appState.layers.forecast ? (
+            <div className="map-legend">
+              <div className="legend-card legend-card--map">
+                <div className="legend-card__header legend-card__header--map">
+                  <span>{selectedVariable.units}</span>
+                </div>
+                <div className="legend-scale legend-scale--vertical">
+                  {selectedVariable.palette
+                    .slice()
+                    .reverse()
+                    .map((entry) => (
+                      <div
+                        key={`${selectedVariable.label}-${entry.value}`}
+                        className="legend-scale__stop legend-scale__stop--vertical"
+                      >
+                        <span style={{ backgroundColor: entry.color }} />
+                        <small>{entry.value}</small>
+                      </div>
+                    ))}
+                </div>
               </div>
             </div>
+          ) : null}
+
+          <div className="mouse-readout">
+            {mouseCoordinates ? (
+              <span>
+                {formatCoordinateLabel(mouseCoordinates.latitude, 'N', 'S')},{' '}
+                {formatCoordinateLabel(mouseCoordinates.longitude, 'E', 'W')}
+              </span>
+            ) : (
+              <span>Move cursor</span>
+            )}
           </div>
 
           <div ref={bookmarkWidgetRef} className="bookmark-widget">
