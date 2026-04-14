@@ -607,7 +607,9 @@ function App() {
   const [selectedStation, setSelectedStation] = useState(null)
   const [bookmarkOpen, setBookmarkOpen] = useState(false)
   const [basemapMenuOpen, setBasemapMenuOpen] = useState(false)
+  const [layerMenuOpen, setLayerMenuOpen] = useState(false)
   const bookmarkWidgetRef = useRef(null)
+  const layerMenuRef = useRef(null)
 
   useEffect(() => {
     setBookmarkUrl(writeStateToUrl(appState))
@@ -626,13 +628,16 @@ function App() {
   }, [copyStatus])
 
   useEffect(() => {
-    if (!bookmarkOpen) {
+    if (!bookmarkOpen && !layerMenuOpen) {
       return undefined
     }
 
     function handlePointerDown(event) {
       if (!bookmarkWidgetRef.current?.contains(event.target)) {
         setBookmarkOpen(false)
+      }
+      if (!layerMenuRef.current?.contains(event.target)) {
+        setLayerMenuOpen(false)
       }
     }
 
@@ -641,7 +646,7 @@ function App() {
     return () => {
       window.removeEventListener('pointerdown', handlePointerDown)
     }
-  }, [bookmarkOpen])
+  }, [bookmarkOpen, layerMenuOpen])
 
   const selectedBasemap = BASEMAPS.find((item) => item.id === appState.basemapId) ?? BASEMAPS[0]
   const selectedVariable = RASTER_VARIABLES[appState.raster.variable]
@@ -725,26 +730,7 @@ function App() {
   return (
     <div className="app-shell">
       <aside className="control-panel">
-        <PanelSection title="Layers and Raster Source" eyebrow="Display Controls">
-          <details className="layer-dropdown">
-            <summary>
-              Active layers ({MAP_LAYERS.filter((layer) => appState.layers[layer.id]).length}/
-              {MAP_LAYERS.length})
-            </summary>
-            <div className="layer-list">
-              {MAP_LAYERS.map((layer) => (
-                <label key={layer.id} className="layer-row" title={layer.description}>
-                  <strong>{layer.label}</strong>
-                  <input
-                    type="checkbox"
-                    checked={appState.layers[layer.id]}
-                    onChange={() => toggleLayer(layer.id)}
-                  />
-                </label>
-              ))}
-            </div>
-          </details>
-
+        <PanelSection title="Raster Source" eyebrow="Display Controls">
           <div className="date-row">
             <button
               className="date-icon-button"
@@ -1019,46 +1005,180 @@ function App() {
           </Map>
 
           <div className="map-canvas__overlay">
-            <div
-              className={basemapMenuOpen ? 'basemap-switcher is-open' : 'basemap-switcher'}
-              title={selectedBasemap.description}
-              onMouseEnter={() => setBasemapMenuOpen(true)}
-              onMouseLeave={() => setBasemapMenuOpen(false)}
-            >
-              <button
-                className="choice-card choice-card--current is-active"
-                type="button"
-                aria-label={`Current basemap: ${selectedBasemap.label}`}
+            <div className="scene-tools">
+              <div
+                className={basemapMenuOpen ? 'basemap-switcher is-open' : 'basemap-switcher'}
+                title={selectedBasemap.description}
+                onMouseEnter={() => setBasemapMenuOpen(true)}
+                onMouseLeave={() => setBasemapMenuOpen(false)}
               >
-                <strong>{selectedBasemap.label}</strong>
-              </button>
+                <button
+                  className="choice-card choice-card--current is-active"
+                  type="button"
+                  aria-label={`Current basemap: ${selectedBasemap.label}`}
+                >
+                  <strong>{selectedBasemap.label}</strong>
+                </button>
 
-              <div className="basemap-switcher__menu">
-                {BASEMAPS.map((basemap) => (
-                  <button
-                    key={basemap.id}
-                    className={basemap.id === appState.basemapId ? 'choice-card is-active' : 'choice-card'}
-                    onClick={() => {
-                      updateTopLevel('basemapId', basemap.id)
-                      if (!basemap.terrainAvailable && appState.terrainEnabled) {
-                        updateTopLevel('terrainEnabled', false)
-                      }
-                      setBasemapMenuOpen(false)
-                    }}
-                    type="button"
-                    title={basemap.description}
-                  >
-                    <strong>{basemap.label}</strong>
-                  </button>
-                ))}
+                <div className="basemap-switcher__menu">
+                  {BASEMAPS.map((basemap) => (
+                    <button
+                      key={basemap.id}
+                      className={basemap.id === appState.basemapId ? 'choice-card is-active' : 'choice-card'}
+                      onClick={() => {
+                        updateTopLevel('basemapId', basemap.id)
+                        if (!basemap.terrainAvailable && appState.terrainEnabled) {
+                          updateTopLevel('terrainEnabled', false)
+                        }
+                        setBasemapMenuOpen(false)
+                      }}
+                      type="button"
+                      title={basemap.description}
+                    >
+                      <strong>{basemap.label}</strong>
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              <div ref={layerMenuRef} className={layerMenuOpen ? 'layer-toggle is-open' : 'layer-toggle'}>
+                <button
+                  className="scene-icon-button"
+                  type="button"
+                  aria-label="Layer toggles"
+                  title="Layer toggles"
+                  onClick={() => setLayerMenuOpen((current) => !current)}
+                >
+                  <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M12 4 4.5 8 12 12 19.5 8 12 4Z" />
+                    <path d="M4.5 11.5 12 15.5l7.5-4" />
+                    <path d="M4.5 15 12 19l7.5-4" />
+                  </svg>
+                </button>
+
+                <div className="layer-toggle__menu">
+                  {MAP_LAYERS.map((layer) => (
+                    <label key={layer.id} className="layer-row" title={layer.description}>
+                      <strong>{layer.label}</strong>
+                      <input
+                        type="checkbox"
+                        checked={appState.layers[layer.id]}
+                        onChange={() => toggleLayer(layer.id)}
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="date-row date-row--map">
+                <button
+                  className="date-icon-button"
+                  type="button"
+                  aria-label="One month before"
+                  title="-1 month"
+                  onClick={() => {
+                    updateRaster('date', shiftIsoMonth(appState.raster.date, -1))
+                  }}
+                >
+                  <span aria-hidden="true">{'<<'}</span>
+                </button>
+
+                <button
+                  className="date-icon-button"
+                  type="button"
+                  aria-label="Previous day"
+                  title="-1 day"
+                  onClick={() => {
+                    updateRaster('date', shiftIsoDate(appState.raster.date, -1))
+                  }}
+                >
+                  <span aria-hidden="true">{'<'}</span>
+                </button>
+
+                <label className="date-field">
+                  <DatePicker
+                    calendarClassName="hydromet-datepicker__calendar"
+                    className="hydromet-datepicker__input"
+                    dateFormat="yyyy-MM-dd"
+                    placeholderText="YYYY-MM-DD"
+                    popperPlacement="bottom-start"
+                    selected={parseIsoDate(appState.raster.date)}
+                    onChange={(date) => {
+                      if (date) {
+                        updateRaster('date', date.toISOString().slice(0, 10))
+                      }
+                    }}
+                  />
+                </label>
+
+                <button
+                  className="date-icon-button"
+                  type="button"
+                  aria-label="Next day"
+                  title="+1 day"
+                  onClick={() => {
+                    updateRaster('date', shiftIsoDate(appState.raster.date, 1))
+                  }}
+                >
+                  <span aria-hidden="true">{'>'}</span>
+                </button>
+
+                <button
+                  className="date-icon-button"
+                  type="button"
+                  aria-label="One month after"
+                  title="+1 month"
+                  onClick={() => {
+                    updateRaster('date', shiftIsoMonth(appState.raster.date, 1))
+                  }}
+                >
+                  <span aria-hidden="true">{'>>'}</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="raster-toolbar">
+              <select
+                value={appState.raster.variable}
+                title="Raster variable"
+                onChange={(event) => updateRaster('variable', event.target.value)}
+              >
+                {Object.entries(RASTER_VARIABLES).map(([value, item]) => (
+                  <option key={value} value={value}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={appState.raster.model}
+                title="Forecast model"
+                onChange={(event) => updateRaster('model', event.target.value)}
+              >
+                {RASTER_MODELS.map((model) => (
+                  <option key={model} value={model}>
+                    {model}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={appState.raster.ensemble}
+                title="Ensemble trace"
+                onChange={(event) => updateRaster('ensemble', event.target.value)}
+              >
+                {ENSEMBLE_TRACES.map((trace) => (
+                  <option key={trace} value={trace}>
+                    {trace}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
           <div className="map-legend">
             <div className="legend-card legend-card--map">
               <div className="legend-card__header legend-card__header--map">
-                <strong>{selectedVariable.label}</strong>
                 <span>{selectedVariable.units}</span>
               </div>
               <div className="legend-scale legend-scale--vertical">
