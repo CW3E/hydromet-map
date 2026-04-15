@@ -89,16 +89,32 @@ export default function MapHud({
           </button>
 
           <div className="layer-toggle__menu">
-            {MAP_LAYERS.map((layer) => (
-              <label key={layer.id} className="layer-row" title={layer.description}>
-                <strong>{layer.label}</strong>
-                <input
-                  type="checkbox"
-                  checked={appState.layers[layer.id]}
-                  onChange={() => toggleLayer(layer.id)}
-                />
-              </label>
-            ))}
+            {MAP_LAYERS.map((layer) => {
+              const symbolColor =
+                layer.id === 'forecast'
+                  ? selectedRasterVariable.palette.at(-1)?.color ?? '#1d6996'
+                  : layer.symbolColor ?? '#4a7189'
+
+              return (
+                <label
+                  key={layer.id}
+                  className={appState.layers[layer.id] ? 'layer-row is-on' : 'layer-row is-off'}
+                  title={layer.description}
+                >
+                  <strong className="layer-row__label">
+                    <span className="layer-row__symbol" style={{ color: symbolColor }}>
+                      {layer.symbol ?? '\u25A1'}
+                    </span>
+                    <span>{layer.label}</span>
+                  </strong>
+                  <input
+                    type="checkbox"
+                    checked={appState.layers[layer.id]}
+                    onChange={() => toggleLayer(layer.id)}
+                  />
+                </label>
+              )
+            })}
           </div>
         </div>
 
