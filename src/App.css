@@ -687,6 +687,38 @@ button:disabled {
   width: max-content;
 }
 
+.legend-scale--threshold {
+  display: grid;
+  grid-template-columns: 14px auto;
+  gap: 0.18rem;
+  align-items: stretch;
+}
+
+.legend-scale__bar {
+  display: grid;
+  grid-auto-rows: minmax(14px, 1fr);
+}
+
+.legend-scale__segment {
+  display: block;
+  width: 14px;
+  min-height: 14px;
+}
+
+.legend-scale__labels {
+  display: grid;
+  grid-template-rows: repeat(var(--legend-threshold-count, 4), 1fr);
+  align-items: start;
+  margin-top: 14px;
+}
+
+.legend-scale__labels small {
+  color: #244050;
+  font-size: 0.72rem;
+  transform: translateY(-50%);
+  line-height: 1;
+}
+
 .legend-scale__stop--vertical {
   grid-template-columns: 14px 1fr;
   align-items: stretch;

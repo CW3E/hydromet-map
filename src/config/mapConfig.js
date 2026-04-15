@@ -36,6 +36,14 @@ export const MAP_LAYERS = [
     symbolColor: '#6b7280',
   },
   {
+    id: 'rivers',
+    label: 'NWM Rivers',
+    type: 'vector-tile',
+    description: 'Flowlines and stream segments from tiled vector sources.',
+    symbol: '\uFF5E',
+    symbolColor: '#008b8b',
+  },
+  {
     id: 'stations',
     label: 'Forecast Points',
     type: 'vector',
@@ -50,14 +58,6 @@ export const MAP_LAYERS = [
     description: 'Forecast basin boundaries from tiled vector sources.',
     symbol: '\u2610',
     symbolColor: '#2563eb',
-  },
-  {
-    id: 'rivers',
-    label: 'NWM Rivers',
-    type: 'vector-tile',
-    description: 'Flowlines and stream segments from tiled vector sources.',
-    symbol: '\uFF5E',
-    symbolColor: '#008b8b',
   },
   {
     id: 'snowCourses',
@@ -82,37 +82,30 @@ export const RASTER_VARIABLES = {
     label: 'Precipitation',
     units: 'mm',
     timestep: '3hour',
-    palette: [
-      { value: '0', color: '#f7fbff' },
-      { value: '5', color: '#cfe1f2' },
-      { value: '15', color: '#73a9cf' },
-      { value: '30', color: '#1d6996' },
-      { value: '50+', color: '#0f3557' },
-    ],
+    palette: {
+      thresholds: ['1', '2.5', '5', '7.5', '10', '15', '20', '30', '40', '50', '70', '100', '150', '200', '250', '300', '400', '500', '750'],
+      colors: ['#ebebeb', '#50d0d0', '#00ffff', '#00e080', '#00c000', '#80e000', '#ffff00', '#ffa000', '#ff0000', '#ff2080', '#f040ff',
+        '#8020ff', '#4040ff', '#202080', '#202020', '#808080', '#e0e0e0', '#eed4bc', '#daa678', '#663300'],
+    },
   },
   temperature: {
     label: 'Temperature',
-    units: 'deg C',
+    units: '\u00B0 C',
     timestep: '1day',
-    palette: [
-      { value: '-10', color: '#2b6cb0' },
-      { value: '0', color: '#90cdf4' },
-      { value: '10', color: '#fef08a' },
-      { value: '20', color: '#fb923c' },
-      { value: '30+', color: '#c2410c' },
-    ],
+    palette: {
+      thresholds: ['-12', '-9', '-6', '-3', '0', '3', '6', '9', '12', '15', '18', '21', '24', '27', '30', '33', '36', '39'],
+      colors: ['#7f00ff', '#612efd', '#435cfa', '#2586f5', '#07abed', '#16cbe4', '#34e4d8', '#52f5cb', '#70fdbc', '#8efdab',
+        '#acf599', '#cae486', '#e8cb71', '#ffab5c', '#ff8645', '#ff5c2e', '#ff2e17', '#ff0000'],
+    },
   },
   wind: {
     label: 'Wind Gust',
     units: 'm/s',
     timestep: '1hour',
-    palette: [
-      { value: '0', color: '#f0fdf4' },
-      { value: '8', color: '#86efac' },
-      { value: '15', color: '#22c55e' },
-      { value: '22', color: '#15803d' },
-      { value: '30+', color: '#14532d' },
-    ],
+    palette: {
+      thresholds: ['8', '15', '22', '30'],
+      colors: ['#f0fdf4', '#86efac', '#22c55e', '#15803d', '#14532d'],
+    },
   },
 }
 

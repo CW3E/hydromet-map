@@ -92,7 +92,7 @@ export default function MapHud({
             {MAP_LAYERS.map((layer) => {
               const symbolColor =
                 layer.id === 'forecast'
-                  ? selectedRasterVariable.palette.at(-1)?.color ?? '#1d6996'
+                  ? selectedRasterVariable.palette.colors.at(-1) ?? '#1d6996'
                   : layer.symbolColor ?? '#4a7189'
 
               return (

@@ -303,7 +303,7 @@ export default function MapCanvas({
               id="forecast-fill"
               type="fill"
               paint={{
-                'fill-color': selectedVariable.palette[selectedVariable.palette.length - 1].color,
+                'fill-color': selectedVariable.palette.colors[selectedVariable.palette.colors.length - 1],
                 'fill-opacity': 0.22,
               }}
             />
@@ -311,7 +311,8 @@ export default function MapCanvas({
               id="forecast-outline"
               type="line"
               paint={{
-                'line-color': selectedVariable.palette[selectedVariable.palette.length - 2].color,
+                'line-color':
+                  selectedVariable.palette.colors[selectedVariable.palette.colors.length - 2],
                 'line-width': 2,
                 'line-dasharray': [2, 2],
               }}
