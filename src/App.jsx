@@ -24,6 +24,8 @@ function App() {
   const bookmarkWidgetRef = useRef(null)
   const basemapMenuRef = useRef(null)
   const layerMenuRef = useRef(null)
+  const mouseCoordinatesFrameRef = useRef(null)
+  const pendingMouseCoordinatesRef = useRef(null)
 
   useEffect(() => {
     if (copyStatus === 'Copied') {
@@ -57,6 +59,15 @@ function App() {
       window.removeEventListener('pointerdown', handlePointerDown)
     }
   }, [basemapMenuOpen, layerMenuOpen])
+
+  useEffect(
+    () => () => {
+      if (mouseCoordinatesFrameRef.current !== null) {
+        window.cancelAnimationFrame(mouseCoordinatesFrameRef.current)
+      }
+    },
+    [],
+  )
 
   const selectedBasemap = BASEMAPS.find((item) => item.id === appState.basemapId) ?? BASEMAPS[0]
   const selectedVariable =
@@ -124,9 +135,21 @@ function App() {
   }
 
   function handleMapMouseMove(event) {
-    setMouseCoordinates({
+    pendingMouseCoordinatesRef.current = {
       longitude: event.lngLat.lng,
       latitude: event.lngLat.lat,
+    }
+
+    if (mouseCoordinatesFrameRef.current !== null) {
+      return
+    }
+
+    mouseCoordinatesFrameRef.current = window.requestAnimationFrame(() => {
+      mouseCoordinatesFrameRef.current = null
+
+      if (pendingMouseCoordinatesRef.current) {
+        setMouseCoordinates(pendingMouseCoordinatesRef.current)
+      }
     })
   }
 

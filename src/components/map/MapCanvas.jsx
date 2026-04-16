@@ -197,7 +197,7 @@ export default function MapCanvas({
         updateTopLevel={updateTopLevel}
       />
 
-      {appState.layers.forecast ? (
+      {appState.layers.raster ? (
         <MapLegend
           palette={selectedVariable.palette}
           units={selectedVariable.units}

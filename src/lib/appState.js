@@ -23,7 +23,7 @@ export function readStateFromUrl() {
   const bearing = params.get('bearing')
   const pitch = params.get('pitch')
   const variable = params.get('variable')
-  const product = params.get('product') ?? params.get('model')
+  const product = params.get('product')
   const ensemble = params.get('ensemble')
   const temporalMode = params.get('temporalMode')
   const date = params.get('date')

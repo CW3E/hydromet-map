@@ -1,5 +1,5 @@
 import cnrfcRegionLayer from './cnrfcRegionLayer'
-import forecastRasterLayer from './forecastRasterLayer'
+import rasterLayer from './rasterLayer'
 import riversLayer from './riversLayer'
 import snowCoursesLayer from './snowCoursesLayer'
 import snowPillowsLayer from './snowPillowsLayer'
@@ -9,7 +9,7 @@ import watershedsLayer from './watershedsLayer'
 export const MAP_LAYER_MODULES = [
   watershedsLayer,
   riversLayer,
-  forecastRasterLayer,
+  rasterLayer,
   cnrfcRegionLayer,
   stationsLayer,
   snowCoursesLayer,

@@ -109,7 +109,7 @@ export const RADAR_GEOJSON = {
   ],
 }
 
-export const FORECAST_GEOJSON = {
+export const RASTER_PLACEHOLDER_GEOJSON = {
   type: 'FeatureCollection',
   features: [
     {

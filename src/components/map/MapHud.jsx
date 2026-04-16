@@ -93,7 +93,7 @@ export default function MapHud({
           <div className="layer-toggle__menu">
             {MAP_LAYERS.map((layer) => {
               const symbolColor =
-                layer.id === 'forecast'
+                layer.id === 'raster'
                   ? selectedRasterVariable.palette.colors.at(-1) ?? '#1d6996'
                   : layer.symbolColor ?? '#4a7189'
 
@@ -269,7 +269,7 @@ export default function MapHud({
         >
           {Object.entries(RASTER_VARIABLES).map(([value, item]) => (
             <option key={value} value={value}>
-              {`${item.label} (${item.timestep})`}
+              {item.label}
             </option>
           ))}
         </select>
