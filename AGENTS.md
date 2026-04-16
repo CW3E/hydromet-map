@@ -7,12 +7,11 @@
   - Allow users to select between different basemap layers predefined in JSON style files
   - Allow users to turn on/off terrain (if available in the basemap) and switch between globe and mecator projections
 - For the raster (PNG) overlay layer
-  - Allow users to select the source, which can be raster maps for different variables, different dates, different prediction models, and different ensemble traces
-  - Build UI's for raster selection, for example, dropdowns (for variables, models, ensemble traces), datepicker and day/month forward/backward buttons (for dates)
+  - Allow users to select the source, which can be raster maps for different variables, different dates, different products, and different ensemble traces
+  - Build UI's for raster selection, for example, dropdowns (for variables, products, ensemble traces), datepicker and day/month forward/backward buttons (for dates)
   - Display a predefined colormap (list of values and colors) for the variable being shown on the map and change it accordingly when the user changes the variable
 - Bookmark the map
-  - Record map view (center, zoom, bearing, pitch, basemap style, terrain on/off status, globe/mecator projection), layers on/off status, and raster data source (variable/date/model/ensemble) in the URL
-  - Allow users to bookmark the URL (for example, copy it to clipboard and generate a QR code) and load it later
+  - Bookmark any map view: record map view (center, zoom, bearing, pitch, basemap style, terrain on/off status, globe/mecator projection), layers on/off status, and raster data source (variable/date/product/ensemble) in an loadable URL (for example, copy it to clipboard and generate a QR code) and allow users to load the map view from it
 - Display time series data upon feature click
   - Fetch remote time series data (in CSV format) according to the feature clicked
   - Display fetched time series data as interactive plots in a popup window

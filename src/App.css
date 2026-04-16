@@ -835,8 +835,8 @@ button:disabled {
 }
 
 .bookmark-popup__body img {
-  width: 150px;
-  height: 150px;
+  width: 200px;
+  height: 200px;
   border-radius: 8px;
   background: #fff;
   border: 1px solid rgba(74, 113, 137, 0.14);
@@ -992,8 +992,8 @@ button:disabled {
   }
 
   .bookmark-popup__body img {
-    width: 148px;
-    height: 148px;
+    width: 180px;
+    height: 180px;
   }
 
   .maplibregl-ctrl-top-right {

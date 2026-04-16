@@ -82,7 +82,7 @@ function App() {
     pitch: parseNumericValue(appState.view.pitch, Number.parseFloat(DEFAULT_STATE.view.pitch)),
   }
   const terrainEnabled = selectedBasemap.terrainAvailable && appState.terrainEnabled
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(bookmarkUrl)}`
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(bookmarkUrl)}`
 
   useEffect(() => {
     setAppState((current) =>
