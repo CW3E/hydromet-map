@@ -692,11 +692,13 @@ button:disabled {
   grid-template-columns: 14px auto;
   gap: 0.18rem;
   align-items: stretch;
+  --legend-scale-min-height: 260px;
 }
 
 .legend-scale__bar {
   display: grid;
   grid-auto-rows: minmax(14px, 1fr);
+  min-height: var(--legend-scale-min-height);
 }
 
 .legend-scale__segment {
@@ -710,6 +712,7 @@ button:disabled {
   grid-template-rows: repeat(var(--legend-threshold-count, 4), 1fr);
   align-items: start;
   margin-top: 14px;
+  min-height: calc(var(--legend-scale-min-height) - 14px);
 }
 
 .legend-scale__labels small {

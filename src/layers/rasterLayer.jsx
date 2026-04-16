@@ -1,26 +1,20 @@
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { RASTER_PLACEHOLDER_GEOJSON } from '../data/demoOverlays'
 
-const RASTER_IMAGE_COORDINATES = [
-  [-125, 44],
-  [-113, 44],
-  [-113, 32],
-  [-125, 32],
-]
-
 const rasterLayer = {
   id: 'raster',
   isVisible: ({ appState }) => appState.layers.raster,
   renderLayers({ appState, selectedVariable }) {
     const rasterUrl = selectedVariable.buildRasterUrl?.(appState.raster)
+    const rasterCoordinates = selectedVariable.coordinates
 
-    if (rasterUrl) {
+    if (rasterUrl && rasterCoordinates) {
       return (
         <Source
           id="raster-source"
           type="image"
           url={rasterUrl}
-          coordinates={RASTER_IMAGE_COORDINATES}
+          coordinates={rasterCoordinates}
         >
           <Layer
             id="raster-image-layer"
