@@ -27,6 +27,7 @@ export default function MapHud({
   selectedBasemap,
   setBasemapMenuOpen,
   setLayerMenuOpen,
+  statusBoundary,
   updateRaster,
   updateTopLevel,
   toggleLayer,
@@ -36,6 +37,21 @@ export default function MapHud({
   const isDateTimeMode = getTemporalModeForTimestep(selectedRasterVariable.timestep) === 'datetime'
   const shortStep = parseTimestep(selectedRasterVariable.timestep)
   const shortStepLabel = `${shortStep.amount} ${shortStep.unit}${shortStep.amount === 1 ? '' : 's'}`
+  const forecastProducts = RASTER_PRODUCTS.filter((product) => product !== 'NRT')
+  const allowsForecastProducts = isDateTimeMode
+    ? appState.raster.datetime > statusBoundary.boundaryDateTime
+    : appState.raster.date > statusBoundary.boundaryDate
+  const allowedProducts = allowsForecastProducts ? forecastProducts : ['NRT']
+  const allowedProductSet = new Set(allowedProducts)
+  const isForecastProduct = appState.raster.product !== 'NRT'
+  const maxPickerDate = parseIsoDate(statusBoundary.maxDate)
+  const maxPickerDateTime = parseIsoDateTime(statusBoundary.maxDateTime)
+  const selectedDateTime = parseIsoDateTime(appState.raster.datetime)
+  const isSelectedOnMaxDate =
+    selectedDateTime &&
+    maxPickerDateTime &&
+    selectedDateTime.toDateString() === maxPickerDateTime.toDateString()
+  const maxTime = isSelectedOnMaxDate ? maxPickerDateTime : undefined
 
   return (
     <div className="map-canvas__overlay">
@@ -152,6 +168,8 @@ export default function MapHud({
                   calendarClassName="hydromet-datepicker__calendar"
                   className="hydromet-datepicker__input"
                   dateFormat="yyyy-MM-dd HH:mm"
+                  maxDate={maxPickerDate}
+                  maxTime={maxTime}
                   placeholderText="YYYY-MM-DD HH:mm"
                   popperPlacement="bottom-start"
                   selected={parseIsoDateTime(appState.raster.datetime)}
@@ -222,6 +240,7 @@ export default function MapHud({
                   calendarClassName="hydromet-datepicker__calendar"
                   className="hydromet-datepicker__input"
                   dateFormat="yyyy-MM-dd"
+                  maxDate={maxPickerDate}
                   placeholderText="YYYY-MM-DD"
                   popperPlacement="bottom-start"
                   selected={parseIsoDate(appState.raster.date)}
@@ -275,12 +294,13 @@ export default function MapHud({
         </select>
 
         <select
+          className={isForecastProduct ? 'raster-toolbar__select raster-toolbar__select--forecast' : 'raster-toolbar__select'}
           value={appState.raster.product}
           title="Raster product"
           onChange={(event) => updateRaster('product', event.target.value)}
         >
           {RASTER_PRODUCTS.map((product) => (
-            <option key={product} value={product}>
+            <option key={product} value={product} disabled={!allowedProductSet.has(product)}>
               {product}
             </option>
           ))}

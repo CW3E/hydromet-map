@@ -84,6 +84,20 @@ export const DEFAULT_RASTER_COORDINATES = [
   [-125, 32],
 ]
 
+export function getRasterProductPath(product) {
+  switch (product) {
+    case 'WWRF-ECMWF':
+      return 'fcst/wwrf_ecmwf'
+    case 'WWRF-GFS':
+      return 'fcst/wwrf_gfs'
+    case 'GFS':
+      return 'fcst/gfs'
+    case 'NRT':
+    default:
+      return 'nrt'
+  }
+}
+
 export const RASTER_VARIABLES = {
   soilMoistureDaily: {
     label: 'Daily SM %-ile',
@@ -96,7 +110,7 @@ export const RASTER_VARIABLES = {
         '#ffffff', '#aaf596', '#4ce600', '#38a800', '#145a00',
         '#002673'],
     },
-    buildRasterUrl: ({ date }) => {
+    buildRasterUrl: ({ date, product }) => {
       if (!date) {
         return null
       }
@@ -108,7 +122,7 @@ export const RASTER_VARIABLES = {
       }
 
       const yyyy = yyyymmdd.slice(0, 4)
-      return `https://cw3e.ucsd.edu/hydro/cnrfc/imgs/nrt/output/${yyyy}/smtot_r_${yyyymmdd}.png`
+      return `https://cw3e.ucsd.edu/hydro/cnrfc/imgs/${getRasterProductPath(product)}/output/${yyyy}/smtot_r_${yyyymmdd}.png`
     },
   },
   sweDaily: {
@@ -122,7 +136,7 @@ export const RASTER_VARIABLES = {
         '#ffe85d', '#d7d7ff', '#b9b9ff', '#8b8bff', '#5d5dff',
         '#2e2eb4'],
     },
-    buildRasterUrl: ({ date }) => {
+    buildRasterUrl: ({ date, product }) => {
       if (!date) {
         return null
       }
@@ -134,7 +148,7 @@ export const RASTER_VARIABLES = {
       }
 
       const yyyy = yyyymmdd.slice(0, 4)
-      return `https://cw3e.ucsd.edu/hydro/cnrfc/imgs/nrt/output/${yyyy}/swe_r_${yyyymmdd}.png`
+      return `https://cw3e.ucsd.edu/hydro/cnrfc/imgs/${getRasterProductPath(product)}/output/${yyyy}/swe_r_${yyyymmdd}.png`
     },
   },
   precipitationDaily: {
@@ -147,7 +161,7 @@ export const RASTER_VARIABLES = {
       colors: ['#ebebeb', '#50d0d0', '#00ffff', '#00e080', '#00c000', '#80e000', '#ffff00', '#ffa000', '#ff0000', '#ff2080', '#f040ff',
         '#8020ff', '#4040ff', '#202080', '#202020', '#808080', '#e0e0e0', '#eed4bc', '#daa678', '#663300'],
     },
-    buildRasterUrl: ({ date }) => {
+    buildRasterUrl: ({ date, product }) => {
       if (!date) {
         return null
       }
@@ -159,7 +173,7 @@ export const RASTER_VARIABLES = {
       }
 
       const yyyy = yyyymmdd.slice(0, 4)
-      return `https://cw3e.ucsd.edu/hydro/cnrfc/imgs/nrt/forcing/${yyyy}/precip_${yyyymmdd}.png`
+      return `https://cw3e.ucsd.edu/hydro/cnrfc/imgs/${getRasterProductPath(product)}/forcing/${yyyy}/precip_${yyyymmdd}.png`
     },
   },
   temperatureDaily: {
@@ -172,7 +186,7 @@ export const RASTER_VARIABLES = {
       colors: ['#7f00ff', '#612efd', '#435cfa', '#2586f5', '#07abed', '#16cbe4', '#34e4d8', '#52f5cb', '#70fdbc', '#8efdab',
         '#acf599', '#cae486', '#e8cb71', '#ffab5c', '#ff8645', '#ff5c2e', '#ff2e17', '#ff0000'],
     },
-    buildRasterUrl: ({ date }) => {
+    buildRasterUrl: ({ date, product }) => {
       if (!date) {
         return null
       }
@@ -184,7 +198,7 @@ export const RASTER_VARIABLES = {
       }
 
       const yyyy = yyyymmdd.slice(0, 4)
-      return `https://cw3e.ucsd.edu/hydro/cnrfc/imgs/nrt/forcing/${yyyy}/tair2m_${yyyymmdd}.png`
+      return `https://cw3e.ucsd.edu/hydro/cnrfc/imgs/${getRasterProductPath(product)}/forcing/${yyyy}/tair2m_${yyyymmdd}.png`
     },
   },
   precipitationMonthly: {
@@ -198,7 +212,7 @@ export const RASTER_VARIABLES = {
         '#ffffff', '#e9e9f1', '#cac9e2', '#a39ac6', '#7764a4',
         '#502382'],
     },
-    buildRasterUrl: ({ date }) => {
+    buildRasterUrl: ({ date, product }) => {
       if (!date) {
         return null
       }
@@ -211,7 +225,7 @@ export const RASTER_VARIABLES = {
 
       const yyyy = yyyymmdd.slice(0, 4)
       const yyyymm = yyyymmdd.slice(0, 6)
-      return `https://cw3e.ucsd.edu/hydro/cnrfc/imgs/nrt/forcing/${yyyy}/precip_r_${yyyymm}.png`
+      return `https://cw3e.ucsd.edu/hydro/cnrfc/imgs/${getRasterProductPath(product)}/forcing/${yyyy}/precip_r_${yyyymm}.png`
     },
   },
   temperatureMonthly: {
@@ -225,7 +239,7 @@ export const RASTER_VARIABLES = {
         '#ffffff', '#e7d6cc', '#f5c1a8', '#f5a182', '#ea7b60',
         '#d34d40'],
     },
-    buildRasterUrl: ({ date }) => {
+    buildRasterUrl: ({ date, product }) => {
       if (!date) {
         return null
       }
@@ -238,7 +252,7 @@ export const RASTER_VARIABLES = {
 
       const yyyy = yyyymmdd.slice(0, 4)
       const yyyymm = yyyymmdd.slice(0, 6)
-      return `https://cw3e.ucsd.edu/hydro/cnrfc/imgs/nrt/forcing/${yyyy}/tair2m_r_${yyyymm}.png`
+      return `https://cw3e.ucsd.edu/hydro/cnrfc/imgs/${getRasterProductPath(product)}/forcing/${yyyy}/tair2m_r_${yyyymm}.png`
     },
   },
   wind3Hourly: {
@@ -250,7 +264,7 @@ export const RASTER_VARIABLES = {
       thresholds: ['8', '15', '22', '30'],
       colors: ['#f0fdf4', '#86efac', '#22c55e', '#15803d', '#14532d'],
     },
-    buildRasterUrl: ({ datetime }) => {
+    buildRasterUrl: ({ datetime, product }) => {
       if (!datetime) {
         return null
       }
@@ -263,7 +277,7 @@ export const RASTER_VARIABLES = {
 
       const yyyymmddhh = normalizedDateTime.slice(0, 10)
       const yyyy = normalizedDateTime.slice(0, 4)
-      return `https://cw3e.ucsd.edu/hydro/cnrfc/imgs/nrt/output/${yyyy}/wind_r_${yyyymmddhh}.png`
+      return `https://cw3e.ucsd.edu/hydro/cnrfc/imgs/${getRasterProductPath(product)}/output/${yyyy}/wind_r_${yyyymmddhh}.png`
     },
   },
 }

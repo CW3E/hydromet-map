@@ -44,6 +44,7 @@ export default function MapCanvas({
   setBasemapMenuOpen,
   setLayerMenuOpen,
   setSelectedStation,
+  statusBoundary,
   terrainEnabled,
   toggleLayer,
   updateRaster,
@@ -193,6 +194,7 @@ export default function MapCanvas({
         selectedBasemap={selectedBasemap}
         setBasemapMenuOpen={setBasemapMenuOpen}
         setLayerMenuOpen={setLayerMenuOpen}
+        statusBoundary={statusBoundary}
         toggleLayer={toggleLayer}
         updateRaster={updateRaster}
         updateTopLevel={updateTopLevel}

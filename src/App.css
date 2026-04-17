@@ -527,6 +527,12 @@ button:disabled {
   background: rgba(244, 249, 252, 0.92);
 }
 
+.raster-toolbar__select--forecast {
+  background: rgba(255, 238, 204, 0.96) !important;
+  border-color: rgba(181, 118, 20, 0.38) !important;
+  color: #6f4312;
+}
+
 .basemap-switcher {
   position: relative;
   width: 75px;
