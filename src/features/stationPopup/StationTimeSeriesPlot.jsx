@@ -13,6 +13,7 @@ const StationTimeSeriesPlot = memo(function StationTimeSeriesPlot({
   const layout = useMemo(
     () => ({
       ...(plotState.layout ?? {}),
+      uirevision: `${stationId}-${plotState.plotId}-${plotState.traceFingerprint}`,
       title: {
         text: plotState.titleText ?? `${stationName} (${stationId})`,
         x: 0.5,

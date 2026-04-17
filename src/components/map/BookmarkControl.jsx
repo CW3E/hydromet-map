@@ -7,6 +7,7 @@ export default function BookmarkControl({
   onClose,
   onCopy,
   onToggle,
+  qrCodeStatus,
   qrCodeUrl,
 }) {
   return (
@@ -45,7 +46,13 @@ export default function BookmarkControl({
                 </div>
 
                 <div className="bookmark-popup__body">
-                  <img alt="QR code for current map bookmark" src={qrCodeUrl} />
+                  {qrCodeStatus === 'ready' && qrCodeUrl ? (
+                    <img alt="QR code for current map bookmark" src={qrCodeUrl} />
+                  ) : (
+                    <div className="bookmark-popup__qr-status" aria-live="polite">
+                      {qrCodeStatus === 'error' ? 'QR code could not be generated.' : 'Generating QR code...'}
+                    </div>
+                  )}
                   <div className="bookmark-popup__content">
                     <button type="button" onClick={onCopy}>
                       {copyStatus}

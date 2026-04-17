@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import 'react-datepicker/dist/react-datepicker.css'
+import QRCode from 'qrcode'
 import './App.css'
 import { BASEMAPS, DEFAULT_RASTER_VARIABLE, DEFAULT_STATE, RASTER_VARIABLES } from './config/mapConfig'
 import MapCanvas from './components/map/MapCanvas'
@@ -17,6 +18,8 @@ import {
 function App() {
   const [appState, setAppState] = useState(() => readStateFromUrl())
   const [bookmarkUrl, setBookmarkUrl] = useState('')
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('')
+  const [qrCodeStatus, setQrCodeStatus] = useState('idle')
   const [copyStatus, setCopyStatus] = useState('Copy URL')
   const [selectedStation, setSelectedStation] = useState(null)
   const [bookmarkOpen, setBookmarkOpen] = useState(false)
@@ -71,6 +74,40 @@ function App() {
     [],
   )
 
+  useEffect(() => {
+    let isCancelled = false
+
+    if (!bookmarkUrl) {
+      setQrCodeDataUrl('')
+      setQrCodeStatus('idle')
+      return undefined
+    }
+
+    setQrCodeStatus('loading')
+
+    QRCode.toDataURL(bookmarkUrl, {
+      width: 200,
+      margin: 1,
+      errorCorrectionLevel: 'M',
+    })
+      .then((dataUrl) => {
+        if (!isCancelled) {
+          setQrCodeDataUrl(dataUrl)
+          setQrCodeStatus('ready')
+        }
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setQrCodeDataUrl('')
+          setQrCodeStatus('error')
+        }
+      })
+
+    return () => {
+      isCancelled = true
+    }
+  }, [bookmarkUrl])
+
   const selectedBasemap = BASEMAPS.find((item) => item.id === appState.basemapId) ?? BASEMAPS[0]
   const selectedVariable =
     RASTER_VARIABLES[appState.raster.variable] ?? RASTER_VARIABLES[DEFAULT_RASTER_VARIABLE]
@@ -84,8 +121,6 @@ function App() {
     pitch: parseNumericValue(appState.view.pitch, Number.parseFloat(DEFAULT_STATE.view.pitch)),
   }
   const terrainEnabled = selectedBasemap.terrainAvailable && appState.terrainEnabled
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(bookmarkUrl)}`
-
   useEffect(() => {
     setAppState((current) =>
       current.raster.temporalMode === temporalMode
@@ -220,7 +255,8 @@ function App() {
               return !current
             })
           }}
-          qrCodeUrl={qrCodeUrl}
+          qrCodeStatus={qrCodeStatus}
+          qrCodeUrl={qrCodeDataUrl}
           selectedBasemap={selectedBasemap}
           selectedStation={selectedStation}
           selectedVariable={selectedVariable}
