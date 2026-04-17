@@ -178,6 +178,21 @@ export function parseIsoDateTime(datetimeText) {
   return matchedDateTime && !Number.isNaN(matchedDateTime.getTime()) ? matchedDateTime : null
 }
 
+export function getDatePartFromDateTime(datetimeText, fallbackDate = DEFAULT_STATE.raster.date) {
+  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(datetimeText)
+    ? datetimeText.slice(0, 10)
+    : fallbackDate
+}
+
+export function mergeDateIntoDateTime(dateText, datetimeText, fallbackTime = '12:00') {
+  const datePart = parseIsoDate(dateText) ? dateText : DEFAULT_STATE.raster.date
+  const timePart = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(datetimeText)
+    ? datetimeText.slice(11, 16)
+    : fallbackTime
+
+  return `${datePart}T${timePart}`
+}
+
 export function formatCoordinate(value) {
   return value.toFixed(4)
 }

@@ -20,10 +20,15 @@ export default function MapLegend({ palette, units, variableLabel }) {
           </div>
           <div
             className="legend-scale__labels"
-            style={{ '--legend-threshold-count': thresholds.length }}
+            style={{ '--legend-segment-count': colors.length }}
           >
             {thresholds.map((threshold, index) => (
-              <small key={`${variableLabel}-threshold-${threshold}-${index}`}>{threshold}</small>
+              <small
+                key={`${variableLabel}-threshold-${threshold}-${index}`}
+                style={{ gridRowStart: index + 2 }}
+              >
+                {threshold}
+              </small>
             ))}
           </div>
         </div>

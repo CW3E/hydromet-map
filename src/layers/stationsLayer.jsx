@@ -1,4 +1,10 @@
 import { Layer, Popup, Source } from 'react-map-gl/maplibre'
+import StationPopup from '../features/stationPopup/StationPopup'
+import {
+  createSelectedStationPopupState,
+  loadStationPopupTabData,
+} from '../features/stationPopup/stationPopupData'
+import { getDefaultStationPopupTabId } from '../features/stationPopup/stationPopupConfig'
 
 const STATIONS_GEOJSON_URL = 'https://cw3e.ucsd.edu/hydro/cnrfc/csv/fcst_points.geojson'
 
@@ -17,17 +23,6 @@ function buildHoveredStation(event, feature) {
   }
 }
 
-function buildSelectedStation(feature) {
-  return {
-    id: feature.properties.ID,
-    name: feature.properties.Location,
-    river: feature.properties.River,
-    reachId: feature.properties.ReachID,
-    longitude: feature.geometry.coordinates[0],
-    latitude: feature.geometry.coordinates[1],
-  }
-}
-
 const stationsLayer = {
   id: 'stations',
   stateKey: 'hoveredStation',
@@ -37,6 +32,7 @@ const stationsLayer = {
   },
   getPointerState({ event }) {
     const hoveredFeature = event.features?.find((feature) => feature.layer.id === 'stations-hit-layer')
+
     return {
       hoveredStation: hoveredFeature ? buildHoveredStation(event, hoveredFeature) : null,
     }
@@ -52,7 +48,11 @@ const stationsLayer = {
       return true
     }
 
-    setSelectedStation(buildSelectedStation(clickedFeature))
+    const station = createSelectedStationPopupState(clickedFeature)
+
+    setSelectedStation(station)
+    loadStationPopupTabData(setSelectedStation, station, getDefaultStationPopupTabId())
+
     return true
   },
   renderLayers({ interactionState }) {
@@ -97,24 +97,10 @@ const stationsLayer = {
   renderPopups({ interactionState, selectedStation, setSelectedStation }) {
     return (
       <>
-        {selectedStation ? (
-          <Popup
-            anchor="top"
-            closeButton
-            closeOnClick={false}
-            latitude={selectedStation.latitude}
-            longitude={selectedStation.longitude}
-            maxWidth="280px"
-            onClose={() => setSelectedStation(null)}
-          >
-            <div className="station-popup">
-              <strong>{selectedStation.name}</strong>
-              <p>{selectedStation.id}</p>
-              <span>{selectedStation.river}</span>
-              <p>Reach ID: {selectedStation.reachId}</p>
-            </div>
-          </Popup>
-        ) : null}
+        <StationPopup
+          selectedStation={selectedStation}
+          setSelectedStation={setSelectedStation}
+        />
 
         {interactionState.hoveredStation ? (
           <Popup

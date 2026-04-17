@@ -5,7 +5,9 @@ import './App.css'
 import { BASEMAPS, DEFAULT_RASTER_VARIABLE, DEFAULT_STATE, RASTER_VARIABLES } from './config/mapConfig'
 import MapCanvas from './components/map/MapCanvas'
 import {
+  getDatePartFromDateTime,
   getTemporalModeForTimestep,
+  mergeDateIntoDateTime,
   parseCenter,
   parseNumericValue,
   readStateFromUrl,
@@ -92,6 +94,14 @@ function App() {
             ...current,
             raster: {
               ...current.raster,
+              date:
+                temporalMode === 'date'
+                  ? getDatePartFromDateTime(current.raster.datetime, current.raster.date)
+                  : current.raster.date,
+              datetime:
+                temporalMode === 'datetime'
+                  ? mergeDateIntoDateTime(current.raster.date, current.raster.datetime)
+                  : current.raster.datetime,
               temporalMode,
             },
           },
@@ -112,9 +122,26 @@ function App() {
         [key]: value,
       }
 
+      if (key === 'date') {
+        nextRaster.datetime = mergeDateIntoDateTime(value, current.raster.datetime)
+      }
+
+      if (key === 'datetime') {
+        nextRaster.date = getDatePartFromDateTime(value, current.raster.date)
+      }
+
       if (key === 'variable') {
         const nextVariable = RASTER_VARIABLES[value] ?? RASTER_VARIABLES[DEFAULT_RASTER_VARIABLE]
-        nextRaster.temporalMode = getTemporalModeForTimestep(nextVariable.timestep)
+        const nextTemporalMode = getTemporalModeForTimestep(nextVariable.timestep)
+        nextRaster.temporalMode = nextTemporalMode
+
+        if (nextTemporalMode === 'datetime') {
+          nextRaster.datetime = mergeDateIntoDateTime(current.raster.date, current.raster.datetime)
+        }
+
+        if (nextTemporalMode === 'date') {
+          nextRaster.date = getDatePartFromDateTime(current.raster.datetime, current.raster.date)
+        }
       }
 
       return {

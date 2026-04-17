@@ -27,4 +27,3 @@
 - `react-plotly.js` and `plotly.js` for interactive time series plots
 - `MUI` or a similar library for consistent look of UI's
 - `papaparse` or a similar library for parsing CSV data
-
