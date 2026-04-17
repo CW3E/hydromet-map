@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Map, { NavigationControl, ScaleControl } from 'react-map-gl/maplibre'
 import { BASEMAP_STYLES } from '../../config/mapConfig'
 import { formatCoordinate, formatViewValue } from '../../lib/appState'
@@ -28,17 +28,15 @@ export default function MapCanvas({
   appState,
   basemapMenuRef,
   basemapMenuOpen,
+  bookmarkUrl,
   bookmarkOpen,
   bookmarkWidgetRef,
   copyStatus,
   layerMenuOpen,
   layerMenuRef,
-  mouseCoordinates,
   onCloseBookmark,
   onCopyBookmark,
-  onMouseMove,
   onToggleBookmark,
-  qrCodeUrl,
   selectedBasemap,
   selectedStation,
   selectedVariable,
@@ -53,6 +51,7 @@ export default function MapCanvas({
   viewState,
 }) {
   const [interactionState, setInteractionState] = useState(INITIAL_INTERACTION_STATE)
+  const mouseReadoutRef = useRef(null)
 
   const layerContext = {
     appState,
@@ -84,7 +83,7 @@ export default function MapCanvas({
   }
 
   function handlePointerMove(event) {
-    onMouseMove(event)
+    mouseReadoutRef.current?.setCoordinates(event.lngLat.lng, event.lngLat.lat)
 
     const nextInteractionState = mergeInteractionState(visibleLayerModules, (layerModule) =>
       layerModule.getPointerState?.({ ...layerContext, event }),
@@ -99,6 +98,8 @@ export default function MapCanvas({
   }
 
   function handlePointerLeave() {
+    mouseReadoutRef.current?.clear()
+
     const nextInteractionState = mergeInteractionState(visibleLayerModules, (layerModule) =>
       layerModule.getPointerLeaveState?.(layerContext),
     )
@@ -205,16 +206,16 @@ export default function MapCanvas({
         />
       ) : null}
 
-      <MouseReadout mouseCoordinates={mouseCoordinates} />
+      <MouseReadout ref={mouseReadoutRef} />
 
       <BookmarkControl
+        bookmarkUrl={bookmarkUrl}
         bookmarkOpen={bookmarkOpen}
         bookmarkWidgetRef={bookmarkWidgetRef}
         copyStatus={copyStatus}
         onClose={onCloseBookmark}
         onCopy={onCopyBookmark}
         onToggle={onToggleBookmark}
-        qrCodeUrl={qrCodeUrl}
       />
     </section>
   )

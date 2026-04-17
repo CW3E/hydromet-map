@@ -1,14 +1,14 @@
 import { createPortal } from 'react-dom'
+import { QRCodeSVG } from 'qrcode.react'
 
 export default function BookmarkControl({
+  bookmarkUrl,
   bookmarkOpen,
   bookmarkWidgetRef,
   copyStatus,
   onClose,
   onCopy,
   onToggle,
-  qrCodeStatus,
-  qrCodeUrl,
 }) {
   return (
     <div ref={bookmarkWidgetRef} className="bookmark-widget">
@@ -46,11 +46,19 @@ export default function BookmarkControl({
                 </div>
 
                 <div className="bookmark-popup__body">
-                  {qrCodeStatus === 'ready' && qrCodeUrl ? (
-                    <img alt="QR code for current map bookmark" src={qrCodeUrl} />
+                  {bookmarkUrl ? (
+                    <div className="bookmark-popup__qr-code" aria-label="QR code for current map bookmark">
+                      <QRCodeSVG
+                        value={bookmarkUrl}
+                        size={200}
+                        marginSize={1}
+                        level="M"
+                        includeMargin={false}
+                      />
+                    </div>
                   ) : (
                     <div className="bookmark-popup__qr-status" aria-live="polite">
-                      {qrCodeStatus === 'error' ? 'QR code could not be generated.' : 'Generating QR code...'}
+                      Generating QR code...
                     </div>
                   )}
                   <div className="bookmark-popup__content">

@@ -1,16 +1,27 @@
+import { forwardRef, useImperativeHandle, useRef } from 'react'
 import { formatCoordinateLabel } from '../../lib/appState'
 
-export default function MouseReadout({ mouseCoordinates }) {
+const MouseReadout = forwardRef(function MouseReadout(_, ref) {
+  const textRef = useRef(null)
+
+  useImperativeHandle(ref, () => ({
+    setCoordinates(longitude, latitude) {
+      if (textRef.current) {
+        textRef.current.textContent = `${formatCoordinateLabel(latitude, 'N', 'S')}, ${formatCoordinateLabel(longitude, 'E', 'W')}`
+      }
+    },
+    clear() {
+      if (textRef.current) {
+        textRef.current.textContent = 'Move cursor'
+      }
+    },
+  }), [])
+
   return (
     <div className="mouse-readout">
-      {mouseCoordinates ? (
-        <span>
-          {formatCoordinateLabel(mouseCoordinates.latitude, 'N', 'S')},{' '}
-          {formatCoordinateLabel(mouseCoordinates.longitude, 'E', 'W')}
-        </span>
-      ) : (
-        <span>Move cursor</span>
-      )}
+      <span ref={textRef}>Move cursor</span>
     </div>
   )
-}
+})
+
+export default MouseReadout

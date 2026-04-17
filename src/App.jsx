@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import 'react-datepicker/dist/react-datepicker.css'
-import QRCode from 'qrcode'
 import './App.css'
 import { BASEMAPS, DEFAULT_RASTER_VARIABLE, DEFAULT_STATE, RASTER_VARIABLES } from './config/mapConfig'
 import MapCanvas from './components/map/MapCanvas'
@@ -18,19 +17,14 @@ import {
 function App() {
   const [appState, setAppState] = useState(() => readStateFromUrl())
   const [bookmarkUrl, setBookmarkUrl] = useState('')
-  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('')
-  const [qrCodeStatus, setQrCodeStatus] = useState('idle')
   const [copyStatus, setCopyStatus] = useState('Copy URL')
   const [selectedStation, setSelectedStation] = useState(null)
   const [bookmarkOpen, setBookmarkOpen] = useState(false)
   const [basemapMenuOpen, setBasemapMenuOpen] = useState(false)
   const [layerMenuOpen, setLayerMenuOpen] = useState(false)
-  const [mouseCoordinates, setMouseCoordinates] = useState(null)
   const bookmarkWidgetRef = useRef(null)
   const basemapMenuRef = useRef(null)
   const layerMenuRef = useRef(null)
-  const mouseCoordinatesFrameRef = useRef(null)
-  const pendingMouseCoordinatesRef = useRef(null)
 
   useEffect(() => {
     if (copyStatus === 'Copied') {
@@ -64,49 +58,6 @@ function App() {
       window.removeEventListener('pointerdown', handlePointerDown)
     }
   }, [basemapMenuOpen, layerMenuOpen])
-
-  useEffect(
-    () => () => {
-      if (mouseCoordinatesFrameRef.current !== null) {
-        window.cancelAnimationFrame(mouseCoordinatesFrameRef.current)
-      }
-    },
-    [],
-  )
-
-  useEffect(() => {
-    let isCancelled = false
-
-    if (!bookmarkUrl) {
-      setQrCodeDataUrl('')
-      setQrCodeStatus('idle')
-      return undefined
-    }
-
-    setQrCodeStatus('loading')
-
-    QRCode.toDataURL(bookmarkUrl, {
-      width: 200,
-      margin: 1,
-      errorCorrectionLevel: 'M',
-    })
-      .then((dataUrl) => {
-        if (!isCancelled) {
-          setQrCodeDataUrl(dataUrl)
-          setQrCodeStatus('ready')
-        }
-      })
-      .catch(() => {
-        if (!isCancelled) {
-          setQrCodeDataUrl('')
-          setQrCodeStatus('error')
-        }
-      })
-
-    return () => {
-      isCancelled = true
-    }
-  }, [bookmarkUrl])
 
   const selectedBasemap = BASEMAPS.find((item) => item.id === appState.basemapId) ?? BASEMAPS[0]
   const selectedVariable =
@@ -196,25 +147,6 @@ function App() {
     }))
   }
 
-  function handleMapMouseMove(event) {
-    pendingMouseCoordinatesRef.current = {
-      longitude: event.lngLat.lng,
-      latitude: event.lngLat.lat,
-    }
-
-    if (mouseCoordinatesFrameRef.current !== null) {
-      return
-    }
-
-    mouseCoordinatesFrameRef.current = window.requestAnimationFrame(() => {
-      mouseCoordinatesFrameRef.current = null
-
-      if (pendingMouseCoordinatesRef.current) {
-        setMouseCoordinates(pendingMouseCoordinatesRef.current)
-      }
-    })
-  }
-
   function refreshBookmarkUrl() {
     const nextBookmarkUrl = writeStateToUrl(appState)
     setBookmarkUrl(nextBookmarkUrl)
@@ -243,10 +175,8 @@ function App() {
           copyStatus={copyStatus}
           layerMenuOpen={layerMenuOpen}
           layerMenuRef={layerMenuRef}
-          mouseCoordinates={mouseCoordinates}
           onCloseBookmark={() => setBookmarkOpen(false)}
           onCopyBookmark={handleCopyBookmark}
-          onMouseMove={handleMapMouseMove}
           onToggleBookmark={() => {
             setBookmarkOpen((current) => {
               if (!current) {
@@ -255,8 +185,7 @@ function App() {
               return !current
             })
           }}
-          qrCodeStatus={qrCodeStatus}
-          qrCodeUrl={qrCodeDataUrl}
+          bookmarkUrl={bookmarkUrl}
           selectedBasemap={selectedBasemap}
           selectedStation={selectedStation}
           selectedVariable={selectedVariable}

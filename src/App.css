@@ -833,12 +833,19 @@ button:disabled {
   width: fit-content;
 }
 
-.bookmark-popup__body img {
+.bookmark-popup__body img,
+.bookmark-popup__qr-code {
   width: 200px;
   height: 200px;
   border-radius: 8px;
   background: #fff;
   border: 1px solid rgba(74, 113, 137, 0.14);
+}
+
+.bookmark-popup__qr-code {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
 }
 
 .bookmark-popup__qr-status {
@@ -1096,7 +1103,8 @@ button:disabled {
     max-height: calc(100vh - 1.6rem);
   }
 
-  .bookmark-popup__body img {
+  .bookmark-popup__body img,
+  .bookmark-popup__qr-code {
     width: 180px;
     height: 180px;
   }
