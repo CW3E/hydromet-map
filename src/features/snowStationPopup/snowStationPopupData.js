@@ -1,11 +1,9 @@
 import { fetchAndParseCsv } from '../../lib/csvData'
 import {
-  DEFAULT_STATION_POPUP_FORECAST_PRODUCT,
-  STATION_POPUP_TABS,
-  getDefaultStationPopupTabId,
-  getStationPopupForecastProductLabel,
-  getStationPopupTabDefinition,
-} from './stationPopupConfig'
+  getDefaultSnowPopupTabId,
+  getSnowPopupTabDefinition,
+  getSnowPopupTabs,
+} from './snowStationPopupConfig'
 
 function findTimeAxisField(fields) {
   const preferredField = fields.find((field) => /^(date|time|datetime|timestamp)$/i.test(field))
@@ -96,6 +94,22 @@ function buildYAxisLayout(plotDefinition, traces) {
   }
 }
 
+function resolvePlotTitleText(plotDefinition, station, tabDefinition) {
+  const template = plotDefinition.titleTemplate
+
+  if (!template) {
+    return `${station.name} (${station.id})`
+  }
+
+  return template
+    .replaceAll('{stationName}', station.name ?? '')
+    .replaceAll('{stationId}', station.id ?? '')
+    .replaceAll('{elevation}', station.elevation ?? '')
+    .replaceAll('{basinName}', station.basinName ?? '')
+    .replaceAll('{hydroArea}', station.hydroArea ?? '')
+    .replaceAll('{tabLabel}', tabDefinition?.label ?? '')
+}
+
 function createEmptyPlotState(plotDefinition) {
   return {
     plotId: plotDefinition.id,
@@ -121,23 +135,6 @@ function createEmptyPlotState(plotDefinition) {
   }
 }
 
-function resolvePlotTitleText(plotDefinition, station) {
-  const template = plotDefinition.titleTemplate
-
-  if (!template) {
-    return `${station.name} (${station.id})`
-  }
-
-  const forecastProductLabel = getStationPopupForecastProductLabel(
-    station.popup?.forecastProduct ?? DEFAULT_STATION_POPUP_FORECAST_PRODUCT,
-  )
-
-  return template
-    .replaceAll('{stationName}', station.name ?? '')
-    .replaceAll('{stationId}', station.id ?? '')
-    .replaceAll('{forecastProduct}', forecastProductLabel)
-}
-
 function createEmptyTabState(tabDefinition) {
   return {
     plotsById: Object.fromEntries(
@@ -146,9 +143,9 @@ function createEmptyTabState(tabDefinition) {
   }
 }
 
-function createEmptyTabDataById() {
+function createEmptyTabDataById(popupDefinition) {
   return Object.fromEntries(
-    STATION_POPUP_TABS.map((tabDefinition) => [tabDefinition.id, createEmptyTabState(tabDefinition)]),
+    getSnowPopupTabs(popupDefinition).map((tabDefinition) => [tabDefinition.id, createEmptyTabState(tabDefinition)]),
   )
 }
 
@@ -201,6 +198,13 @@ function buildTrace(seriesKey, seriesConfig, sourceRecord) {
     width: 2,
     ...seriesConfig.line,
   }
+  if (seriesConfig.fill) {
+    trace.fill = seriesConfig.fill
+  }
+
+  if (seriesConfig.fillcolor) {
+    trace.fillcolor = seriesConfig.fillcolor
+  }
 
   if (seriesConfig.marker) {
     trace.marker = seriesConfig.marker
@@ -218,15 +222,30 @@ async function fetchPlotSources(plotDefinition, station) {
         popupState: station.popup,
       })
       const { rows, fields } = await fetchAndParseCsv(url, { dynamicTyping: true })
+      const transformedRows =
+        typeof sourceDefinition.transformRows === 'function'
+          ? (sourceDefinition.transformRows({
+              rows,
+              fields,
+              station,
+              popupState: station.popup,
+            }) ?? rows)
+          : rows
+      const transformedFields = Array.from(
+        new Set([
+          ...fields,
+          ...transformedRows.flatMap((row) => Object.keys(row ?? {})),
+        ]),
+      )
 
       return [
         sourceDefinition.id,
         {
           id: sourceDefinition.id,
           url,
-          rows,
-          fields,
-          xField: findTimeAxisField(fields),
+          rows: transformedRows,
+          fields: transformedFields,
+          xField: findTimeAxisField(transformedFields),
         },
       ]
     }),
@@ -235,10 +254,33 @@ async function fetchPlotSources(plotDefinition, station) {
   return Object.fromEntries(sourceEntries)
 }
 
-async function buildTimeSeriesPlotState(plotDefinition, station) {
+function buildXAxisLayout(plotDefinition, station) {
+  if (typeof plotDefinition.xAxis === 'function') {
+    return plotDefinition.xAxis({
+      station,
+      popupState: station.popup,
+    }) ?? {}
+  }
+
+  return plotDefinition.xAxis ?? {}
+}
+
+async function buildTimeSeriesPlotState(plotDefinition, station, tabDefinition) {
   const sourceRecords = await fetchPlotSources(plotDefinition, station)
   const xAxisLayout = buildXAxisLayout(plotDefinition, station)
-  const traces = Object.entries(plotDefinition.series ?? {})
+  const generatedSeries =
+    typeof plotDefinition.buildSeries === 'function'
+      ? (plotDefinition.buildSeries({
+          sourceRecords,
+          station,
+          popupState: station.popup,
+        }) ?? {})
+      : {}
+  const allSeries = {
+    ...generatedSeries,
+    ...(plotDefinition.series ?? {}),
+  }
+  const traces = Object.entries(allSeries)
     .filter(([, seriesConfig]) => seriesConfig.visible ?? true)
     .map(([seriesKey, seriesConfig]) => {
       const sourceRecord = getSourceRecord(sourceRecords, seriesConfig.sourceId, seriesKey)
@@ -254,7 +296,7 @@ async function buildTimeSeriesPlotState(plotDefinition, station) {
     status: 'ready',
     error: null,
     traces,
-    titleText: resolvePlotTitleText(plotDefinition, station),
+    titleText: resolvePlotTitleText(plotDefinition, station, tabDefinition),
     layout: plotDefinition.layout ?? {},
     plotlyConfig: plotDefinition.plotlyConfig ?? {},
     xField: primarySource?.xField ?? null,
@@ -263,7 +305,10 @@ async function buildTimeSeriesPlotState(plotDefinition, station) {
     leftAxisCount,
     rightAxisCount,
     hovermode: plotDefinition.hovermode ?? 'closest',
-    traceFingerprint: traces.map((trace) => `${trace.type}:${trace.name}:${trace.yaxis ?? 'y'}`).join('|'),
+    traceFingerprint:
+      traces.length > 0
+        ? traces.map((trace) => `${trace.type}:${trace.name}:${trace.yaxis ?? 'y'}`).join('|')
+        : 'empty',
     sources: Object.fromEntries(
       Object.entries(sourceRecords).map(([sourceId, sourceRecord]) => [
         sourceId,
@@ -276,9 +321,9 @@ async function buildTimeSeriesPlotState(plotDefinition, station) {
   }
 }
 
-async function buildPlotState(plotDefinition, station) {
+async function buildPlotState(plotDefinition, station, tabDefinition) {
   if (plotDefinition.type === 'timeseries') {
-    return buildTimeSeriesPlotState(plotDefinition, station)
+    return buildTimeSeriesPlotState(plotDefinition, station, tabDefinition)
   }
 
   throw new Error(`Unsupported plot type "${plotDefinition.type}".`)
@@ -309,31 +354,37 @@ function triggerPlotResize() {
   })
 }
 
-export function createInitialStationPopupState() {
+export function createInitialSnowStationPopupState(popupDefinition) {
   return {
-    activeTabId: getDefaultStationPopupTabId(),
-    forecastProduct: DEFAULT_STATION_POPUP_FORECAST_PRODUCT,
-    tabDataById: createEmptyTabDataById(),
+    activeTabId: getDefaultSnowPopupTabId(popupDefinition),
+    tabDataById: createEmptyTabDataById(popupDefinition),
   }
 }
 
-export function createSelectedStationPopupState(feature, initialPopupState = {}) {
+export function createSelectedSnowStationPopupState(
+  feature,
+  popupDefinition,
+  initialPopupState = {},
+) {
+  const properties = feature?.properties ?? {}
+
   return {
-    popupType: 'forecast-points',
-    id: feature.properties.ID,
-    name: feature.properties.Location,
-    river: feature.properties.River,
-    reachId: feature.properties.ReachID,
+    popupType: popupDefinition.popupType,
+    id: properties.STA ?? 'Unknown',
+    name: properties.StationName ?? properties.STA ?? 'Unknown',
+    elevation: properties.Elevation ?? null,
+    basinName: properties.BasinName ?? null,
+    hydroArea: properties.HydroArea ?? null,
     longitude: feature.geometry.coordinates[0],
     latitude: feature.geometry.coordinates[1],
     popup: {
-      ...createInitialStationPopupState(),
+      ...createInitialSnowStationPopupState(popupDefinition),
       ...initialPopupState,
     },
   }
 }
 
-export function setActiveStationPopupTab(setSelectedStation, tabId) {
+export function setActiveSnowStationPopupTab(setSelectedStation, tabId) {
   setSelectedStation((current) =>
     current
       ? {
@@ -349,30 +400,15 @@ export function setActiveStationPopupTab(setSelectedStation, tabId) {
   triggerPlotResize()
 }
 
-export function setStationPopupForecastProduct(setSelectedStation, productId) {
-  setSelectedStation((current) =>
-    current
-      ? {
-          ...current,
-          popup: {
-            ...current.popup,
-            forecastProduct: productId,
-            tabDataById: createEmptyTabDataById(),
-          },
-        }
-      : current,
-  )
-}
-
-export function loadStationPopupTabData(setSelectedStation, station, tabId) {
-  const tabDefinition = getStationPopupTabDefinition(tabId)
+export function loadSnowStationPopupTabData(setSelectedStation, station, popupDefinition, tabId) {
+  const tabDefinition = getSnowPopupTabDefinition(popupDefinition, tabId)
 
   if (!tabDefinition) {
     return
   }
 
   setSelectedStation((current) => {
-    if (!current || current.id !== station.id) {
+    if (!current || current.id !== station.id || current.popupType !== popupDefinition.popupType) {
       return current
     }
 
@@ -403,12 +439,12 @@ export function loadStationPopupTabData(setSelectedStation, station, tabId) {
   Promise.all(
     tabDefinition.plots.map(async (plotDefinition) => [
       plotDefinition.id,
-      await buildPlotState(plotDefinition, station),
+      await buildPlotState(plotDefinition, station, tabDefinition),
     ]),
   )
     .then((plotEntries) => {
       setSelectedStation((current) =>
-        current?.id === station.id
+        current?.id === station.id && current.popupType === popupDefinition.popupType
           ? {
               ...current,
               popup: {
@@ -426,7 +462,7 @@ export function loadStationPopupTabData(setSelectedStation, station, tabId) {
     })
     .catch((error) => {
       setSelectedStation((current) =>
-        current?.id === station.id
+        current?.id === station.id && current.popupType === popupDefinition.popupType
           ? {
               ...current,
               popup: {
@@ -453,18 +489,4 @@ export function loadStationPopupTabData(setSelectedStation, station, tabId) {
           : current,
       )
     })
-}
-
-export function getStationPopupTabs() {
-  return STATION_POPUP_TABS
-}
-function buildXAxisLayout(plotDefinition, station) {
-  if (typeof plotDefinition.xAxis === 'function') {
-    return plotDefinition.xAxis({
-      station,
-      popupState: station.popup,
-    }) ?? {}
-  }
-
-  return plotDefinition.xAxis ?? {}
 }

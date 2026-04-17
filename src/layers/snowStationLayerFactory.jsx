@@ -1,4 +1,10 @@
 import { Layer, Popup, Source } from 'react-map-gl/maplibre'
+import SnowStationPopup from '../features/snowStationPopup/SnowStationPopup'
+import { getDefaultSnowPopupTabId } from '../features/snowStationPopup/snowStationPopupConfig'
+import {
+  createSelectedSnowStationPopupState,
+  loadSnowStationPopupTabData,
+} from '../features/snowStationPopup/snowStationPopupData'
 
 const SNOW_POINT_RADIUS = ['interpolate', ['linear'], ['zoom'], 0, 2, 5, 2, 6, 3, 12, 6]
 const SNOW_POINT_HIGHLIGHT_RADIUS = ['interpolate', ['linear'], ['zoom'], 0, 3, 5, 3, 6, 4, 12, 7]
@@ -26,6 +32,7 @@ export default function createSnowStationLayer({
   hitLayerId,
   data,
   circleColor,
+  popupDefinition,
   stateKey,
 }) {
   return {
@@ -43,6 +50,27 @@ export default function createSnowStationLayer({
     },
     getPointerLeaveState() {
       return { [stateKey]: null }
+    },
+    handleClick({ event, setSelectedStation, statusBoundary }) {
+      const clickedFeature = event.features?.find((feature) => feature.layer.id === hitLayerId)
+
+      if (!clickedFeature || clickedFeature.geometry.type !== 'Point') {
+        return false
+      }
+
+      const station = createSelectedSnowStationPopupState(clickedFeature, popupDefinition, {
+        statusTimestamp: statusBoundary?.statusTimestamp ?? null,
+      })
+
+      setSelectedStation(station)
+      loadSnowStationPopupTabData(
+        setSelectedStation,
+        station,
+        popupDefinition,
+        getDefaultSnowPopupTabId(popupDefinition),
+      )
+
+      return true
     },
     renderLayers({ interactionState }) {
       const hoveredSnowStation = interactionState[stateKey]
@@ -85,30 +113,36 @@ export default function createSnowStationLayer({
         </>
       )
     },
-    renderPopups({ interactionState }) {
+    renderPopups({ interactionState, selectedStation, setSelectedStation }) {
       const hoveredSnowStation = interactionState[stateKey]
 
-      if (!hoveredSnowStation) {
-        return null
-      }
-
       return (
-        <Popup
-          anchor="bottom"
-          closeButton={false}
-          closeOnClick={false}
-          latitude={hoveredSnowStation.latitude}
-          longitude={hoveredSnowStation.longitude}
-          offset={10}
-        >
-          <div className="river-popup">
-            <strong>Station ID: {hoveredSnowStation.sta}</strong>
-            <p>Station Name: {hoveredSnowStation.stationName}</p>
-            <p>Elevation: {hoveredSnowStation.elevation} ft</p>
-            <p>Basin Name: {hoveredSnowStation.basinName}</p>
-            <p>Hydro Area: {hoveredSnowStation.hydroArea}</p>
-          </div>
-        </Popup>
+        <>
+          <SnowStationPopup
+            popupDefinition={popupDefinition}
+            selectedStation={selectedStation}
+            setSelectedStation={setSelectedStation}
+          />
+
+          {hoveredSnowStation ? (
+            <Popup
+              anchor="bottom"
+              closeButton={false}
+              closeOnClick={false}
+              latitude={hoveredSnowStation.latitude}
+              longitude={hoveredSnowStation.longitude}
+              offset={10}
+            >
+              <div className="river-popup">
+                <strong>Station ID: {hoveredSnowStation.sta}</strong>
+                <p>Station Name: {hoveredSnowStation.stationName}</p>
+                <p>Elevation: {hoveredSnowStation.elevation} ft</p>
+                <p>Basin Name: {hoveredSnowStation.basinName}</p>
+                <p>Hydro Area: {hoveredSnowStation.hydroArea}</p>
+              </div>
+            </Popup>
+          ) : null}
+        </>
       )
     },
   }

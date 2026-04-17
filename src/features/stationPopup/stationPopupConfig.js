@@ -29,7 +29,74 @@ export function getStationPopupForecastProductLabel(productId) {
   )
 }
 
-const DEFAULT_TIMESERIES_LAYOUT = {
+function parsePopupStatusTimestamp(rawValue) {
+  if (typeof rawValue !== 'string' || !rawValue.trim()) {
+    return null
+  }
+
+  const normalizedValue = rawValue.trim()
+  const parsedValue = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(normalizedValue)
+    ? new Date(`${normalizedValue}:00`)
+    : new Date(normalizedValue)
+
+  return Number.isNaN(parsedValue.getTime()) ? null : parsedValue
+}
+
+function shiftDate(date, { years = 0, months = 0, days = 0 }) {
+  const nextDate = new Date(date)
+
+  if (years !== 0) {
+    nextDate.setFullYear(nextDate.getFullYear() + years)
+  }
+
+  if (months !== 0) {
+    nextDate.setMonth(nextDate.getMonth() + months)
+  }
+
+  if (days !== 0) {
+    nextDate.setDate(nextDate.getDate() + days)
+  }
+
+  return nextDate
+}
+
+function formatRangeDate(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function formatRangeDateTime(date) {
+  const datePart = formatRangeDate(date)
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${datePart} ${hours}:${minutes}`
+}
+
+function buildRelativeTimeAxis({
+  popupState,
+  startShift,
+  endShift,
+  mode = 'datetime',
+}) {
+  const statusTimestamp = parsePopupStatusTimestamp(popupState?.statusTimestamp)
+
+  if (!statusTimestamp) {
+    return {}
+  }
+
+  const rangeStart = shiftDate(statusTimestamp, startShift)
+  const rangeEnd = shiftDate(statusTimestamp, endShift)
+
+  return {
+    range: mode === 'date'
+      ? [formatRangeDate(rangeStart), formatRangeDate(rangeEnd)]
+      : [formatRangeDateTime(rangeStart), formatRangeDateTime(rangeEnd)],
+  }
+}
+
+export const DEFAULT_TIMESERIES_LAYOUT = {
   autosize: true,
   margin: {
     l: 5,
@@ -53,7 +120,7 @@ const DEFAULT_TIMESERIES_LAYOUT = {
   },
 }
 
-const DEFAULT_TIMESERIES_PLOTLY_CONFIG = {
+export const DEFAULT_TIMESERIES_PLOTLY_CONFIG = {
   displayModeBar: 'hover',
   responsive: true,
 }
@@ -82,9 +149,13 @@ export const STATION_POPUP_TABS = [
         titleTemplate: DEFAULT_TIMESERIES_TITLE_TEMPLATE,
         layout: DEFAULT_TIMESERIES_LAYOUT,
         plotlyConfig: DEFAULT_TIMESERIES_PLOTLY_CONFIG,
-        xAxis: {
-          range: ['2025-10-01 00:00', '2026-05-07 00:00'],
-        },
+        xAxis: ({ popupState }) =>
+          buildRelativeTimeAxis({
+            popupState,
+            startShift: { months: -6 },
+            endShift: { days: 20 },
+            mode: 'datetime',
+          }),
         axes: {
           y: {
             title: { text: 'Temperature (°C)', font: { color: 'orange' }, standoff: 0 },
@@ -200,9 +271,13 @@ export const STATION_POPUP_TABS = [
         titleTemplate: DEFAULT_TIMESERIES_TITLE_TEMPLATE,
         layout: DEFAULT_TIMESERIES_LAYOUT,
         plotlyConfig: DEFAULT_TIMESERIES_PLOTLY_CONFIG,
-        xAxis: {
-          range: ['2025-06-01 00:00', '2026-05-07 00:00'],
-        },
+        xAxis: ({ popupState }) =>
+          buildRelativeTimeAxis({
+            popupState,
+            startShift: { months: -12 },
+            endShift: { days: 30 },
+            mode: 'date',
+          }),
         axes: {
           y: {
             title: { text: 'Temperature (°C)', font: { color: 'orange' }, standoff: 0 },
@@ -344,7 +419,13 @@ export const STATION_POPUP_TABS = [
         titleTemplate: DEFAULT_TIMESERIES_TITLE_TEMPLATE,
         layout: DEFAULT_TIMESERIES_LAYOUT,
         plotlyConfig: DEFAULT_TIMESERIES_PLOTLY_CONFIG,
-        xAxis: {},
+        xAxis: ({ popupState }) =>
+          buildRelativeTimeAxis({
+            popupState,
+            startShift: { years: -10 },
+            endShift: { months: 1 },
+            mode: 'date',
+          }),
         axes: {
           y: {
             title: { text: 'Temperature (°C)', font: { color: 'orange' }, standoff: 0 },

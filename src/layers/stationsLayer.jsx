@@ -40,7 +40,7 @@ const stationsLayer = {
   getPointerLeaveState() {
     return { hoveredStation: null }
   },
-  handleClick({ event, setSelectedStation }) {
+  handleClick({ event, setSelectedStation, statusBoundary }) {
     const clickedFeature = event.features?.find((feature) => feature.layer.id === 'stations-hit-layer')
 
     if (!clickedFeature || clickedFeature.geometry.type !== 'Point') {
@@ -48,7 +48,9 @@ const stationsLayer = {
       return true
     }
 
-    const station = createSelectedStationPopupState(clickedFeature)
+    const station = createSelectedStationPopupState(clickedFeature, {
+      statusTimestamp: statusBoundary?.statusTimestamp ?? null,
+    })
 
     setSelectedStation(station)
     loadStationPopupTabData(setSelectedStation, station, getDefaultStationPopupTabId())

@@ -70,6 +70,7 @@ function buildStatusBoundary(statusTimestamp) {
   const maxForecastTimestamp = addDays(statusTimestamp, 16)
 
   return {
+    statusTimestamp: formatStatusDateTime(statusTimestamp),
     boundaryDate: formatStatusDate(statusTimestamp),
     boundaryDateTime: formatStatusDateTime(statusTimestamp),
     maxDate: formatStatusDate(maxForecastTimestamp),

@@ -60,6 +60,7 @@ export default function MapCanvas({
     selectedStation,
     selectedVariable,
     setSelectedStation,
+    statusBoundary,
   }
 
   const visibleLayerModules = MAP_LAYER_MODULES.filter(

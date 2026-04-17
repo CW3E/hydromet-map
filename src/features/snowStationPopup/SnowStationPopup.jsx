@@ -1,16 +1,7 @@
 import { Popup } from 'react-map-gl/maplibre'
-import { STATION_POPUP_WIDTH } from './stationPopupConfig'
-import {
-  STATION_POPUP_FORECAST_PRODUCTS,
-  getStationPopupTabDefinition,
-} from './stationPopupConfig'
-import {
-  getStationPopupTabs,
-  loadStationPopupTabData,
-  setActiveStationPopupTab,
-  setStationPopupForecastProduct,
-} from './stationPopupData'
-import StationTimeSeriesPlot from './StationTimeSeriesPlot'
+import StationTimeSeriesPlot from '../stationPopup/StationTimeSeriesPlot'
+import { getDefaultSnowPopupTabId, getSnowPopupTabDefinition, getSnowPopupTabs } from './snowStationPopupConfig'
+import { loadSnowStationPopupTabData, setActiveSnowStationPopupTab } from './snowStationPopupData'
 
 function renderPlotPanel(plotState, station) {
   if (plotState.status === 'loading') {
@@ -36,17 +27,17 @@ function renderPlotPanel(plotState, station) {
   return <p className="station-popup__status">Select a tab to load its plot data.</p>
 }
 
-export default function StationPopup({
+export default function SnowStationPopup({
+  popupDefinition,
   selectedStation,
   setSelectedStation,
 }) {
-  if (!selectedStation || selectedStation.popupType !== 'forecast-points') {
+  if (!selectedStation || selectedStation.popupType !== popupDefinition.popupType) {
     return null
   }
 
-  const tabs = getStationPopupTabs()
-  const activeTabId = selectedStation.popup?.activeTabId ?? tabs[0]?.id ?? 'daily'
-  const forecastProduct = selectedStation.popup?.forecastProduct ?? STATION_POPUP_FORECAST_PRODUCTS[0].id
+  const tabs = getSnowPopupTabs(popupDefinition)
+  const activeTabId = selectedStation.popup?.activeTabId ?? getDefaultSnowPopupTabId(popupDefinition)
 
   return (
     <Popup
@@ -55,12 +46,12 @@ export default function StationPopup({
       closeOnClick={false}
       latitude={selectedStation.latitude}
       longitude={selectedStation.longitude}
-      maxWidth={STATION_POPUP_WIDTH}
+      maxWidth={popupDefinition.popupWidth}
       onClose={() => setSelectedStation(null)}
     >
       <div className="station-popup station-popup--timeseries">
         <div className="station-popup__header-row">
-          <div className="station-popup__tabs" role="tablist" aria-label="Station time-series tabs">
+          <div className="station-popup__tabs" role="tablist" aria-label="Snow station tabs">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -69,44 +60,18 @@ export default function StationPopup({
                 aria-selected={activeTabId === tab.id}
                 className={activeTabId === tab.id ? 'station-popup__tab is-active' : 'station-popup__tab'}
                 onClick={() => {
-                  setActiveStationPopupTab(setSelectedStation, tab.id)
-                  loadStationPopupTabData(setSelectedStation, selectedStation, tab.id)
+                  setActiveSnowStationPopupTab(setSelectedStation, tab.id)
+                  loadSnowStationPopupTabData(setSelectedStation, selectedStation, popupDefinition, tab.id)
                 }}
               >
                 {tab.label}
               </button>
             ))}
           </div>
-
-          <label className="station-popup__control">
-            <span>Forecast Product</span>
-            <select
-              value={forecastProduct}
-              onChange={(event) => {
-                const nextForecastProduct = event.target.value
-                const nextStation = {
-                  ...selectedStation,
-                  popup: {
-                    ...selectedStation.popup,
-                    forecastProduct: nextForecastProduct,
-                  },
-                }
-
-                setStationPopupForecastProduct(setSelectedStation, nextForecastProduct)
-                loadStationPopupTabData(setSelectedStation, nextStation, activeTabId)
-              }}
-            >
-              {STATION_POPUP_FORECAST_PRODUCTS.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.label}
-                </option>
-              ))}
-            </select>
-          </label>
         </div>
 
         {tabs.map((tab) => {
-          const tabDefinition = getStationPopupTabDefinition(tab.id)
+          const tabDefinition = getSnowPopupTabDefinition(popupDefinition, tab.id)
           const tabState = selectedStation.popup?.tabDataById?.[tab.id]
 
           return (
