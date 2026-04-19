@@ -11,6 +11,7 @@ import MouseReadout from './MouseReadout'
 import TerrainToggleControl from './TerrainToggleControl'
 
 const INITIAL_INTERACTION_STATE = {
+  hoveredB120Point: null,
   hoveredRiver: null,
   hoveredSnowCourseStation: null,
   hoveredSnowPillowStation: null,

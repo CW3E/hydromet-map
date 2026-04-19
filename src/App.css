@@ -618,7 +618,7 @@ button:disabled {
   position: absolute;
   top: -0.15rem;
   left: calc(100% + 0.24rem);
-  width: 168px;
+  width: 196px;
   padding: 0.16rem;
   display: grid;
   gap: 0.1rem;
@@ -748,7 +748,7 @@ button:disabled {
 
 .bookmark-widget {
   position: absolute;
-  top: 15.8rem;
+  top: 16.85rem;
   right: 0.5rem;
   z-index: 6;
   width: 30px;
@@ -1030,13 +1030,13 @@ button:disabled {
   color: #355567;
 }
 
-.maplibregl-ctrl-top-right,
-.maplibregl-ctrl-bottom-left {
+.map-canvas .maplibregl-ctrl-top-right,
+.map-canvas .maplibregl-ctrl-bottom-left {
   z-index: 2;
 }
 
-.maplibregl-ctrl-top-right {
-  top: 3.5rem;
+.map-canvas .maplibregl-ctrl-top-right {
+  top: 4.97rem !important;
 }
 
 @media (max-width: 1024px) {
@@ -1101,7 +1101,7 @@ button:disabled {
   .bookmark-widget {
     top: auto;
     right: 0.5rem;
-    bottom: 0.8rem;
+    bottom: 0;
   }
 
   .bookmark-popup {
@@ -1120,7 +1120,7 @@ button:disabled {
     height: 180px;
   }
 
-  .maplibregl-ctrl-top-right {
-    top: 11.8rem;
+  .map-canvas .maplibregl-ctrl-top-right {
+    top: 13.27rem !important;
   }
 }
