@@ -100,6 +100,7 @@ function buildYAxisLayout(plotDefinition, traces) {
 function createEmptyPlotState(plotDefinition) {
   return {
     plotId: plotDefinition.id,
+    plotType: plotDefinition.type ?? 'timeseries',
     status: 'idle',
     error: null,
     traces: [],
@@ -119,6 +120,7 @@ function createEmptyPlotState(plotDefinition) {
     hovermode: plotDefinition.hovermode ?? 'closest',
     traceFingerprint: 'empty',
     sources: {},
+    footerText: plotDefinition.footerText ?? null,
   }
 }
 
@@ -266,6 +268,16 @@ async function fetchPlotSources(plotDefinition, station) {
   return Object.fromEntries(sourceEntries)
 }
 
+async function fetchJson(url) {
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error(`Failed to load JSON from ${url}.`)
+  }
+
+  return response.json()
+}
+
 function buildXAxisLayout(plotDefinition, station) {
   if (typeof plotDefinition.xAxis === 'function') {
     return plotDefinition.xAxis({
@@ -293,6 +305,8 @@ async function buildTimeSeriesPlotState(plotDefinition, station) {
 
   return {
     plotId: plotDefinition.id,
+    plotType: plotDefinition.type ?? 'timeseries',
+    plotHeight: plotDefinition.plotHeight ?? null,
     status: 'ready',
     error: null,
     traces,
@@ -315,12 +329,216 @@ async function buildTimeSeriesPlotState(plotDefinition, station) {
         },
       ]),
     ),
+    footerText: plotDefinition.footerText ?? null,
+  }
+}
+
+function formatTableCellValue(value, formatter) {
+  if (typeof formatter === 'function') {
+    return formatter(value)
+  }
+
+  if (value === null || value === undefined) {
+    return ''
+  }
+
+  return String(value)
+}
+
+async function buildTablePlotState(plotDefinition, station) {
+  const sourceRecords = await fetchPlotSources(plotDefinition, station)
+  const sourceRecord = getSourceRecord(sourceRecords, plotDefinition.sourceId, plotDefinition.id)
+  const rows = sourceRecord.rows ?? []
+  const selectedRows =
+    typeof plotDefinition.selectRows === 'function'
+      ? (plotDefinition.selectRows({ rows, station, popupState: station.popup }) ?? [])
+      : rows
+
+  if (!selectedRows.length) {
+    throw new Error('No table rows were found in the configured CSV source.')
+  }
+
+  const columns = plotDefinition.columns ?? []
+  const headerValues = columns.map((column) => column.label ?? column.key)
+  const cellValues = columns.map((column) =>
+    selectedRows.map((row) => formatTableCellValue(row[column.key], column.format)),
+  )
+
+  return {
+    plotId: plotDefinition.id,
+    plotType: plotDefinition.type ?? 'table',
+    plotHeight: plotDefinition.plotHeight ?? null,
+    status: 'ready',
+    error: null,
+    traces: [
+      {
+        type: 'table',
+        header: {
+          values: headerValues,
+          align: 'center',
+          fill: { color: 'rgba(29, 105, 150, 0.12)' },
+          line: { color: 'rgba(16,34,47,0.12)' },
+          font: { size: 12, color: '#10222f' },
+        },
+        cells: {
+          values: cellValues,
+          align: 'center',
+          fill: { color: '#ffffff' },
+          line: { color: 'rgba(16,34,47,0.08)' },
+          font: { size: 12, color: '#244050' },
+          height: 28,
+        },
+      },
+    ],
+    titleText: resolvePlotTitleText(plotDefinition, station),
+    layout: plotDefinition.layout ?? {},
+    plotlyConfig: plotDefinition.plotlyConfig ?? {},
+    xField: null,
+    xAxisLayout: {},
+    yAxesLayout: {
+      yaxis: {
+        automargin: true,
+        title: { text: 'Value' },
+      },
+    },
+    leftAxisCount: 1,
+    rightAxisCount: 0,
+    hovermode: plotDefinition.hovermode ?? 'closest',
+    traceFingerprint: `table:${headerValues.join('|')}:${selectedRows.length}`,
+    sources: Object.fromEntries(
+      Object.entries(sourceRecords).map(([sourceId, sourceRecordEntry]) => [
+        sourceId,
+        {
+          url: sourceRecordEntry.url,
+          fields: sourceRecordEntry.fields,
+        },
+      ]),
+    ),
+    footerText: plotDefinition.footerText ?? null,
+  }
+}
+
+async function buildChoroplethMapPlotState(plotDefinition, station) {
+  const geojson = await fetchJson(plotDefinition.basinGeoJsonUrl)
+  const stationIds = plotDefinition.stationIds ?? []
+  const forecastRows = await Promise.all(
+    stationIds.map(async (stationId) => {
+      const url = plotDefinition.buildStationUrl({
+        stationId,
+        station,
+        popupState: station.popup,
+      })
+      const { rows } = await fetchAndParseCsv(url, { dynamicTyping: true })
+      const lastRow = rows?.[rows.length - 1] ?? null
+      return {
+        stationId,
+        lastRow,
+      }
+    }),
+  )
+
+  const values = forecastRows
+    .map(({ stationId, lastRow }) => {
+      const rawValue = lastRow?.[plotDefinition.valueKey]
+      const numericValue =
+        typeof rawValue === 'number' ? rawValue : Number.parseFloat(rawValue)
+
+      if (!Number.isFinite(numericValue)) {
+        return null
+      }
+
+      return {
+        stationId,
+        value: numericValue,
+      }
+    })
+    .filter(Boolean)
+
+  if (!values.length) {
+    throw new Error(`No numeric values were found for "${plotDefinition.valueKey}".`)
+  }
+
+  return {
+    plotId: plotDefinition.id,
+    plotType: plotDefinition.type ?? 'choroplethmap',
+    plotHeight: plotDefinition.plotHeight ?? null,
+    status: 'ready',
+    error: null,
+    traces: [
+      {
+        type: 'choropleth',
+        geojson,
+        featureidkey: 'properties.ID',
+        locations: values.map((entry) => entry.stationId),
+        z: values.map((entry) => entry.value),
+        colorscale: plotDefinition.colorscale ?? 'Viridis',
+        reversescale: plotDefinition.reversescale ?? false,
+        zmin: plotDefinition.zmin,
+        zmax: plotDefinition.zmax,
+        zmid: plotDefinition.zmid,
+        marker: {
+          line: {
+            color: '#0b3b8f',
+            width: 1,
+          },
+        },
+        colorbar: {
+          title: {
+            text: plotDefinition.colorbarTitle ?? plotDefinition.valueLabel ?? plotDefinition.valueKey,
+            side: 'right',
+          },
+        },
+        customdata: values.map((entry) => [entry.stationId, entry.value]),
+        hovertemplate: 'ID: %{customdata[0]}<br>'
+          + `${plotDefinition.valueLabel ?? plotDefinition.valueKey}: %{z:.0f}<extra></extra>`,
+      },
+    ],
+    titleText: resolvePlotTitleText(plotDefinition, station),
+    layout: {
+      ...(plotDefinition.layout ?? {}),
+      geo: {
+        fitbounds: 'locations',
+        visible: false,
+        showframe: false,
+        showcoastlines: false,
+        projection: { type: 'mercator' },
+        bgcolor: 'rgba(0,0,0,0)',
+      },
+    },
+    plotlyConfig: plotDefinition.plotlyConfig ?? {},
+    xField: null,
+    xAxisLayout: {},
+    yAxesLayout: {
+      yaxis: {
+        automargin: true,
+        title: { text: 'Value' },
+      },
+    },
+    leftAxisCount: 1,
+    rightAxisCount: 0,
+    hovermode: plotDefinition.hovermode ?? 'closest',
+    traceFingerprint: `choropleth:${plotDefinition.valueKey}:${values.length}:${plotDefinition.zmin ?? 'auto'}:${plotDefinition.zmax ?? 'auto'}:${plotDefinition.reversescale ? 'reversed' : 'normal'}:${JSON.stringify(plotDefinition.colorscale ?? 'Viridis')}`,
+    sources: {
+      basins: {
+        url: plotDefinition.basinGeoJsonUrl,
+        fields: ['ID'],
+      },
+    },
+    footerText: plotDefinition.footerText ?? null,
   }
 }
 
 async function buildPlotState(plotDefinition, station) {
   if (plotDefinition.type === 'timeseries') {
     return buildTimeSeriesPlotState(plotDefinition, station)
+  }
+
+  if (plotDefinition.type === 'table') {
+    return buildTablePlotState(plotDefinition, station)
+  }
+
+  if (plotDefinition.type === 'choroplethmap') {
+    return buildChoroplethMapPlotState(plotDefinition, station)
   }
 
   throw new Error(`Unsupported plot type "${plotDefinition.type}".`)

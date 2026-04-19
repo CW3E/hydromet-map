@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Popup } from 'react-map-gl/maplibre'
 import StationTimeSeriesPlot from '../stationPopup/StationTimeSeriesPlot'
+import B120PointPopupTable from './B120PointPopupTable'
 import {
   B120_POINT_FORECAST_UPDATE_OPTIONS,
   B120_POINT_FORECAST_UPDATES_URL,
   B120_POINT_POST_PROCESSING_OPTIONS,
   B120_POINT_POPUP_WIDTH,
+  doesB120PointTabUseForecastUpdate,
   doesB120PointTabUsePostProcessing,
   getB120PointPopupTabDefinition,
   normalizeB120ForecastUpdateDate,
@@ -29,13 +31,31 @@ function renderPlotPanel(plotState, station) {
 
   if (plotState.status === 'ready') {
     return (
-      <div className="station-popup__plot">
-        <StationTimeSeriesPlot
-          stationName={station.location}
-          stationId={station.stationId}
-          plotState={plotState}
-        />
-      </div>
+      <>
+        <div
+          className="station-popup__plot"
+          style={plotState.plotHeight ? { height: `${plotState.plotHeight}px` } : undefined}
+        >
+          {plotState.plotType === 'timeseries' ? (
+            <StationTimeSeriesPlot
+              stationName={station.location}
+              stationId={station.stationId}
+              plotState={plotState}
+            />
+          ) : (
+            <B120PointPopupTable
+              stationId={station.stationId}
+              plotState={plotState}
+            />
+          )}
+        </div>
+        {plotState.footerText && plotState.plotType === 'timeseries' ? (
+          <p
+            className="station-popup__footer"
+            dangerouslySetInnerHTML={{ __html: plotState.footerText }}
+          />
+        ) : null}
+      </>
     )
   }
 
@@ -53,6 +73,7 @@ export default function B120PointPopup({
     selectedStation?.popup?.forecastUpdateDate ?? forecastUpdateOptions[forecastUpdateOptions.length - 1]
   const forecastPostProcessing =
     selectedStation?.popup?.forecastPostProcessing ?? B120_POINT_POST_PROCESSING_OPTIONS[0].id
+  const forecastUpdateEnabled = doesB120PointTabUseForecastUpdate(activeTabId)
   const postProcessingEnabled = doesB120PointTabUsePostProcessing(activeTabId)
 
   useEffect(() => {
@@ -158,10 +179,15 @@ export default function B120PointPopup({
           </div>
 
           <label className="station-popup__control station-popup__control--compact">
-            <span>Forecast Update on:</span>
+            <span>Update:</span>
             <select
               value={forecastUpdateDate}
+              disabled={!forecastUpdateEnabled}
               onChange={(event) => {
+                if (!forecastUpdateEnabled) {
+                  return
+                }
+
                 const nextForecastUpdateDate = event.target.value
                 const nextStation = {
                   ...selectedStation,
@@ -215,19 +241,22 @@ export default function B120PointPopup({
           </label>
         </div>
 
-        {tabs.map((tab) => {
-          const tabDefinition = getB120PointPopupTabDefinition(tab.id)
-          const tabState = selectedStation.popup?.tabDataById?.[tab.id]
+        {(() => {
+          const activeTabDefinition = getB120PointPopupTabDefinition(activeTabId)
+          const activeTabState = selectedStation.popup?.tabDataById?.[activeTabId]
+          const tabPanelClassName =
+            activeTabDefinition?.plots?.length > 1
+              ? 'station-popup__tab-panel station-popup__tab-panel--grid'
+              : 'station-popup__tab-panel'
 
           return (
             <div
-              key={tab.id}
-              className="station-popup__tab-panel"
+              key={activeTabId}
+              className={tabPanelClassName}
               role="tabpanel"
-              hidden={activeTabId !== tab.id}
             >
-              {tabDefinition?.plots.map((plotDefinition) => {
-                const plotState = tabState?.plotsById?.[plotDefinition.id]
+              {activeTabDefinition?.plots.map((plotDefinition) => {
+                const plotState = activeTabState?.plotsById?.[plotDefinition.id]
 
                 return (
                   <div key={plotDefinition.id} className="station-popup__plot-panel">
@@ -243,7 +272,7 @@ export default function B120PointPopup({
               })}
             </div>
           )
-        })}
+        })()}
       </div>
     </Popup>
   )

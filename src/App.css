@@ -963,8 +963,8 @@ button:disabled {
 }
 
 .station-popup__control--compact select {
-  min-width: 112px;
-  padding: 0.2rem 0.28rem;
+  min-width: 96px;
+  padding: 0.2rem 0.24rem;
 }
 
 .station-popup__tabs {
@@ -1005,6 +1005,17 @@ button:disabled {
   min-height: 0;
 }
 
+.station-popup__tab-panel--grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  align-items: start;
+}
+
+.station-popup__tab-panel--grid .station-popup__plot {
+  max-width: none;
+}
+
 .station-popup__status {
   margin-top: 0.55rem;
   color: #355567;
@@ -1018,6 +1029,13 @@ button:disabled {
   width: 100%;
   max-width: min(1040px, calc(100vw - 4rem));
   height: 330px;
+}
+
+.station-popup__footer {
+  margin: 0.28rem 0 0;
+  color: #355567;
+  font-size: 0.72rem;
+  line-height: 1.35;
 }
 
 .river-popup {
@@ -1131,5 +1149,9 @@ button:disabled {
 
   .map-canvas .maplibregl-ctrl-top-right {
     top: 13.27rem !important;
+  }
+
+  .station-popup__tab-panel--grid {
+    grid-template-columns: 1fr;
   }
 }
