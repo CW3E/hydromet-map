@@ -16,13 +16,13 @@ src/layers/myNewLayer.jsx
 
 Use the existing modules as references:
 
-- [src/layers/b120PointsLayer.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/b120PointsLayer.jsx)
-- [src/layers/cnrfcRiversLayer.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/cnrfcRiversLayer.jsx)
-- [src/layers/cnrfcRasterLayer.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/cnrfcRasterLayer.jsx)
+- [src/layers/b120PointsLayer.jsx](../src/layers/b120PointsLayer.jsx)
+- [src/layers/cnrfcRiversLayer.jsx](../src/layers/cnrfcRiversLayer.jsx)
+- [src/layers/cnrfcRasterLayer.jsx](../src/layers/cnrfcRasterLayer.jsx)
 
 ## Step 2: export the layer from the registry
 
-Update [src/layers/index.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/index.js):
+Update [src/layers/index.js](../src/layers/index.js):
 
 1. import the module
 2. add it to `MAP_LAYER_MODULES`
@@ -31,7 +31,7 @@ This affects render order, so placement in that array matters.
 
 ## Step 3: register the layer id
 
-Add an entry to `ALL_MAP_LAYERS` in [src/config/mapConfig.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/config/mapConfig.js).
+Add an entry to `ALL_MAP_LAYERS` in [src/config/mapConfig.js](../src/config/mapConfig.js).
 
 Define:
 
@@ -84,21 +84,21 @@ create a feature module under `src/features/` and call it from the layer's `hand
 
 Good references:
 
-- [src/layers/cnrfcPointsLayer.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/cnrfcPointsLayer.jsx)
-- [src/layers/b120PointsLayer.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/b120PointsLayer.jsx)
+- [src/layers/cnrfcPointsLayer.jsx](../src/layers/cnrfcPointsLayer.jsx)
+- [src/layers/b120PointsLayer.jsx](../src/layers/b120PointsLayer.jsx)
 
 ### Polygon layer with hover-linked highlight
 
 Good references:
 
-- [src/layers/cnrfcBasinsLayer.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/cnrfcBasinsLayer.jsx)
-- [src/layers/b120BasinsLayer.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/b120BasinsLayer.jsx)
+- [src/layers/cnrfcBasinsLayer.jsx](../src/layers/cnrfcBasinsLayer.jsx)
+- [src/layers/b120BasinsLayer.jsx](../src/layers/b120BasinsLayer.jsx)
 
 ### Raster overlay
 
 Good reference:
 
-- [src/layers/cnrfcRasterLayer.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/cnrfcRasterLayer.jsx)
+- [src/layers/cnrfcRasterLayer.jsx](../src/layers/cnrfcRasterLayer.jsx)
 
 ## Naming recommendations
 

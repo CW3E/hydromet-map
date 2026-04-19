@@ -6,14 +6,14 @@ Each layer lives in its own module under `src/layers/`.
 
 Current registry:
 
-- [src/layers/index.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/index.js)
+- [src/layers/index.js](../src/layers/index.js)
 
 Examples:
 
-- [src/layers/cnrfcRasterLayer.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/cnrfcRasterLayer.jsx)
-- [src/layers/cnrfcPointsLayer.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/cnrfcPointsLayer.jsx)
-- [src/layers/cnrfcBasinsLayer.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/cnrfcBasinsLayer.jsx)
-- [src/layers/b120PointsLayer.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/b120PointsLayer.jsx)
+- [src/layers/cnrfcRasterLayer.jsx](../src/layers/cnrfcRasterLayer.jsx)
+- [src/layers/cnrfcPointsLayer.jsx](../src/layers/cnrfcPointsLayer.jsx)
+- [src/layers/cnrfcBasinsLayer.jsx](../src/layers/cnrfcBasinsLayer.jsx)
+- [src/layers/b120PointsLayer.jsx](../src/layers/b120PointsLayer.jsx)
 
 ## Typical layer module shape
 
@@ -118,7 +118,7 @@ Controlled by each project's `availableLayerIds`.
 
 ### Render order
 
-Controlled by the order of modules in [src/layers/index.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/index.js).
+Controlled by the order of modules in [src/layers/index.js](../src/layers/index.js).
 
 The toggle order and render order are separate on purpose.
 

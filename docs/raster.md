@@ -13,7 +13,7 @@ This keeps the raster selectors unambiguous and avoids overlapping raster overla
 
 ## Current location
 
-Raster family definitions live in [src/config/mapConfig.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/config/mapConfig.js) under `RASTER_FAMILIES`.
+Raster family definitions live in [src/config/mapConfig.js](../src/config/mapConfig.js) under `RASTER_FAMILIES`.
 
 Current family:
 
@@ -67,7 +67,7 @@ precipitationDaily: {
 
 ## How selector options are derived
 
-The raster toolbar in [src/components/map/MapHud.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/components/map/MapHud.jsx) reads everything from the active project's raster family.
+The raster toolbar in [src/components/map/MapHud.jsx](../src/components/map/MapHud.jsx) reads everything from the active project's raster family.
 
 That means:
 
@@ -91,11 +91,11 @@ Current examples:
 - `cnrfc` defaults to `soilMoistureDaily`
 - `b120` defaults to `sweDaily`
 
-This is implemented by merging `projectDefinition.defaultRaster` over `buildDefaultRasterState(rasterFamily)` in [src/config/mapConfig.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/config/mapConfig.js).
+This is implemented by merging `projectDefinition.defaultRaster` over `buildDefaultRasterState(rasterFamily)` in [src/config/mapConfig.js](../src/config/mapConfig.js).
 
 ## Raster rendering
 
-Raster rendering happens in [src/layers/cnrfcRasterLayer.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/cnrfcRasterLayer.jsx).
+Raster rendering happens in [src/layers/cnrfcRasterLayer.jsx](../src/layers/cnrfcRasterLayer.jsx).
 
 Behavior:
 

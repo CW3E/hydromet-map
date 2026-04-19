@@ -26,7 +26,7 @@ A project defines:
 - which raster family is used, if any
 - optional default raster overrides
 
-Current definitions live in [src/config/mapConfig.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/config/mapConfig.js).
+Current definitions live in [src/config/mapConfig.js](../src/config/mapConfig.js).
 
 ### Project state
 
@@ -56,7 +56,7 @@ This lets users switch projects without losing their previous project-specific s
 
 A layer is a reusable map module registered in:
 
-- [src/layers/index.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/index.js)
+- [src/layers/index.js](../src/layers/index.js)
 
 Projects choose which layer ids to expose. The actual implementation lives once in `src/layers/`.
 
@@ -80,21 +80,21 @@ But the structure now supports multiple families, with the rule that each projec
 
 ### App and state
 
-- [src/App.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/App.jsx)
-- [src/lib/appState.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/lib/appState.js)
-- [src/config/mapConfig.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/config/mapConfig.js)
+- [src/App.jsx](../src/App.jsx)
+- [src/lib/appState.js](../src/lib/appState.js)
+- [src/config/mapConfig.js](../src/config/mapConfig.js)
 
 ### Map shell
 
-- [src/components/map/MapCanvas.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/components/map/MapCanvas.jsx)
-- [src/components/map/MapHud.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/components/map/MapHud.jsx)
-- [src/components/map/MapLegend.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/components/map/MapLegend.jsx)
-- [src/components/map/BookmarkControl.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/components/map/BookmarkControl.jsx)
-- [src/components/map/GlobeProjectionControl.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/components/map/GlobeProjectionControl.jsx)
+- [src/components/map/MapCanvas.jsx](../src/components/map/MapCanvas.jsx)
+- [src/components/map/MapHud.jsx](../src/components/map/MapHud.jsx)
+- [src/components/map/MapLegend.jsx](../src/components/map/MapLegend.jsx)
+- [src/components/map/BookmarkControl.jsx](../src/components/map/BookmarkControl.jsx)
+- [src/components/map/GlobeProjectionControl.jsx](../src/components/map/GlobeProjectionControl.jsx)
 
 ### Layer registry
 
-- [src/layers/index.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/layers/index.js)
+- [src/layers/index.js](../src/layers/index.js)
 
 ### Popup features
 

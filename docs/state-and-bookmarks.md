@@ -18,8 +18,8 @@ Runtime behavior:
 
 Main implementation:
 
-- [src/App.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/App.jsx)
-- [src/lib/appState.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/lib/appState.js)
+- [src/App.jsx](../src/App.jsx)
+- [src/lib/appState.js](../src/lib/appState.js)
 
 ## Project state shape
 
@@ -73,7 +73,7 @@ The bookmark stores the active project and that active project's visible state. 
 
 Bookmark logic lives in:
 
-- [src/lib/appState.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/lib/appState.js)
+- [src/lib/appState.js](../src/lib/appState.js)
 
 Main functions:
 

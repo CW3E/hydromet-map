@@ -25,10 +25,10 @@ Most popup features are split into:
 
 Files:
 
-- [src/features/cnrfcPointPopup/cnrfcPointPopupConfig.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/features/cnrfcPointPopup/cnrfcPointPopupConfig.js)
-- [src/features/cnrfcPointPopup/cnrfcPointPopupData.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/features/cnrfcPointPopup/cnrfcPointPopupData.js)
-- [src/features/cnrfcPointPopup/CnrfcPointPopup.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/features/cnrfcPointPopup/CnrfcPointPopup.jsx)
-- [src/features/cnrfcPointPopup/TimeSeriesPlot.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/features/cnrfcPointPopup/TimeSeriesPlot.jsx)
+- [src/features/cnrfcPointPopup/cnrfcPointPopupConfig.js](../src/features/cnrfcPointPopup/cnrfcPointPopupConfig.js)
+- [src/features/cnrfcPointPopup/cnrfcPointPopupData.js](../src/features/cnrfcPointPopup/cnrfcPointPopupData.js)
+- [src/features/cnrfcPointPopup/CnrfcPointPopup.jsx](../src/features/cnrfcPointPopup/CnrfcPointPopup.jsx)
+- [src/features/cnrfcPointPopup/TimeSeriesPlot.jsx](../src/features/cnrfcPointPopup/TimeSeriesPlot.jsx)
 
 Characteristics:
 
@@ -41,9 +41,9 @@ Characteristics:
 
 Files:
 
-- [src/features/snowStationPopup/snowStationPopupConfig.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/features/snowStationPopup/snowStationPopupConfig.js)
-- [src/features/snowStationPopup/snowStationPopupData.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/features/snowStationPopup/snowStationPopupData.js)
-- [src/features/snowStationPopup/SnowStationPopup.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/features/snowStationPopup/SnowStationPopup.jsx)
+- [src/features/snowStationPopup/snowStationPopupConfig.js](../src/features/snowStationPopup/snowStationPopupConfig.js)
+- [src/features/snowStationPopup/snowStationPopupData.js](../src/features/snowStationPopup/snowStationPopupData.js)
+- [src/features/snowStationPopup/SnowStationPopup.jsx](../src/features/snowStationPopup/SnowStationPopup.jsx)
 
 Characteristics:
 
@@ -55,10 +55,10 @@ Characteristics:
 
 Files:
 
-- [src/features/b120PointPopup/b120PointPopupConfig.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/features/b120PointPopup/b120PointPopupConfig.js)
-- [src/features/b120PointPopup/b120PointPopupData.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/features/b120PointPopup/b120PointPopupData.js)
-- [src/features/b120PointPopup/B120PointPopup.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/features/b120PointPopup/B120PointPopup.jsx)
-- [src/features/b120PointPopup/B120PointPopupTable.jsx](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/features/b120PointPopup/B120PointPopupTable.jsx)
+- [src/features/b120PointPopup/b120PointPopupConfig.js](../src/features/b120PointPopup/b120PointPopupConfig.js)
+- [src/features/b120PointPopup/b120PointPopupData.js](../src/features/b120PointPopup/b120PointPopupData.js)
+- [src/features/b120PointPopup/B120PointPopup.jsx](../src/features/b120PointPopup/B120PointPopup.jsx)
+- [src/features/b120PointPopup/B120PointPopupTable.jsx](../src/features/b120PointPopup/B120PointPopupTable.jsx)
 
 Characteristics:
 

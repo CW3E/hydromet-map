@@ -10,7 +10,7 @@ A project is a named map experience that selects:
 - default visible layers
 - optional default raster overrides
 
-Current project definitions live in [src/config/mapConfig.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/config/mapConfig.js) under `PROJECTS`.
+Current project definitions live in [src/config/mapConfig.js](../src/config/mapConfig.js) under `PROJECTS`.
 
 ## Current projects
 
@@ -90,7 +90,7 @@ Important detail:
 
 Project layer order comes from `availableLayerIds`, not from the global layer registry.
 
-That behavior is implemented in `getProjectMapLayers()` in [src/config/mapConfig.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/config/mapConfig.js).
+That behavior is implemented in `getProjectMapLayers()` in [src/config/mapConfig.js](../src/config/mapConfig.js).
 
 If you want to change the toggle order inside a project, change `availableLayerIds`.
 
@@ -113,7 +113,7 @@ are preserved in memory.
 
 To add a new project:
 
-1. Add a new entry to `PROJECTS` in [src/config/mapConfig.js](/abs/path/c:/Users/m3pan/Desktop/projects/hydromet-map/src/config/mapConfig.js).
+1. Add a new entry to `PROJECTS` in [src/config/mapConfig.js](../src/config/mapConfig.js).
 2. Set `rasterFamilyId` to a raster family id or leave it unset/null for a no-raster project.
 3. Define `availableLayerIds` in the exact order you want in the toggle list.
 4. Define `defaultVisibleLayerIds`.
