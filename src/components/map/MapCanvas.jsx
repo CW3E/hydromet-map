@@ -13,6 +13,8 @@ import TerrainToggleControl from './TerrainToggleControl'
 const INITIAL_INTERACTION_STATE = {
   hoveredB120Point: null,
   hoveredCnrfcPoint: null,
+  hoveredGradesHydroDl: null,
+  hoveredMeritBasin: null,
   hoveredRiver: null,
   hoveredSnowCourseStation: null,
   hoveredSnowPillowStation: null,
@@ -58,6 +60,7 @@ export default function MapCanvas({
   viewState,
 }) {
   const [interactionState, setInteractionState] = useState(INITIAL_INTERACTION_STATE)
+  const mapRef = useRef(null)
   const mouseReadoutRef = useRef(null)
   const availableLayerIdSet = new Set(activeProject?.availableLayerIds ?? [])
 
@@ -138,6 +141,7 @@ export default function MapCanvas({
         interactiveLayerIds={interactiveLayerIds}
         mapStyle={BASEMAP_STYLES[appState.basemapId]}
         projection={appState.projection}
+        ref={mapRef}
         reuseMaps
         onClick={handleMapClick}
         onMouseLeave={handlePointerLeave}
@@ -153,16 +157,6 @@ export default function MapCanvas({
         ))}
 
         <NavigationControl position="top-right" visualizePitch />
-        {selectedBasemap.terrainAvailable ? (
-          <TerrainToggleControl
-            enabled={terrainEnabled}
-            onTerrainChange={(terrainIsEnabled) => {
-              if (appState.terrainEnabled !== terrainIsEnabled) {
-                updateTopLevel('terrainEnabled', terrainIsEnabled)
-              }
-            }}
-          />
-        ) : null}
         <ScaleControl position="bottom-left" unit="metric" />
 
         {visibleLayerModules.map((layerModule) =>
@@ -208,6 +202,18 @@ export default function MapCanvas({
           }
         }}
       />
+
+      {selectedBasemap.terrainAvailable ? (
+        <TerrainToggleControl
+          enabled={terrainEnabled}
+          mapRef={mapRef}
+          onTerrainChange={(terrainIsEnabled) => {
+            if (appState.terrainEnabled !== terrainIsEnabled) {
+              updateTopLevel('terrainEnabled', terrainIsEnabled)
+            }
+          }}
+        />
+      ) : null}
 
       <MouseReadout ref={mouseReadoutRef} />
 

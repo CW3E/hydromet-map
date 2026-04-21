@@ -1107,7 +1107,7 @@ button:disabled {
 
 .projection-widget {
   position: absolute;
-  top: 13.95rem;
+  top: 14.15rem;
   right: 0.5rem;
   z-index: 6;
   width: 30px;
@@ -1127,6 +1127,46 @@ button:disabled {
 }
 
 .projection-trigger svg {
+  width: 24px;
+  height: 24px;
+}
+
+.projection-trigger--active {
+  background: #d9ecf5;
+  color: #1d6996;
+}
+
+.terrain-widget {
+  position: absolute;
+  top: 11.55rem;
+  right: 0.5rem;
+  z-index: 6;
+  width: 30px;
+}
+
+.terrain-trigger {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  color: #244050;
+  border: 1px solid rgba(16, 34, 47, 0.12);
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.terrain-trigger:hover {
+  background: #f5f5f5;
+}
+
+.terrain-trigger--active {
+  background: #d9ecf5;
+  color: #1d6996;
+}
+
+.terrain-trigger svg {
   width: 24px;
   height: 24px;
 }
@@ -1204,7 +1244,13 @@ button:disabled {
   .projection-widget {
     top: auto;
     right: 0.5rem;
-    bottom: 6.15rem;
+    bottom: 5.95rem;
+  }
+
+  .terrain-widget {
+    top: auto;
+    right: 0.5rem;
+    bottom: 8.5rem;
   }
 
   .bookmark-popup {

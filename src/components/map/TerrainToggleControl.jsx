@@ -1,61 +1,71 @@
-import { useEffect, useRef } from 'react'
-import { useControl, useMap } from 'react-map-gl/maplibre'
+import { useEffect } from 'react'
 import { TERRAIN_SPEC } from '../../config/mapConfig'
 
-export default function TerrainToggleControl({ enabled, onTerrainChange }) {
-  const { current: map } = useMap()
-  const callbackRef = useRef(onTerrainChange)
+function TerrainIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path
+        d="M4 18l4.8-6.2 2.9 3.5 3.4-5 4.9 7.7"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M4 18h16"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.4"
+      />
+    </svg>
+  )
+}
 
-  callbackRef.current = onTerrainChange
-
-  useControl(({ mapLib }) => new mapLib.TerrainControl(TERRAIN_SPEC), { position: 'top-right' })
-
+export default function TerrainToggleControl({ enabled, mapRef, onTerrainChange }) {
   useEffect(() => {
-    if (!map) {
-      return undefined
-    }
+    const map = mapRef?.current?.getMap?.()
 
-    const mapInstance = map.getMap()
-    const syncTerrain = () => {
-      callbackRef.current(Boolean(mapInstance.getTerrain()))
-    }
-
-    mapInstance.on('terrain', syncTerrain)
-
-    return () => {
-      mapInstance.off('terrain', syncTerrain)
-    }
-  }, [map])
-
-  useEffect(() => {
     if (!map) {
       return
     }
 
-    const mapInstance = map.getMap()
-
     const syncDesiredTerrain = () => {
-      const terrainSourceExists = Boolean(mapInstance.getSource(TERRAIN_SPEC.source))
+      const terrainSourceExists = Boolean(map.getSource(TERRAIN_SPEC.source))
 
       if (enabled) {
-        if (terrainSourceExists && !mapInstance.getTerrain()) {
-          mapInstance.setTerrain(TERRAIN_SPEC)
+        if (terrainSourceExists && !map.getTerrain()) {
+          map.setTerrain(TERRAIN_SPEC)
         }
         return
       }
 
-      if (mapInstance.getTerrain()) {
-        mapInstance.setTerrain(null)
+      if (map.getTerrain()) {
+        map.setTerrain(null)
       }
     }
 
     syncDesiredTerrain()
-    mapInstance.on('styledata', syncDesiredTerrain)
+    map.on('styledata', syncDesiredTerrain)
 
     return () => {
-      mapInstance.off('styledata', syncDesiredTerrain)
+      map.off('styledata', syncDesiredTerrain)
     }
-  }, [enabled, map])
+  }, [enabled, mapRef])
 
-  return null
+  return (
+    <div className="terrain-widget">
+      <button
+        className={`terrain-trigger${enabled ? ' terrain-trigger--active' : ''}`}
+        type="button"
+        title={enabled ? 'Disable terrain' : 'Enable terrain'}
+        aria-label={enabled ? 'Disable terrain' : 'Enable terrain'}
+        aria-pressed={enabled ? 'true' : 'false'}
+        onClick={() => onTerrainChange(!enabled)}
+      >
+        <TerrainIcon />
+      </button>
+    </div>
+  )
 }

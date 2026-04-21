@@ -83,6 +83,22 @@ export const ALL_MAP_LAYERS = [
     symbolColor: '#008b8b',
   },
   {
+    id: 'gradesHydroDl',
+    label: 'GRADES-hydroDL (v2.0)',
+    type: 'vector-tile',
+    description: 'Global GRADES-hydroDL flowlines from tiled vector sources.',
+    symbol: '\uFF5E',
+    symbolColor: '#8b5cf6',
+  },
+  {
+    id: 'meritBasins',
+    label: 'MERIT Basins (v1.0)',
+    type: 'vector-tile',
+    description: 'Global MERIT Hydro basin flowlines from tiled vector sources.',
+    symbol: '\uFF5E',
+    symbolColor: '#00ced1',
+  },
+  {
     id: 'cnrfcBasins',
     label: 'CNRFC Basins',
     type: 'vector-tile',
@@ -558,6 +574,12 @@ export const PROJECTS = {
   b120: {
     id: 'b120',
     label: 'B120',
+    defaultView: {
+      center: '-119,39',
+      zoom: '5.6',
+      bearing: '0',
+      pitch: '0',
+    },
     rasterFamilyId: 'cnrfc',
     defaultRaster: {
       variable: 'sweDaily',
@@ -588,13 +610,28 @@ export const PROJECTS = {
       variable: 'sweDaily',
     },
     defaultView: {
-      center: '-108,40',
-      zoom: '5.3',
+      center: '-108,39.8',
+      zoom: '5.8',
       bearing: '0',
       pitch: '0',
     },
     availableLayerIds: ['ucrbRaster', 'ucrbRegion', 'ucrbRivers', 'yampaRegion', 'yampaPoints'],
     defaultVisibleLayerIds: ['ucrbRaster', 'ucrbRegion', 'ucrbRivers', 'yampaRegion', 'yampaPoints'],
+  },
+  global: {
+    id: 'global',
+    label: 'Global',
+    defaultView: {
+      center: '55,30',
+      zoom: '2.8',
+      bearing: '0',
+      pitch: '0',
+    },
+    defaultBasemapId: 'terrain',
+    defaultTerrainEnabled: false,
+    defaultProjection: 'globe',
+    availableLayerIds: ['gradesHydroDl', 'meritBasins'],
+    defaultVisibleLayerIds: ['gradesHydroDl'],
   },
 }
 
@@ -651,6 +688,11 @@ export const RIVER_NETWORK_PMTILES_URL =
 export const UCRB_RIVER_NETWORK_PMTILES_URL =
   'https://cw3e.ucsd.edu/wrf_hydro/ucrb/pmtiles/nwm_reaches_ucrb.pmtiles'
 export const RIVER_NETWORK_SOURCE_LAYER = 'NWM_v2.1_channels'
+export const MERIT_BASINS_PMTILES_URL =
+  'https://cw3e.ucsd.edu/hydro/merit_rivers/riv_MERIT_Hydro_v07_Basins_v01_dense.pmtiles'
+export const MERIT_BASINS_SOURCE_LAYER = 'MERIT-Basins_Rivers'
+export const GRADES_HYDRODL_PMTILES_URL =
+  'https://cw3e.ucsd.edu/hydro/grades_hydrodl/pmtiles/riv_20251231.pmtiles'
 export const FORECAST_BASINS_PMTILES_URL =
   'https://cw3e.ucsd.edu/wrf_hydro/cnrfc/pmtiles/CNRFC_Basins.pmtiles'
 export const FORECAST_BASINS_SOURCE_LAYER = 'CNRFC_Basins'

@@ -1,12 +1,10 @@
 function GlobeIcon() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M4 12h16" fill="none" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M12 4a11 11 0 0 0 0 16" fill="none" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M12 4a11 11 0 0 1 0 16" fill="none" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M6.6 8.5c1.4.8 3.4 1.3 5.4 1.3s4-.5 5.4-1.3" fill="none" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M6.6 15.5c1.4-.8 3.4-1.3 5.4-1.3s4 .5 5.4 1.3" fill="none" stroke="currentColor" strokeWidth="1.2" />
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+      <path d="M5.5 16.5H19.5M5.5 8.5H19.5M4.5 12.5H20.5M12.5 20.5C12.5 20.5 8 18.5 8 12.5C8 6.5 12.5 4.5 12.5 4.5M12.5
+      4.5C12.5 4.5 17 6.5 17 12.5C17 18.5 12.5 20.5 12.5 20.5M12.5 4.5V20.5M20.5 12.5C20.5 16.9183 16.9183 20.5 12.5
+      20.5C8.08172 20.5 4.5 16.9183 4.5 12.5C4.5 8.08172 8.08172 4.5 12.5 4.5C16.9183 4.5 20.5 8.08172 20.5 12.5Z"
+      stroke="currentColor" stroke-width="1"/>
     </svg>
   )
 }
@@ -17,10 +15,11 @@ export default function GlobeProjectionControl({ projection, onProjectionChange 
   return (
     <div className="projection-widget">
       <button
-        className="projection-trigger"
+        className={`projection-trigger${projection === 'globe' ? ' projection-trigger--active' : ''}`}
         type="button"
         title={projection === 'globe' ? 'Switch to mercator projection' : 'Switch to globe projection'}
         aria-label={projection === 'globe' ? 'Switch to mercator projection' : 'Switch to globe projection'}
+        aria-pressed={projection === 'globe' ? 'true' : 'false'}
         onClick={() => onProjectionChange(nextProjection)}
       >
         <GlobeIcon />
