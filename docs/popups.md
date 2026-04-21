@@ -102,6 +102,8 @@ Characteristics:
 - uses binary range requests instead of CSV-only loading
 - supports recent-window plotting plus full-history plotting
 - can attach calendar-year climatology percentiles for `GRADES-hydroDL`
+- `SWORD Reaches` currently exposes only the `Full History` tab
+- title text can be built from clicked-feature metadata such as COMID, reach ids, length, area, slope, and width
 - rendered once from `MapCanvas.jsx`, while the line layers keep their own hover popups
 
 ## Plot types currently supported

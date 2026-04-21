@@ -300,9 +300,11 @@ function triggerPlotResize() {
   })
 }
 
-export function createInitialGlobalReachPopupState() {
+export function createInitialGlobalReachPopupState(layerId = null) {
+  const defaultTabId = layerId === 'swordReaches' ? 'history' : getDefaultGlobalReachPopupTabId()
+
   return {
-    activeTabId: getDefaultGlobalReachPopupTabId(),
+    activeTabId: defaultTabId,
     tabDataById: createEmptyTabDataById(),
   }
 }
@@ -322,13 +324,22 @@ export function createSelectedGlobalReachPopupState(feature, {
     layerId,
     hydrography,
     id: properties.reach_id ?? properties.COMID ?? 'Unknown',
+    comid: properties.COMID ?? properties.comid ?? null,
     name: properties.river_name ?? '',
     riverName: properties.river_name ?? '',
+    lengthKm: Number.parseFloat(properties.lengthkm),
+    upstreamAreaKm2: Number.parseFloat(properties.uparea),
+    streamOrder: Number.parseInt(properties.order ?? properties.strm_order, 10),
+    reachIdV16: properties.reach_id_v16 ?? null,
+    reachLengthKm: Number.parseFloat(properties.reach_len),
+    slopeMPerKm: Number.parseFloat(properties.slope),
+    flowAccumulationKm2: Number.parseFloat(properties.facc),
+    widthM: Number.parseFloat(properties.width),
     binaryComid: Number.parseFloat(properties.COMID ?? properties.comid ?? properties.reach_id),
     dindex: Number.parseInt(properties.dindex ?? 0, 10),
     longitude,
     latitude,
-    popup: createInitialGlobalReachPopupState(),
+    popup: createInitialGlobalReachPopupState(layerId),
   }
 }
 
@@ -439,6 +450,10 @@ export function loadGlobalReachPopupTabData(setSelectedStation, station, tabId) 
     })
 }
 
-export function getGlobalReachPopupTabs() {
+export function getGlobalReachPopupTabs(station = null) {
+  if (station?.layerId === 'swordReaches') {
+    return GLOBAL_REACH_POPUP_TABS.filter((tab) => tab.id === 'history')
+  }
+
   return GLOBAL_REACH_POPUP_TABS
 }

@@ -40,8 +40,11 @@ export default function GlobalReachPopup({
   selectedStation,
   setSelectedStation,
 }) {
-  const tabs = getGlobalReachPopupTabs()
-  const activeTabId = selectedStation?.popup?.activeTabId ?? tabs[0]?.id ?? 'daily'
+  const tabs = getGlobalReachPopupTabs(selectedStation)
+  const requestedTabId = selectedStation?.popup?.activeTabId
+  const activeTabId = tabs.some((tab) => tab.id === requestedTabId)
+    ? requestedTabId
+    : (tabs[0]?.id ?? 'daily')
 
   useEffect(() => {
     if (

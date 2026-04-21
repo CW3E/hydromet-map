@@ -78,6 +78,12 @@ Raster family:
 
 This project is intended for large-domain hydrography exploration without a raster overlay.
 
+Default map setup:
+
+- basemap: `Terrain`
+- terrain: enabled
+- projection: `globe`
+
 Known issue:
 
 - on `Terrain` or `Satellite` basemaps, interacting with `GRADES-hydroDL` and `SWORD Reaches` can occasionally lead to drag freeze / popup-close glitches when terrain is switched off

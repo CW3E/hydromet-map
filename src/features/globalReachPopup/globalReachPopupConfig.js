@@ -11,30 +11,30 @@ export const GLOBAL_REACH_POPUP_WIDTH = '1100px'
 
 const RECENT_DAYS = 366
 const CLIMATOLOGY_LINE_COLORS = [
-  'mediumslateblue',
-  'lightcyan',
-  'lightgreen',
-  'green',
-  'lightyellow',
-  'lightpink',
-  'lightpink',
+  'mediumpurple', //'mediumslateblue',
+  'lightblue', //'lightcyan',
+  'lightcyan', //'lightgreen',
+  'lightgreen', //'green',
+  'yellow', //'lightyellow',
+  'orange', //'lightpink',
+  'sienna', //'lightpink',
 ]
 
 const CLIMATOLOGY_FILL_COLORS = [
-  'mediumslateblue',
-  'lightcyan',
-  'lightgreen',
-  'green',
-  'lightyellow',
-  'lightpink',
-  'white',
+  'mediumpurple', //'mediumslateblue',
+  'lightblue', //'lightcyan',
+  'lightcyan', //'lightgreen',
+  'lightgreen', //'green',
+  'yellow', //'lightyellow',
+  'orange', //'lightpink',
+  'white', //'white',
 ]
 
 const CLIMATOLOGY_SERIES_DEFINITIONS = {
   p95: {
     sourceId: 'climatology',
     column: 'Pctl7',
-    label: 'P95',
+    label: '95<sup>th</sup>',
     line: { color: CLIMATOLOGY_LINE_COLORS[0], width: 1 },
     fill: 'tozeroy',
     fillcolor: `${CLIMATOLOGY_FILL_COLORS[0]}22`,
@@ -43,7 +43,7 @@ const CLIMATOLOGY_SERIES_DEFINITIONS = {
   p90: {
     sourceId: 'climatology',
     column: 'Pctl6',
-    label: 'P90',
+    label: '90<sup>th</sup>',
     line: { color: CLIMATOLOGY_LINE_COLORS[1], width: 1 },
     fill: 'tozeroy',
     fillcolor: `${CLIMATOLOGY_FILL_COLORS[1]}22`,
@@ -52,7 +52,7 @@ const CLIMATOLOGY_SERIES_DEFINITIONS = {
   p80: {
     sourceId: 'climatology',
     column: 'Pctl5',
-    label: 'P80',
+    label: '80<sup>th</sup>',
     line: { color: CLIMATOLOGY_LINE_COLORS[2], width: 1 },
     fill: 'tozeroy',
     fillcolor: `${CLIMATOLOGY_FILL_COLORS[2]}22`,
@@ -61,15 +61,16 @@ const CLIMATOLOGY_SERIES_DEFINITIONS = {
   p50: {
     sourceId: 'climatology',
     column: 'Pctl4',
-    label: 'P50',
+    label: '50<sup>th</sup>',
     line: { color: CLIMATOLOGY_LINE_COLORS[3], width: 1 },
-    fill: 'none',
+    fill: 'tozeroy',
+    fillcolor: `${CLIMATOLOGY_FILL_COLORS[3]}22`,
     yAxis: 'y',
   },
   p20: {
     sourceId: 'climatology',
     column: 'Pctl3',
-    label: 'P20',
+    label: '20<sup>th</sup>',
     line: { color: CLIMATOLOGY_LINE_COLORS[4], width: 1 },
     fill: 'tozeroy',
     fillcolor: `${CLIMATOLOGY_FILL_COLORS[4]}22`,
@@ -78,7 +79,7 @@ const CLIMATOLOGY_SERIES_DEFINITIONS = {
   p10: {
     sourceId: 'climatology',
     column: 'Pctl2',
-    label: 'P10',
+    label: '10<sup>th</sup>',
     line: { color: CLIMATOLOGY_LINE_COLORS[5], width: 1 },
     fill: 'tozeroy',
     fillcolor: `${CLIMATOLOGY_FILL_COLORS[5]}22`,
@@ -87,7 +88,7 @@ const CLIMATOLOGY_SERIES_DEFINITIONS = {
   p5: {
     sourceId: 'climatology',
     column: 'Pctl1',
-    label: 'P5',
+    label: '5<sup>th</sup>',
     line: { color: CLIMATOLOGY_LINE_COLORS[6], width: 1 },
     fill: 'tozeroy',
     fillcolor: CLIMATOLOGY_FILL_COLORS[6],
@@ -187,11 +188,59 @@ function buildGlobalReachFullHistorySeries() {
 
 function buildGlobalReachTitle(station) {
   if (station.layerId === 'swordReaches') {
-    const riverName = station.riverName ? `, ${station.riverName}` : ''
-    return `SWORD Reaches (v17b), ${station.id}${riverName}`
+    const firstLineParts = [
+      `GRADES-hydroDL on SWORD, Reach ID (v17b): ${station.id}`,
+    ]
+    const secondLineParts = []
+
+    if (station.reachIdV16) {
+      firstLineParts.push(`Reach ID (v16): ${station.reachIdV16}`)
+    }
+
+    if (station.riverName) {
+      secondLineParts.push(`Name: ${station.riverName}`)
+    }
+
+    if (Number.isFinite(station.reachLengthKm)) {
+      secondLineParts.push(`Length: ${station.reachLengthKm.toFixed(1)} km`)
+    }
+
+    if (Number.isFinite(station.slopeMPerKm)) {
+      secondLineParts.push(`Slope: ${station.slopeMPerKm.toFixed(3)} m/km`)
+    }
+
+    if (Number.isFinite(station.flowAccumulationKm2)) {
+      secondLineParts.push(`Flow Accumulation: ${station.flowAccumulationKm2.toFixed(1)} km<sup>2</sup>`)
+    }
+
+    if (Number.isFinite(station.widthM)) {
+      secondLineParts.push(`Width: ${station.widthM.toFixed(1)} m`)
+    }
+
+    if (secondLineParts.length > 0) {
+      return `${firstLineParts.join(', ')}<br>${secondLineParts.join(', ')}`
+    }
+
+    return firstLineParts.join(', ')
   }
 
-  return `GRADES-hydroDL (v2.0), COMID ${station.id}`
+  const titleParts = [
+    `GRADES-hydroDL (v2.0), COMID: ${station.comid ?? station.id}`,
+  ]
+
+  if (Number.isFinite(station.lengthKm)) {
+    titleParts.push(`Length: ${station.lengthKm.toFixed(1)} km`)
+  }
+
+  if (Number.isFinite(station.upstreamAreaKm2)) {
+    titleParts.push(`Area: ${station.upstreamAreaKm2.toFixed(0)} km<sup>2</sup>`)
+  }
+
+  if (Number.isFinite(station.streamOrder)) {
+    titleParts.push(`Order: ${station.streamOrder}`)
+  }
+
+  return titleParts.join(', ')
 }
 
 export const GLOBAL_REACH_POPUP_TABS = [

@@ -206,13 +206,43 @@ function buildStatsSeries(sourceRecords) {
     })
   }).reverse()
 
+  function formatStatsLabel(field) {
+    const percentileMatch = /^p(\d+)$/i.exec(field)
+
+    if (!percentileMatch) {
+      return toTitleCaseLabel(field)
+    }
+
+    const percentileValue = Number.parseInt(percentileMatch[1], 10)
+
+    if (!Number.isFinite(percentileValue)) {
+      return toTitleCaseLabel(field)
+    }
+
+    const remainder100 = percentileValue % 100
+    const remainder10 = percentileValue % 10
+    let ordinalSuffix = 'th'
+
+    if (remainder100 < 11 || remainder100 > 13) {
+      if (remainder10 === 1) {
+        ordinalSuffix = 'st'
+      } else if (remainder10 === 2) {
+        ordinalSuffix = 'nd'
+      } else if (remainder10 === 3) {
+        ordinalSuffix = 'rd'
+      }
+    }
+
+    return `${percentileValue}<sup>${ordinalSuffix}</sup>`
+  }
+
   return Object.fromEntries(
     numericFields.map((field, index) => [
       `stats${field}`,
       {
         sourceId: 'stats',
         column: field,
-        label: toTitleCaseLabel(field),
+        label: formatStatsLabel(field),
         mode: 'lines',
         line: {
           color: statsLineColors[index % statsLineColors.length],
