@@ -4,6 +4,8 @@
 
 The app is a React + MapLibre web map with a project-centered state model.
 
+For a visual overview, see [Structure Diagrams](./structure-diagrams.md).
+
 At a high level:
 
 - `App.jsx` owns application state, bookmark state, and project switching.
