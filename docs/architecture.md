@@ -8,7 +8,10 @@ At a high level:
 
 - `App.jsx` owns application state, bookmark state, and project switching.
 - `mapConfig.js` defines reusable registries for basemaps, layers, raster families, and projects.
-- `MapCanvas.jsx` renders the map, visible layers, built-in controls, overlay widgets, and popups.
+- `MapCanvas.jsx` is now the top-level map composition layer: it wires the map instance, visible layers, controls, shared popups, and map tools together.
+- `useMapTools.js` owns context-menu tool state, tool API calls, measurement logic, and temporary map-tool overlays/dialog state.
+- `MapToolOverlays.jsx` renders temporary tool outputs such as watershed polygons, upstream river lines, downstream flowpaths, and measurement lines.
+- `MapToolDialogs.jsx` renders the shared modal/dialog workflow for map-tool results and downloads.
 - Layer modules in `src/layers/` encapsulate map sources, styles, hover/click behavior, and popup entry points.
 - Popup feature modules in `src/features/` encapsulate remote CSV loading, plot/table/map configs, and popup UIs.
 - Shared export helpers in `src/lib/` handle popup CSV download behavior.
@@ -90,6 +93,10 @@ But the structure now supports multiple families, with the rule that each projec
 ### Map shell
 
 - [src/components/map/MapCanvas.jsx](../src/components/map/MapCanvas.jsx)
+- [src/components/map/useMapTools.js](../src/components/map/useMapTools.js)
+- [src/components/map/MapToolOverlays.jsx](../src/components/map/MapToolOverlays.jsx)
+- [src/components/map/MapToolDialogs.jsx](../src/components/map/MapToolDialogs.jsx)
+- [src/components/map/MapContextMenu.jsx](../src/components/map/MapContextMenu.jsx)
 - [src/components/map/MapHud.jsx](../src/components/map/MapHud.jsx)
 - [src/components/map/MapLegend.jsx](../src/components/map/MapLegend.jsx)
 - [src/components/map/BookmarkControl.jsx](../src/components/map/BookmarkControl.jsx)
@@ -122,7 +129,10 @@ But the structure now supports multiple families, with the rule that each projec
 4. `MapCanvas.jsx` filters layer modules against the active project's `availableLayerIds`.
 5. Each visible layer module renders sources/layers and optional popup content.
 6. `MapCanvas.jsx` may also render shared popup components that are driven by `selectedStation`.
-7. `MapHud.jsx` renders only the controls relevant to the active project's raster family and layers.
+7. `useMapTools.js` manages right-click/long-press map tools and temporary tool results.
+8. `MapToolOverlays.jsx` renders temporary tool outputs inside the main map.
+9. `MapToolDialogs.jsx` renders tool result dialogs outside the map canvas tree.
+10. `MapHud.jsx` renders only the controls relevant to the active project's raster family and layers.
 
 ### Interaction flow
 
@@ -132,6 +142,12 @@ But the structure now supports multiple families, with the rule that each projec
   visible layer modules may handle clicks through `handleClick`
 - popup:
   selected feature state is stored in `selectedStation` and rendered by popup modules
+- context menu:
+  `useMapTools.js` listens to desktop right-click and mobile long-press to open a shared map action menu
+- map tools:
+  tool API responses are stored as temporary overlay state and rendered through `MapToolOverlays.jsx`
+- tool dialogs:
+  successful tool fetches can be downloaded as GeoJSON and optionally added to the map as temporary layers
 
 For popup CSV export:
 
@@ -140,6 +156,31 @@ For popup CSV export:
 - the shared header download button triggers one or more CSV downloads
 
 For the global hydrography layers, `selectedStation` is populated by the layer click handlers and the shared `GlobalReachPopup` is rendered once from `MapCanvas.jsx`.
+
+## Map tools
+
+The app now has a shared context-menu-driven map tool system.
+
+Current tools:
+
+- `Watershed to here`
+- `Upstream rivers`
+- `Downstream flowpath`
+- `All 3 above!`
+- `Measure distance`
+- `Clear all temporary`
+
+Current behavior:
+
+- tool outputs are temporary and are not part of the project layer registry
+- watershed results render as blue polygon fill + outline
+- upstream rivers render as blue lines
+- downstream flowpath renders as a thicker red line
+- the combined tool can fetch all three outputs from the same clicked coordinate and add them together
+- the measurement tool stores a start point, previews a live line to the current pointer, and labels both preview and final lines directly on the map
+- tool dialogs can download returned GeoJSON before or instead of adding it to the map
+
+These map tools intentionally live outside the layer module system because they are map-driven actions rather than reusable project layers.
 
 ## Design rules in the current app
 
@@ -159,3 +200,9 @@ If you add new functionality, prefer extending one of these existing seams:
 - add a new popup feature module
 
 Avoid pushing unrelated logic into `App.jsx` or `MapCanvas.jsx` when it can live in a layer or feature module.
+
+For map tools specifically:
+
+- keep API orchestration and tool state in `useMapTools.js`
+- keep temporary rendering in `MapToolOverlays.jsx`
+- keep dialog UI in `MapToolDialogs.jsx`

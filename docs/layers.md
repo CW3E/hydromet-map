@@ -174,6 +174,27 @@ This is what enables patterns like:
 - hover point -> highlight basin
 - hover river -> show river popup
 
+## Temporary map-tool overlays
+
+Not every visible thing on the map is a project layer.
+
+The app now also supports temporary map-tool overlays that are rendered outside the layer registry:
+
+- watershed polygons returned by the context-menu tool
+- upstream river lines returned by the context-menu tool
+- downstream flowpaths returned by the context-menu tool
+- measurement preview/final lines
+
+These are rendered by:
+
+- [src/components/map/MapToolOverlays.jsx](../src/components/map/MapToolOverlays.jsx)
+
+The state and API calls for these overlays are managed by:
+
+- [src/components/map/useMapTools.js](../src/components/map/useMapTools.js)
+
+This keeps the reusable project layer system separate from ad hoc map-tool outputs.
+
 ## Advice when adding a layer
 
 - Keep the map styling and interaction logic in the layer module.

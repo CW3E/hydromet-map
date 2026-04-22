@@ -904,6 +904,179 @@ button:disabled {
   align-items: center;
 }
 
+.map-context-menu {
+  position: absolute;
+  z-index: 8;
+  min-width: 176px;
+  max-width: min(240px, calc(100vw - 2rem));
+  padding: 0.35rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(16, 34, 47, 0.09);
+  box-shadow: 0 20px 45px rgba(38, 73, 89, 0.18);
+  color: #10222f;
+  transform: translate(10px, 10px);
+}
+
+.map-context-menu__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.map-context-menu__header strong {
+  font-size: 0.78rem;
+  line-height: 1.1;
+}
+
+.map-context-menu__close {
+  width: 1.3rem;
+  height: 1.3rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: #e4eef3;
+  color: #244050;
+  border-radius: 999px;
+  line-height: 1;
+  box-shadow: none;
+  transform: none;
+  font-size: 0.72rem;
+}
+
+.map-context-menu__close:hover {
+  transform: none;
+}
+
+.map-context-menu__coords {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: nowrap;
+  margin-bottom: 0.35rem;
+  padding: 0.28rem 0.34rem;
+  border-radius: 8px;
+  background: #f5f9fb;
+  color: #355567;
+  font-size: 0.7rem;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.map-context-menu__actions {
+  display: grid;
+  gap: 0.22rem;
+}
+
+.map-context-menu__action {
+  width: 100%;
+  justify-content: flex-start;
+  border-radius: 10px;
+  padding: 0.42rem 0.55rem;
+  background: rgba(244, 249, 252, 0.92);
+  color: #244050;
+  border: 1px solid rgba(74, 113, 137, 0.16);
+  box-shadow: none;
+  transform: none;
+  text-align: left;
+  font-size: 0.76rem;
+}
+
+.map-context-menu__action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.map-context-menu__action:hover {
+  transform: none;
+  background: rgba(29, 105, 150, 0.12);
+}
+
+.map-tool-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+  background: rgba(16, 34, 47, 0.16);
+}
+
+.map-tool-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 30;
+  width: min(440px, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(16, 34, 47, 0.09);
+  box-shadow: 0 20px 45px rgba(38, 73, 89, 0.18);
+  color: #10222f;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.map-tool-dialog__header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.map-tool-dialog__header strong {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.92rem;
+  line-height: 1.1;
+}
+
+.map-tool-dialog__close {
+  width: 1.3rem;
+  height: 1.3rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: #e4eef3;
+  color: #244050;
+  border-radius: 999px;
+  line-height: 1;
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+}
+
+.map-tool-dialog__body {
+  color: #355567;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.map-tool-dialog__message p {
+  margin: 0.2rem 0;
+}
+
+.map-tool-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.map-tool-dialog__button {
+  padding: 0.36rem 0.62rem;
+  border-radius: 999px;
+}
+
+.map-tool-dialog__button--secondary {
+  background: #e4eef3;
+  color: #244050;
+}
+
 .project-selector {
   position: absolute;
   left: 15.2rem;

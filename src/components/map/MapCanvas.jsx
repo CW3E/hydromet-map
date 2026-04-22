@@ -6,10 +6,14 @@ import { formatCoordinate, formatViewValue } from '../../lib/appState'
 import { MAP_LAYER_MODULES } from '../../layers'
 import BookmarkControl from './BookmarkControl'
 import GlobeProjectionControl from './GlobeProjectionControl'
+import MapContextMenu from './MapContextMenu'
 import MapHud from './MapHud'
 import MapLegend from './MapLegend'
+import MapToolDialogs from './MapToolDialogs'
+import MapToolOverlays from './MapToolOverlays'
 import MouseReadout from './MouseReadout'
 import TerrainToggleControl from './TerrainToggleControl'
+import useMapTools from './useMapTools'
 
 const INITIAL_INTERACTION_STATE = {
   hoveredB120Point: null,
@@ -71,6 +75,7 @@ export default function MapCanvas({
   viewState,
 }) {
   const [interactionState, setInteractionState] = useState(INITIAL_INTERACTION_STATE)
+  const [mapInstance, setMapInstance] = useState(null)
   const mapRef = useRef(null)
   const mouseReadoutRef = useRef(null)
   const isDraggingRef = useRef(false)
@@ -95,6 +100,11 @@ export default function MapCanvas({
     (layerModule) => layerModule.getInteractiveLayerIds?.(layerContext) ?? [],
   )
 
+  const mapTools = useMapTools({
+    mapInstance,
+    setSelectedStation,
+  })
+
   function handleMapMove(event) {
     const nextView = event.viewState
     updateTopLevel('view', {
@@ -107,6 +117,7 @@ export default function MapCanvas({
 
   function handlePointerMove(event) {
     mouseReadoutRef.current?.setCoordinates(event.lngLat.lng, event.lngLat.lat)
+    mapTools.handlePointerMove(event.lngLat)
 
     if (isDraggingRef.current) {
       return
@@ -130,6 +141,7 @@ export default function MapCanvas({
 
   function handlePointerLeave() {
     mouseReadoutRef.current?.clear()
+    mapTools.handlePointerLeave()
 
     const nextInteractionState = mergeInteractionState(visibleLayerModules, (layerModule) =>
       layerModule.getPointerLeaveState?.(layerContext),
@@ -148,6 +160,10 @@ export default function MapCanvas({
   }
 
   function handleMapClick(event) {
+    if (mapTools.handleMapClick(event)) {
+      return
+    }
+
     const handled = visibleLayerModules.some(
       (layerModule) => layerModule.handleClick?.({ ...layerContext, event, setInteractionState }) === true,
     )
@@ -159,6 +175,7 @@ export default function MapCanvas({
 
   function handleDragStart() {
     isDraggingRef.current = true
+    mapTools.handleDragStart()
   }
 
   function handleDragEnd() {
@@ -177,6 +194,7 @@ export default function MapCanvas({
         projection={appState.projection}
         ref={mapRef}
         reuseMaps
+        onLoad={(event) => setMapInstance(event.target)}
         onClick={handleMapClick}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
@@ -185,6 +203,8 @@ export default function MapCanvas({
         onMove={handleMapMove}
         style={{ width: '100%', height: '100%' }}
       >
+        <MapToolOverlays mapTools={mapTools} />
+
         {visibleLayerModules.map((layerModule) => (
           <layerModule.renderLayers
             key={layerModule.id}
@@ -260,6 +280,20 @@ export default function MapCanvas({
       ) : null}
 
       <MouseReadout ref={mouseReadoutRef} />
+
+      {mapTools.contextMenuState ? (
+        <MapContextMenu
+          actions={mapTools.contextMenuActions}
+          latitude={mapTools.contextMenuState.latitude}
+          longitude={mapTools.contextMenuState.longitude}
+          menuRef={mapTools.contextMenuRef}
+          onClose={mapTools.closeContextMenu}
+          x={mapTools.contextMenuState.x}
+          y={mapTools.contextMenuState.y}
+        />
+      ) : null}
+
+      <MapToolDialogs mapTools={mapTools} />
 
       <div
         className="project-selector"

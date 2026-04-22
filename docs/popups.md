@@ -181,3 +181,24 @@ If a new layer needs a non-trivial popup:
 For shared popup UIs used by multiple layers, it is reasonable to render the popup once from `MapCanvas.jsx` and let layers only populate `selectedStation`.
 
 That keeps layer modules smaller and makes popup logic reusable.
+
+## Map tool dialogs
+
+The context-menu map tools use a similar "shared rendering from `MapCanvas.jsx`" idea, but they are not feature popups.
+
+Instead, they render through:
+
+- [src/components/map/MapToolDialogs.jsx](../src/components/map/MapToolDialogs.jsx)
+
+These dialogs are used for:
+
+- watershed GeoJSON results
+- upstream rivers GeoJSON results
+- downstream flowpath GeoJSON results
+- the combined `All 3 above!` tool
+
+They support:
+
+- success/error/loading states
+- optional GeoJSON download before adding to the map
+- shared location reporting based on the clicked map coordinate
