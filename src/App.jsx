@@ -21,6 +21,7 @@ import {
   readStateFromUrl,
   writeStateToUrl,
 } from './lib/appState'
+import { fetchJsonNoCache } from './lib/network'
 
 const NRT_PRODUCT = 'NRT'
 const FORECAST_PRODUCTS = ['WWRF-ECMWF', 'WWRF-GFS', 'GFS']
@@ -278,7 +279,9 @@ function App() {
         }
 
         try {
-          const response = await fetch(statusUrl, { signal: abortController.signal })
+          const response = await fetchJsonNoCache(statusUrl, {
+            signal: abortController.signal,
+          })
 
           if (!response.ok) {
             return

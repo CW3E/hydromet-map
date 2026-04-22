@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Popup } from 'react-map-gl/maplibre'
 import TimeSeriesPlot from '../cnrfcPointPopup/TimeSeriesPlot'
+import { fetchJsonNoCache } from '../../lib/network'
 import B120PointPopupTable from './B120PointPopupTable'
 import {
   B120_POINT_FORECAST_UPDATE_OPTIONS,
@@ -80,7 +81,7 @@ export default function B120PointPopup({
 
     async function loadForecastUpdateOptions() {
       try {
-        const response = await fetch(B120_POINT_FORECAST_UPDATES_URL)
+        const response = await fetchJsonNoCache(B120_POINT_FORECAST_UPDATES_URL)
 
         if (!response.ok) {
           return

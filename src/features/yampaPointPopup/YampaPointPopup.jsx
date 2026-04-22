@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Popup } from 'react-map-gl/maplibre'
 import TimeSeriesPlot from '../cnrfcPointPopup/TimeSeriesPlot'
+import { fetchJsonNoCache } from '../../lib/network'
 import YampaPointPopupTable from './YampaPointPopupTable'
 import {
   YAMPA_POINT_FORECAST_UPDATE_OPTIONS,
@@ -80,7 +81,7 @@ export default function YampaPointPopup({
 
     async function loadForecastUpdateOptions() {
       try {
-        const response = await fetch(YAMPA_POINT_FORECAST_UPDATES_URL)
+        const response = await fetchJsonNoCache(YAMPA_POINT_FORECAST_UPDATES_URL)
 
         if (!response.ok) {
           return
