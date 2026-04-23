@@ -20,6 +20,7 @@ function buildHoveredCnrfcPoint(event, feature) {
     river: properties.River || 'Unknown',
     location: locationParts.length > 1 ? locationParts.slice(1).join(' - ') : location,
     reachId: properties.ReachID ?? 'Unknown',
+    wrfHydroAvailable: properties.wrf_hydro_available === 'true',
   }
 }
 
@@ -65,7 +66,12 @@ const cnrfcPointsLayer = {
             type="circle"
             paint={{
               'circle-radius': ['interpolate', ['linear'], ['zoom'], 0, 3, 5, 3, 6, 4, 12, 8],
-              'circle-color': '#2563eb',
+              'circle-color': [
+                'case',
+                ['==', ['get', 'wrf_hydro_available'], 'true'],
+                '#2563eb',
+                'darkgray',
+              ],
               'circle-stroke-width': 0,
             }}
           />
@@ -117,6 +123,7 @@ const cnrfcPointsLayer = {
               <p>River: {interactionState.hoveredCnrfcPoint.river}</p>
               <p>Location: {interactionState.hoveredCnrfcPoint.location}</p>
               <p>Matching NWM Reach: {interactionState.hoveredCnrfcPoint.reachId}</p>
+              <p>WRF-Hydro Data Available: {interactionState.hoveredCnrfcPoint.wrfHydroAvailable ? 'Yes' : 'No'}</p>
             </div>
           </Popup>
         ) : null}
