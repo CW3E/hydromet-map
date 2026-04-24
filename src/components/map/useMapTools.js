@@ -35,6 +35,8 @@ export default function useMapTools({ mapInstance, setSelectedStation }) {
   const contextMenuRef = useRef(null)
   const longPressTimerRef = useRef(null)
   const longPressStartRef = useRef(null)
+  const mouseContextStartRef = useRef(null)
+  const suppressMouseContextMenuRef = useRef(false)
 
   async function downloadGeoJsonFile({ fileNameRoot = 'feature', geojson, latitude, longitude }) {
     const filename = `${fileNameRoot}_${formatCoordinate(latitude)}_${formatCoordinate(longitude)}.geojson`
@@ -394,6 +396,47 @@ export default function useMapTools({ mapInstance, setSelectedStation }) {
 
     function handleContextMenu(event) {
       event.preventDefault()
+    }
+
+    function handleMouseContextPointerDown(event) {
+      if (event.pointerType !== 'mouse') {
+        return
+      }
+
+      const { pointX, pointY } = getPointFromClientPosition(event.clientX, event.clientY)
+      const isPureRightButtonPress = event.button === 2 && event.buttons === 2
+
+      mouseContextStartRef.current = {
+        pointX,
+        pointY,
+        allowMenu: isPureRightButtonPress,
+      }
+
+      if (!isPureRightButtonPress) {
+        suppressMouseContextMenuRef.current = true
+      }
+    }
+
+    function handleMouseContextPointerUp(event) {
+      if (event.pointerType !== 'mouse') {
+        return
+      }
+
+      const mouseContextStart = mouseContextStartRef.current
+      mouseContextStartRef.current = null
+
+      if (!mouseContextStart) {
+        return
+      }
+
+      if (suppressMouseContextMenuRef.current) {
+        suppressMouseContextMenuRef.current = false
+        return
+      }
+
+      if (event.button !== 2 || !mouseContextStart.allowMenu) {
+        return
+      }
 
       const { pointX, pointY } = getPointFromClientPosition(event.clientX, event.clientY)
       const lngLat = mapInstance.unproject([pointX, pointY])
@@ -435,6 +478,17 @@ export default function useMapTools({ mapInstance, setSelectedStation }) {
     }
 
     function handleLongPressPointerMove(event) {
+      if (event.pointerType === 'mouse' && mouseContextStartRef.current) {
+        const { pointX, pointY } = getPointFromClientPosition(event.clientX, event.clientY)
+        const dx = pointX - mouseContextStartRef.current.pointX
+        const dy = pointY - mouseContextStartRef.current.pointY
+
+        if (Math.hypot(dx, dy) > 6) {
+          mouseContextStartRef.current.allowMenu = false
+          suppressMouseContextMenuRef.current = true
+        }
+      }
+
       if (!longPressStartRef.current) {
         return
       }
@@ -455,8 +509,10 @@ export default function useMapTools({ mapInstance, setSelectedStation }) {
     }
 
     canvasContainer.addEventListener('contextmenu', handleContextMenu)
+    canvasContainer.addEventListener('pointerdown', handleMouseContextPointerDown)
     canvasContainer.addEventListener('pointerdown', handleLongPressPointerDown)
     canvasContainer.addEventListener('pointermove', handleLongPressPointerMove)
+    canvasContainer.addEventListener('pointerup', handleMouseContextPointerUp)
     canvasContainer.addEventListener('pointerup', handleLongPressPointerEnd)
     canvasContainer.addEventListener('pointercancel', handleLongPressPointerEnd)
     canvasContainer.addEventListener('pointerleave', handleLongPressPointerEnd)
@@ -464,9 +520,13 @@ export default function useMapTools({ mapInstance, setSelectedStation }) {
     return () => {
       clearLongPressTimer()
       longPressStartRef.current = null
+      mouseContextStartRef.current = null
+      suppressMouseContextMenuRef.current = false
       canvasContainer.removeEventListener('contextmenu', handleContextMenu)
+      canvasContainer.removeEventListener('pointerdown', handleMouseContextPointerDown)
       canvasContainer.removeEventListener('pointerdown', handleLongPressPointerDown)
       canvasContainer.removeEventListener('pointermove', handleLongPressPointerMove)
+      canvasContainer.removeEventListener('pointerup', handleMouseContextPointerUp)
       canvasContainer.removeEventListener('pointerup', handleLongPressPointerEnd)
       canvasContainer.removeEventListener('pointercancel', handleLongPressPointerEnd)
       canvasContainer.removeEventListener('pointerleave', handleLongPressPointerEnd)
@@ -492,6 +552,21 @@ export default function useMapTools({ mapInstance, setSelectedStation }) {
       document.removeEventListener('pointerdown', handleDocumentPointerDown)
     }
   }, [contextMenuState])
+
+  useEffect(() => {
+    if (!mapInstance) {
+      return undefined
+    }
+
+    const canvas = mapInstance.getCanvas()
+    const previousCursor = canvas.style.cursor
+
+    canvas.style.cursor = contextMenuState ? 'crosshair' : previousCursor || ''
+
+    return () => {
+      canvas.style.cursor = previousCursor
+    }
+  }, [contextMenuState, mapInstance])
 
   return {
     closeCombinedToolsDialog,
