@@ -65,13 +65,20 @@ export default function MapHud({
   const allowedProductSet = new Set(allowedProducts)
   const isForecastProduct = appState.family?.product !== 'NRT'
   const activeRasterLayerId = layerFamily?.raster?.layerId
+  const minPickerDate = parseIsoDate(statusBoundary.minDate)
   const maxPickerDate = parseIsoDate(statusBoundary.maxDate)
+  const minPickerDateTime = parseIsoDateTime(statusBoundary.minDateTime)
   const maxPickerDateTime = parseIsoDateTime(statusBoundary.maxDateTime)
   const selectedDateTime = parseIsoDateTime(appState.family?.datetime ?? '')
+  const isSelectedOnMinDate =
+    selectedDateTime &&
+    minPickerDateTime &&
+    selectedDateTime.toDateString() === minPickerDateTime.toDateString()
   const isSelectedOnMaxDate =
     selectedDateTime &&
     maxPickerDateTime &&
     selectedDateTime.toDateString() === maxPickerDateTime.toDateString()
+  const minTime = isSelectedOnMinDate ? minPickerDateTime : undefined
   const maxTime = isSelectedOnMaxDate ? maxPickerDateTime : undefined
 
   return (
@@ -190,6 +197,8 @@ export default function MapHud({
                     calendarClassName="hydromet-datepicker__calendar"
                     className="hydromet-datepicker__input"
                     dateFormat="yyyy-MM-dd HH:mm"
+                    minDate={minPickerDate}
+                    minTime={minTime}
                     maxDate={maxPickerDate}
                     maxTime={maxTime}
                     placeholderText="YYYY-MM-DD HH:mm"
@@ -262,6 +271,7 @@ export default function MapHud({
                     calendarClassName="hydromet-datepicker__calendar"
                     className="hydromet-datepicker__input"
                     dateFormat="yyyy-MM-dd"
+                    minDate={minPickerDate}
                     maxDate={maxPickerDate}
                     placeholderText="YYYY-MM-DD"
                     popperPlacement="bottom-start"

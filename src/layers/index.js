@@ -9,6 +9,7 @@ import ucrbRiversLayer from './ucrbRiversLayer'
 import cnrfcPointsLayer from './cnrfcPointsLayer'
 import geodarLayer from './geodarLayer'
 import gshaLayer from './gshaLayer'
+import globalRasterLayer from './globalRasterLayer'
 import gradesHydroDlLayer from './gradesHydroDlLayer'
 import gradesHydroDlStaticLayer from './gradesHydroDlStaticLayer'
 import gritLayer from './gritLayer'
@@ -36,6 +37,7 @@ export const MAP_LAYER_MODULES = [
   ucrbRiversLayer,
   geodarLayer,
   gshaLayer,
+  globalRasterLayer,
   gradesHydroDlLayer,
   gradesHydroDlStaticLayer,
   gritLayer,

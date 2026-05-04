@@ -80,15 +80,42 @@ function buildStatusBoundary(statusTimestamp) {
   }
 }
 
+function buildFamilyDateBounds({ minDate, minDateTime, maxDate, maxDateTime }) {
+  return {
+    minDate: minDate ?? null,
+    minDateTime: minDateTime ?? (minDate ? `${minDate}T00:00` : null),
+    maxDate: maxDate ?? null,
+    maxDateTime: maxDateTime ?? (maxDate ? `${maxDate}T23:59` : null),
+  }
+}
+
 function getInitialStatusTimestamp() {
   return parseStatusTimestamp(DEFAULT_DATETIME) ?? new Date()
 }
 
 function buildInitialStatusBoundaryByProjectId() {
-  const initialBoundary = buildStatusBoundary(getInitialStatusTimestamp())
-
   return Object.fromEntries(
-    Object.keys(PROJECTS).map((projectId) => [projectId, initialBoundary]),
+    Object.keys(PROJECTS).map((projectId) => {
+      const layerFamily = getProjectLayerFamily(projectId)
+      const familySelectors = layerFamily?.selectors ?? {}
+
+      if (layerFamily?.id === 'globalHydro') {
+        return [projectId, buildFamilyDateBounds({
+          minDate: familySelectors.minDate,
+          minDateTime: familySelectors.minDateTime,
+          maxDate: familySelectors.defaultDate,
+          maxDateTime: familySelectors.defaultDateTime,
+        })]
+      }
+
+      return [projectId, {
+        ...buildStatusBoundary(getInitialStatusTimestamp()),
+        ...buildFamilyDateBounds({
+          minDate: familySelectors.minDate,
+          minDateTime: familySelectors.minDateTime,
+        }),
+      }]
+    }),
   )
 }
 
@@ -131,20 +158,32 @@ function constrainFamilyStateToStatusBoundary(familyState, statusBoundary, layer
     return familyState
   }
 
-  if (!layerFamily?.selectors?.statusUrl) {
-    return familyState
-  }
-
   const nextFamily = { ...familyState }
   const familyProducts = layerFamily?.selectors?.products ?? []
   const forecastProducts = familyProducts.filter((product) => product !== NRT_PRODUCT)
+  const minDate = statusBoundary?.minDate ?? layerFamily?.selectors?.minDate ?? null
+  const minDateTime = statusBoundary?.minDateTime ?? layerFamily?.selectors?.minDateTime ?? null
+  const maxDate = statusBoundary?.maxDate ?? layerFamily?.selectors?.maxDate ?? null
+  const maxDateTime = statusBoundary?.maxDateTime ?? layerFamily?.selectors?.maxDateTime ?? null
 
-  if (nextFamily.date > statusBoundary.maxDate) {
-    nextFamily.date = statusBoundary.maxDate
+  if (minDate && nextFamily.date < minDate) {
+    nextFamily.date = minDate
   }
 
-  if (nextFamily.datetime > statusBoundary.maxDateTime) {
-    nextFamily.datetime = statusBoundary.maxDateTime
+  if (maxDate && nextFamily.date > maxDate) {
+    nextFamily.date = maxDate
+  }
+
+  if (minDateTime && nextFamily.datetime < minDateTime) {
+    nextFamily.datetime = minDateTime
+  }
+
+  if (maxDateTime && nextFamily.datetime > maxDateTime) {
+    nextFamily.datetime = maxDateTime
+  }
+
+  if (!layerFamily?.selectors?.statusUrl) {
+    return nextFamily
   }
 
   const shouldUseForecastProducts =
@@ -285,12 +324,19 @@ function App() {
           try {
             const descriptor = await fetchGradesBinaryDescriptor()
             const gradesEndDate = descriptor?.MERIT?.end
+            const familySelectors = layerFamily.selectors ?? {}
 
             if (!gradesEndDate) {
               return
             }
 
             loadedStatusByProjectId[projectId] = {
+              boundary: buildFamilyDateBounds({
+                minDate: familySelectors.minDate,
+                minDateTime: familySelectors.minDateTime,
+                maxDate: gradesEndDate,
+                maxDateTime: `${gradesEndDate}T23:59`,
+              }),
               date: gradesEndDate,
               datetime: `${gradesEndDate}T12:00`,
             }
@@ -408,7 +454,7 @@ function App() {
             statusBoundaryByProjectId[projectId]
             ?? buildStatusBoundary(getInitialStatusTimestamp())
 
-          if (!layerFamily || !projectState.family || !layerFamily.selectors?.statusUrl) {
+          if (!layerFamily || !projectState.family) {
             return [projectId, projectState]
           }
 

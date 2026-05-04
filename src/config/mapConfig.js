@@ -35,6 +35,13 @@ export const ALL_MAP_LAYERS = [
     symbol: '\u25A0',
   },
   {
+    id: 'globalRaster',
+    label: 'Global Rasters',
+    type: 'png-overlay',
+    description: 'Global raster overlay rendered from a variable and date.',
+    symbol: '\u25A0',
+  },
+  {
     id: 'cnrfcRegion',
     label: 'CNRFC Region',
     type: 'vector',
@@ -250,6 +257,13 @@ export const UCRB_RASTER_COORDINATES = [
   [-104, 45],
   [-104, 34],
   [-113, 34],
+]
+
+export const GLOBAL_RASTER_COORDINATES = [
+  [-180, 85],
+  [180, 85],
+  [180, -85],
+  [-180, -85],
 ]
 
 export function getRasterProductPath(product) {
@@ -559,6 +573,54 @@ export const UCRB_RASTER_VARIABLES = cloneRasterVariablesForDomain(CNRFC_RASTER_
   domain: 'ucrb',
 })
 
+export const GLOBAL_RASTER_VARIABLES = {
+  precipitationDaily: {
+    label: 'Daily P',
+    units: 'mm',
+    timestep: '1day',
+    coordinates: GLOBAL_RASTER_COORDINATES,
+    palette: {
+      thresholds: ['1', '2.5', '5', '7.5', '10', '15', '20', '30', '40', '50', '70', '100', '150', '200', '250', '300', '400', '500', '600'],
+      colors: [
+        '#ebebeb',
+        '#50d0d0',
+        '#00ffff',
+        '#00e080',
+        '#00c000',
+        '#80e000',
+        '#ffff00',
+        '#ffa000',
+        '#ff0000',
+        '#ff2080',
+        '#f040ff',
+        '#8020ff',
+        '#4040ff',
+        '#202080',
+        '#202020',
+        '#808080',
+        '#e0e0e0',
+        '#eed4bc',
+        '#daa678',
+        '#663300',
+      ],
+    },
+    buildRasterUrl: ({ date, product }) => {
+      if (!date) {
+        return null
+      }
+
+      const yyyymmdd = date.replaceAll('-', '')
+
+      if (yyyymmdd.length !== 8) {
+        return null
+      }
+
+      const yyyy = yyyymmdd.slice(0, 4)
+      return `https://cw3e.ucsd.edu/hydro/grades_hydrodl/imgs/${getRasterProductPath(product)}/${yyyy}/prec_${yyyymmdd}.png`
+    },
+  },
+}
+
 export const LAYER_FAMILIES = {
   cnrfc: {
     id: 'cnrfc',
@@ -613,11 +675,17 @@ export const LAYER_FAMILIES = {
   globalHydro: {
     id: 'globalHydro',
     label: 'Global Hydro',
+    raster: {
+      layerId: 'globalRaster',
+      variables: GLOBAL_RASTER_VARIABLES,
+    },
     selectors: {
-      products: [],
+      products: ['NRT'],
       ensembleTraces: [],
       defaultDate: '2025-12-20',
       defaultDateTime: '2025-12-20T12:00',
+      minDate: '2025-01-01',
+      minDateTime: '2025-01-01T00:00',
       timeStep: '1day',
       dateSelector: true,
     },
@@ -812,6 +880,7 @@ export const PROJECTS = {
     defaultProjection: 'globe',
     layerFamilyId: 'globalHydro',
     availableLayerIds: [
+      'globalRaster',
       'gradesHydroDl',
       'camaFlood',
       'hydroRivers',
@@ -821,7 +890,7 @@ export const PROJECTS = {
       'gsha',
       'geodar',
     ],
-    defaultVisibleLayerIds: ['gradesHydroDl', 'gsha'],
+    defaultVisibleLayerIds: ['globalRaster', 'gradesHydroDl', 'gsha'],
   },
 }
 
@@ -886,7 +955,7 @@ export const UCRB_RIVER_NETWORK_PMTILES_URL =
 export const RIVER_NETWORK_SOURCE_LAYER = 'NWM_v2.1_channels'
 export const CNRFC_STREAMFLOW_DATA_SOURCE_LAYER = 'CNRFC_Streamflow'
 export const MERIT_BASINS_PMTILES_URL =
-  'https://cw3e.ucsd.edu//merit_rivers/riv_MERIT_Hydro_v07_Basins_v01_dense.pmtiles'
+  'https://cw3e.ucsd.edu/hydro/merit_rivers/riv_MERIT_Hydro_v07_Basins_v01_dense.pmtiles'
 export const MERIT_BASINS_SOURCE_LAYER = 'MERIT-Basins_Rivers'
 export const CAMA_FLOOD_PMTILES_URL =
   'https://cw3e.ucsd.edu/hydro/camaflood_rivers/strnet_06min.pmtiles'

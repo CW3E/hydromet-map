@@ -73,6 +73,12 @@ function getFirstDayOfMonth(date) {
   return new Date(date.getFullYear(), date.getMonth(), 1)
 }
 
+function getStartDate(date) {
+  // we don't start later than Apr 1 of the year, since the forecast is for Apr-Jul period
+  const month = date.getMonth();
+  return new Date(date.getFullYear(), month>3 ? 3 : month, 1)
+}
+
 function getLastDayOfMonth(date) {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0)
 }
@@ -84,7 +90,7 @@ function buildForecastDateRange(updateDate) {
     return null
   }
 
-  const startDate = getFirstDayOfMonth(parsedUpdateDate)
+  const startDate = getStartDate(parsedUpdateDate)
   const endDate = getLastDayOfMonth(new Date(startDate.getFullYear(), startDate.getMonth() + 5, 1))
 
   return {
