@@ -619,6 +619,96 @@ export const GLOBAL_RASTER_VARIABLES = {
       return `https://cw3e.ucsd.edu/hydro/grades_hydrodl/imgs/${getRasterProductPath(product)}/${yyyy}/prec_${yyyymmdd}.png`
     },
   },
+  temperatureDailyMaximum: {
+    label: 'Daily Tmax',
+    units: '\u00B0C',
+    timestep: '1day',
+    coordinates: GLOBAL_RASTER_COORDINATES,
+    palette: {
+      thresholds: ['-28', '-20', '-15', '-10', '-6', '-3', '0', '3', '6', '9', '12', '15', '18', '21', '24', '27', '30', '34', '38'],
+      colors: [
+        '#d0d0d0',
+        '#d8b9e6',
+        '#b485d0',
+        '#8a4cb4',
+        '#5d1f95',
+        '#3524c9',
+        '#0a36ff',
+        '#0f79d6',
+        '#0fa282',
+        '#0fb33d',
+        '#5acc18',
+        '#b0e714',
+        '#fff300',
+        '#ffd200',
+        '#ffad00',
+        '#ff7a00',
+        '#ff3d00',
+        '#ff7d7d',
+        '#ffc0c0',
+        '#e0e0e0',
+      ],
+    },
+    buildRasterUrl: ({ date, product }) => {
+      if (!date) {
+        return null
+      }
+
+      const yyyymmdd = date.replaceAll('-', '')
+
+      if (yyyymmdd.length !== 8) {
+        return null
+      }
+
+      const yyyy = yyyymmdd.slice(0, 4)
+      return `https://cw3e.ucsd.edu/hydro/grades_hydrodl/imgs/${getRasterProductPath(product)}/${yyyy}/tmax_${yyyymmdd}.png`
+    },
+  },
+  temperatureDailyMinimum: {
+    label: 'Daily Tmin',
+    units: '\u00B0C',
+    timestep: '1day',
+    coordinates: GLOBAL_RASTER_COORDINATES,
+    palette: {
+      thresholds: ['-28', '-20', '-15', '-10', '-6', '-3', '0', '3', '6', '9', '12', '15', '18', '21', '24', '27', '30', '34', '38'],
+      colors: [
+        '#d0d0d0',
+        '#d8b9e6',
+        '#b485d0',
+        '#8a4cb4',
+        '#5d1f95',
+        '#3524c9',
+        '#0a36ff',
+        '#0f79d6',
+        '#0fa282',
+        '#0fb33d',
+        '#5acc18',
+        '#b0e714',
+        '#fff300',
+        '#ffd200',
+        '#ffad00',
+        '#ff7a00',
+        '#ff3d00',
+        '#ff7d7d',
+        '#ffc0c0',
+        '#e0e0e0',
+      ],
+    },
+    buildRasterUrl: ({ date, product }) => {
+      if (!date) {
+        return null
+      }
+
+      const yyyymmdd = date.replaceAll('-', '')
+
+      if (yyyymmdd.length !== 8) {
+        return null
+      }
+
+      const yyyy = yyyymmdd.slice(0, 4)
+      return `https://cw3e.ucsd.edu/hydro/grades_hydrodl/imgs/${getRasterProductPath(product)}/${yyyy}/tmin_${yyyymmdd}.png`
+    },
+  },
 }
 
 export const LAYER_FAMILIES = {
@@ -681,6 +771,9 @@ export const LAYER_FAMILIES = {
     },
     selectors: {
       products: ['NRT'],
+      productLabels: {
+        NRT: 'NRT (MSWEP+ERA5)',
+      },
       ensembleTraces: [],
       defaultDate: '2025-12-20',
       defaultDateTime: '2025-12-20T12:00',

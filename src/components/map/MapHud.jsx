@@ -36,6 +36,7 @@ export default function MapHud({
   const selectedRasterVariable =
     familyVariables[appState.family?.variable] ?? familyVariables[familyVariableIds[0]] ?? null
   const familyProducts = layerFamily?.selectors?.products ?? []
+  const familyProductLabels = layerFamily?.selectors?.productLabels ?? {}
   const ensembleTraces = layerFamily?.selectors?.ensembleTraces ?? []
   const hasFamilyDateSelector = Boolean(layerFamily?.selectors?.dateSelector || selectedRasterVariable)
   const hasVariableSelector = familyVariableIds.length > 0
@@ -339,7 +340,7 @@ export default function MapHud({
               >
                 {familyProducts.map((product) => (
                   <option key={product} value={product} disabled={!allowedProductSet.has(product)}>
-                    {product}
+                    {familyProductLabels[product] ?? product}
                   </option>
                 ))}
               </select>
