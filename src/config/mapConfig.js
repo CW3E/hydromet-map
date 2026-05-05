@@ -882,6 +882,7 @@ export const PROJECTS = {
   cnrfc: {
     id: 'cnrfc',
     label: 'CNRFC',
+    documentTitle: 'CW3E River Forecasting (CNRFC Region)',
     statusButtonEnabled: true,
     layerFamilyId: 'cnrfc',
     defaultFamily: {
@@ -908,6 +909,7 @@ export const PROJECTS = {
   ocwd: {
     id: 'ocwd',
     label: 'OCWD',
+    documentTitle: 'CW3E OCWD Digital Twin',
     statusButtonEnabled: false,
     defaultView: {
       center: '-117.7,33.84',
@@ -943,6 +945,7 @@ export const PROJECTS = {
   b120: {
     id: 'b120',
     label: 'B120',
+    documentTitle: 'CW3E B120 Forecasting',
     statusButtonEnabled: false,
     defaultView: {
       center: '-119,39',
@@ -975,6 +978,7 @@ export const PROJECTS = {
   yampa: {
     id: 'yampa',
     label: 'Yampa',
+    documentTitle: 'CW3E Yampa Forecasting',
     statusButtonEnabled: false,
     layerFamilyId: 'ucrb',
     defaultFamily: {
@@ -992,6 +996,7 @@ export const PROJECTS = {
   global: {
     id: 'global',
     label: 'Global',
+    documentTitle: 'Global Hydrology Explorer',
     statusButtonEnabled: false,
     defaultView: {
       center: '55,30',

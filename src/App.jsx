@@ -268,6 +268,10 @@ function App() {
     ?? buildStatusBoundary(getInitialStatusTimestamp())
 
   useEffect(() => {
+    document.title = activeProject.documentTitle ?? `Hydromet Map - ${activeProject.label}`
+  }, [activeProject.documentTitle, activeProject.label])
+
+  useEffect(() => {
     if (copyStatus === 'Copied') {
       const timeoutId = window.setTimeout(() => {
         setCopyStatus('Copy URL')
