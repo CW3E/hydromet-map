@@ -221,6 +221,35 @@ select,
   position: relative;
 }
 
+.status-button {
+  min-width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 10px;
+  background: rgba(244, 249, 252, 0.92);
+  color: #1d6996;
+  border: 1px solid rgba(74, 113, 137, 0.2);
+  box-shadow: none;
+  transform: none;
+  display: grid;
+  place-items: center;
+}
+
+.status-button:hover {
+  transform: none;
+  background: rgba(29, 105, 150, 0.12);
+}
+
+.status-button svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.3;
+}
+
 .date-icon-button span {
   display: none;
 }
@@ -1022,6 +1051,10 @@ button:disabled {
   gap: 0.8rem;
 }
 
+.map-tool-dialog--wide {
+  width: min(840px, calc(100vw - 2rem));
+}
+
 .map-tool-dialog__header {
   display: flex;
   align-items: start;
@@ -1056,6 +1089,10 @@ button:disabled {
   line-height: 1.45;
 }
 
+.map-tool-dialog--wide .map-tool-dialog__body {
+  overflow-x: auto;
+}
+
 .map-tool-dialog__message p {
   margin: 0.2rem 0;
 }
@@ -1075,6 +1112,80 @@ button:disabled {
 .map-tool-dialog__button--secondary {
   background: #e4eef3;
   color: #244050;
+}
+
+.family-status {
+  color: #244050;
+}
+
+.family-status__message p {
+  margin: 0.2rem 0;
+}
+
+.family-status__message--error {
+  color: #b42318;
+}
+
+.family-status__summary {
+  margin-bottom: 0.6rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  background: #eeeeee;
+}
+
+.family-status__section + .family-status__section {
+  margin-top: 0.7rem;
+}
+
+.family-status__section-title {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.82rem;
+}
+
+.family-status__rows {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.family-status__row {
+  display: grid;
+  grid-template-columns: minmax(0, 180px) minmax(0, 1fr);
+  gap: 0.6rem;
+  align-items: start;
+}
+
+.family-status__label {
+  font-weight: 600;
+}
+
+.family-status__value {
+  word-break: break-word;
+}
+
+.family-status__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.76rem;
+}
+
+.family-status__table th,
+.family-status__table td {
+  padding: 0.35rem 0.45rem;
+  border: 1px solid rgba(74, 113, 137, 0.18);
+  vertical-align: top;
+  text-align: left;
+}
+
+.family-status__table th {
+  background: #edf4f7;
+  color: #10222f;
+}
+
+.family-status__table--cnrfc th,
+.family-status__table--cnrfc td {
+  font-size: 0.72rem;
+  white-space: nowrap;
 }
 
 .project-selector {

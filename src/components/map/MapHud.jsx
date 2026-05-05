@@ -23,6 +23,7 @@ export default function MapHud({
   layerMenuRef,
   layerFamily,
   selectedBasemap,
+  setFamilyStatusOpen,
   setBasemapMenuOpen,
   setLayerMenuOpen,
   statusBoundary,
@@ -38,6 +39,7 @@ export default function MapHud({
   const familyProducts = layerFamily?.selectors?.products ?? []
   const familyProductLabels = layerFamily?.selectors?.productLabels ?? {}
   const ensembleTraces = layerFamily?.selectors?.ensembleTraces ?? []
+  const hasStatusPanel = Boolean(activeProject?.statusButtonEnabled && layerFamily?.statusPanel?.url)
   const hasFamilyDateSelector = Boolean(layerFamily?.selectors?.dateSelector || selectedRasterVariable)
   const hasVariableSelector = familyVariableIds.length > 0
   const hasProductSelector = familyProducts.length > 0
@@ -240,6 +242,23 @@ export default function MapHud({
                 >
                   <span aria-hidden="true">{'>>'}</span>
                 </button>
+
+                {hasStatusPanel ? (
+                  <button
+                    className="status-button status-button--icon"
+                    type="button"
+                    aria-label="Show status"
+                    title="Show status"
+                    onClick={() => setFamilyStatusOpen(true)}
+                  >
+                    <svg aria-hidden="true" viewBox="0 0 24 24">
+                      <path d="M9 4.5h6" />
+                      <path d="M10 3.3h4v2.4h-4z" />
+                      <rect x="4" y="4.5" width="16" height="15" rx="2" ry="2" />
+                      <path d="M8.5 12.5 11.3 15.3 16.5 9.3" />
+                    </svg>
+                  </button>
+                ) : null}
               </>
             ) : (
               <>
@@ -308,6 +327,23 @@ export default function MapHud({
                 >
                   <span aria-hidden="true">{'>>'}</span>
                 </button>
+
+                {hasStatusPanel ? (
+                  <button
+                    className="status-button status-button--icon"
+                    type="button"
+                    aria-label="Show status"
+                    title="Show status"
+                    onClick={() => setFamilyStatusOpen(true)}
+                  >
+                    <svg aria-hidden="true" viewBox="0 0 24 24">
+                      <path d="M9 4.5h6" />
+                      <path d="M10 3.3h4v2.4h-4z" />
+                      <rect x="4" y="4.5" width="16" height="15" rx="2" ry="2" />
+                      <path d="M8.5 12.5 11.3 15.3 16.5 9.3" />
+                    </svg>
+                  </button>
+                ) : null}
               </>
             )}
           </div>

@@ -6,6 +6,7 @@ import GlobalReachPopup from '../../features/globalReachPopup/GlobalReachPopup'
 import { formatCoordinate, formatViewValue } from '../../lib/appState'
 import { MAP_LAYER_MODULES } from '../../layers'
 import BookmarkControl from './BookmarkControl'
+import FamilyStatusDialog from './FamilyStatusDialog'
 import GlobeProjectionControl from './GlobeProjectionControl'
 import MapContextMenu from './MapContextMenu'
 import MapHud from './MapHud'
@@ -82,6 +83,7 @@ export default function MapCanvas({
 }) {
   const [interactionState, setInteractionState] = useState(INITIAL_INTERACTION_STATE)
   const [mapInstance, setMapInstance] = useState(null)
+  const [familyStatusOpen, setFamilyStatusOpen] = useState(false)
   const mapRef = useRef(null)
   const mouseReadoutRef = useRef(null)
   const isDraggingRef = useRef(false)
@@ -258,6 +260,7 @@ export default function MapCanvas({
         layerMenuRef={layerMenuRef}
         layerFamily={layerFamily}
         selectedBasemap={selectedBasemap}
+        setFamilyStatusOpen={setFamilyStatusOpen}
         setBasemapMenuOpen={setBasemapMenuOpen}
         setLayerMenuOpen={setLayerMenuOpen}
         statusBoundary={statusBoundary}
@@ -310,6 +313,12 @@ export default function MapCanvas({
       ) : null}
 
       <MapToolDialogs mapTools={mapTools} />
+
+      <FamilyStatusDialog
+        layerFamily={layerFamily}
+        onClose={() => setFamilyStatusOpen(false)}
+        open={familyStatusOpen}
+      />
 
       <div
         className="project-selector"

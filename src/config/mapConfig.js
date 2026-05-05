@@ -1,3 +1,5 @@
+import { GRADES_BINARY_DESCRIPTOR_URL } from '../lib/gradesBinaryData'
+
 export const BASEMAPS = [
   {
     id: 'flat',
@@ -727,6 +729,12 @@ export const LAYER_FAMILIES = {
       defaultDate: '2026-04-13',
       defaultDateTime: '2026-04-13T12:00',
     },
+    statusPanel: {
+      title: 'CNRFC Job Status',
+      hideTitle: true,
+      url: 'https://cw3e.ucsd.edu/hydro/cnrfc/csv/job_status.json',
+      renderer: 'cnrfcJobTable',
+    },
     linkedLayers: {
       cnrfcStreamflow: {
         buildDataPmtilesUrl: ({ date, product }) => {
@@ -760,6 +768,19 @@ export const LAYER_FAMILIES = {
       defaultDate: '2026-04-13',
       defaultDateTime: '2026-04-13T12:00',
     },
+    statusPanel: {
+      title: 'UCRB Status',
+      url: 'https://cw3e.ucsd.edu/hydro/ucrb/csv/status.json',
+      renderer: 'genericSections',
+      sections: [
+        {
+          title: 'Product Status',
+          rows: [
+            { label: 'WRF-Hydro NRT', path: 'WRF-Hydro NRT' },
+          ],
+        },
+      ],
+    },
     linkedLayers: {},
   },
   globalHydro: {
@@ -781,6 +802,11 @@ export const LAYER_FAMILIES = {
       minDateTime: '2025-01-01T00:00',
       timeStep: '1day',
       dateSelector: true,
+    },
+    statusPanel: {
+      title: 'Global Hydro Status',
+      url: GRADES_BINARY_DESCRIPTOR_URL,
+      renderer: 'gradesDescriptor',
     },
     linkedLayers: {
       gradesHydroDl: {
@@ -856,6 +882,7 @@ export const PROJECTS = {
   cnrfc: {
     id: 'cnrfc',
     label: 'CNRFC',
+    statusButtonEnabled: true,
     layerFamilyId: 'cnrfc',
     defaultFamily: {
       variable: 'soilMoistureDaily',
@@ -881,6 +908,7 @@ export const PROJECTS = {
   ocwd: {
     id: 'ocwd',
     label: 'OCWD',
+    statusButtonEnabled: false,
     defaultView: {
       center: '-117.7,33.84',
       zoom: '10.5',
@@ -915,6 +943,7 @@ export const PROJECTS = {
   b120: {
     id: 'b120',
     label: 'B120',
+    statusButtonEnabled: false,
     defaultView: {
       center: '-119,39',
       zoom: '5.6',
@@ -946,6 +975,7 @@ export const PROJECTS = {
   yampa: {
     id: 'yampa',
     label: 'Yampa',
+    statusButtonEnabled: false,
     layerFamilyId: 'ucrb',
     defaultFamily: {
       variable: 'sweDaily',
@@ -962,6 +992,7 @@ export const PROJECTS = {
   global: {
     id: 'global',
     label: 'Global',
+    statusButtonEnabled: false,
     defaultView: {
       center: '55,30',
       zoom: '2.8',

@@ -1,5 +1,5 @@
-const GRADES_BINARY_BASE_URL = 'https://cw3e.ucsd.edu/hydro/grades_hydrodl/bin'
-const GRADES_BINARY_DESCRIPTOR_URL = `${GRADES_BINARY_BASE_URL}/grades_hydrodl.json`
+export const GRADES_BINARY_BASE_URL = 'https://cw3e.ucsd.edu/hydro/grades_hydrodl/bin'
+export const GRADES_BINARY_DESCRIPTOR_URL = `${GRADES_BINARY_BASE_URL}/grades_hydrodl.json`
 const CLIMATOLOGY_COLUMN_NAMES = ['Pctl5', 'Pctl10', 'Pctl20', 'Pctl50', 'Pctl80', 'Pctl90', 'Pctl95']
 
 let gradesDescriptorPromise = null

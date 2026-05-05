@@ -3,7 +3,9 @@ import { createPortal } from 'react-dom'
 export default function MapToolDialog({
   actions,
   children,
+  className = '',
   eyebrow = 'Map Tool',
+  hideTitle = false,
   onClose,
   open,
   title,
@@ -15,11 +17,16 @@ export default function MapToolDialog({
   return createPortal(
     <>
       <div className="map-tool-dialog-backdrop" onClick={onClose} />
-      <div className="map-tool-dialog" role="dialog" aria-modal="true" aria-label={title}>
+      <div
+        className={className ? `map-tool-dialog ${className}` : 'map-tool-dialog'}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title || eyebrow}
+      >
         <div className="map-tool-dialog__header">
           <div>
-            <p className="map-canvas__eyebrow">{eyebrow}</p>
-            <strong>{title}</strong>
+            {eyebrow ? <p className="map-canvas__eyebrow">{eyebrow}</p> : null}
+            {!hideTitle && title ? <strong>{title}</strong> : null}
           </div>
           <button className="map-tool-dialog__close" type="button" aria-label="Close dialog" onClick={onClose}>
             x
