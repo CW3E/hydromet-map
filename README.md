@@ -27,10 +27,15 @@
 - `papaparse` or a similar library for parsing CSV data
 
 ## Documentation
-- How-to guides: [docs/how-to/README.md](./docs/how-to/README.md)
-- Architecture overview: [docs/architecture.md](./docs/architecture.md)
-- Project system: [docs/projects.md](./docs/projects.md)
-- Layer modules: [docs/layers.md](./docs/layers.md)
-- Raster families: [docs/raster.md](./docs/raster.md)
-- Popup modules: [docs/popups.md](./docs/popups.md)
-- State and bookmarks: [docs/state-and-bookmarks.md](./docs/state-and-bookmarks.md)
+- Documentation index: [docs/README.md](./docs/README.md)
+- Developer reference:
+  [docs/architecture.md](./docs/architecture.md),
+  [docs/projects.md](./docs/projects.md),
+  [docs/layers.md](./docs/layers.md),
+  [docs/raster.md](./docs/raster.md),
+  [docs/popups.md](./docs/popups.md),
+  [docs/state-and-bookmarks.md](./docs/state-and-bookmarks.md)
+- Developer guides:
+  [docs/how-to/README.md](./docs/how-to/README.md)
+- Future app-user guide:
+  [docs/user-guide/README.md](./docs/user-guide/README.md)

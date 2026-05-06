@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Map, { NavigationControl, ScaleControl } from 'react-map-gl/maplibre'
 import { BASEMAP_STYLES, PROJECT_OPTIONS } from '../../config/mapConfig'
 import CnrfcStreamflowPopup from '../../features/cnrfcStreamflowPopup/CnrfcStreamflowPopup'
@@ -84,9 +84,11 @@ export default function MapCanvas({
   const [interactionState, setInteractionState] = useState(INITIAL_INTERACTION_STATE)
   const [mapInstance, setMapInstance] = useState(null)
   const [familyStatusOpen, setFamilyStatusOpen] = useState(false)
+  const [projectSelectorOpen, setProjectSelectorOpen] = useState(false)
   const mapRef = useRef(null)
   const mouseReadoutRef = useRef(null)
   const isDraggingRef = useRef(false)
+  const projectSelectorRef = useRef(null)
   const availableLayerIdSet = new Set(activeProject?.availableLayerIds ?? [])
 
   const layerContext = {
@@ -193,6 +195,26 @@ export default function MapCanvas({
       isDraggingRef.current = false
     })
   }
+
+  useEffect(() => {
+    if (!projectSelectorOpen) {
+      return undefined
+    }
+
+    function handleDocumentPointerDown(event) {
+      if (projectSelectorRef.current?.contains(event.target)) {
+        return
+      }
+
+      setProjectSelectorOpen(false)
+    }
+
+    document.addEventListener('pointerdown', handleDocumentPointerDown)
+
+    return () => {
+      document.removeEventListener('pointerdown', handleDocumentPointerDown)
+    }
+  }, [projectSelectorOpen])
 
   return (
     <section className="map-canvas">
@@ -321,23 +343,46 @@ export default function MapCanvas({
       />
 
       <div
-        className="project-selector"
+        ref={projectSelectorRef}
+        className={projectSelectorOpen ? 'project-selector is-open' : 'project-selector'}
+        onMouseEnter={() => setProjectSelectorOpen(true)}
+        onMouseLeave={() => setProjectSelectorOpen(false)}
         onMouseDown={(event) => event.stopPropagation()}
         onPointerDown={(event) => event.stopPropagation()}
         onTouchStart={(event) => event.stopPropagation()}
       >
-        <div className="project-selector__label">
-          <span>Project</span>
-          <select
-            value={activeProjectId}
-            onChange={(event) => onChangeProject(event.target.value)}
-          >
-            {PROJECT_OPTIONS.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.label}
-              </option>
-            ))}
-          </select>
+        <button
+          className="project-selector__trigger"
+          type="button"
+          aria-label="Project selector"
+          title="Project selector"
+          onClick={() => setProjectSelectorOpen((current) => !current)}
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <rect x="4.5" y="4.5" width="6" height="6" rx="1.2" ry="1.2" />
+            <rect x="13.5" y="4.5" width="6" height="6" rx="1.2" ry="1.2" />
+            <rect x="4.5" y="13.5" width="6" height="6" rx="1.2" ry="1.2" />
+            <rect x="13.5" y="13.5" width="6" height="6" rx="1.2" ry="1.2" />
+          </svg>
+        </button>
+
+        <div className="project-selector__panel">
+          <div className="project-selector__label">
+            <span>Project</span>
+            <select
+              value={activeProjectId}
+              onChange={(event) => {
+                onChangeProject(event.target.value)
+                setProjectSelectorOpen(false)
+              }}
+            >
+              {PROJECT_OPTIONS.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 

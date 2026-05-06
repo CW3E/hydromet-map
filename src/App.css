@@ -1232,6 +1232,55 @@ button:disabled {
   left: 15.2rem;
   bottom: 0.57rem;
   z-index: 2;
+  display: flex;
+  align-items: center;
+}
+
+.project-selector__trigger {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(244, 249, 252, 0.72);
+  color: #355567;
+  border: 1px solid rgba(74, 113, 137, 0.1);
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+}
+
+.project-selector__trigger:hover {
+  transform: none;
+  background: rgba(244, 249, 252, 0.88);
+}
+
+.project-selector__trigger svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+
+.project-selector__panel {
+  position: absolute;
+  left: calc(100% + 0.24rem);
+  bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.project-selector.is-open .project-selector__panel {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .project-selector__label {

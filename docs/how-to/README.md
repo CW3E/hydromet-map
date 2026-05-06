@@ -1,8 +1,10 @@
 # How-To Guides
 
-This section is task-oriented documentation for people who want to add or customize map functionality without first reading all of the architecture docs.
+This section is task-oriented documentation for project developers: people who want to add or customize map functionality without first becoming experts in the full app architecture.
 
-If you are new to the codebase, start here.
+These guides are still developer docs. They are aimed at contributors who edit configuration and feature code, not regular app users.
+
+If you are new to the codebase and mostly want to add new content within existing patterns, start here.
 
 Recommended reading order:
 
@@ -18,7 +20,7 @@ These guides are intentionally practical:
 - what patterns already exist in the app
 - what to test afterward
 
-For the underlying concepts and system diagrams, go back to:
+For the underlying framework concepts and system diagrams, go back to:
 
 - [Architecture](../architecture.md)
 - [Layers](../layers.md)
