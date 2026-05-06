@@ -365,14 +365,15 @@ export default function useMapTools({ mapInstance, setSelectedStation }) {
     }
 
     return [
-      { id: 'identify-watershed', label: 'Watershed to here', onSelect: identifyWatershedAtContextLocation },
-      { id: 'identify-upstream-rivers', label: 'Upstream rivers', onSelect: identifyUpstreamRiversAtContextLocation },
-      { id: 'identify-flowpath', label: 'Downstream flowpath', onSelect: identifyFlowpathAtContextLocation },
-      { id: 'identify-all-three', label: 'All 3 above!', onSelect: identifyAllThreeAtContextLocation },
-      { id: 'measure-distance', label: 'Measure distance', onSelect: startMeasurementAtContextLocation },
+      { id: 'identify-watershed', label: 'Watershed to here', icon: 'watershed', onSelect: identifyWatershedAtContextLocation },
+      { id: 'identify-upstream-rivers', label: 'Upstream rivers', icon: 'rivers', onSelect: identifyUpstreamRiversAtContextLocation },
+      { id: 'identify-flowpath', label: 'Downstream flowpath', icon: 'flowpath', onSelect: identifyFlowpathAtContextLocation },
+      { id: 'identify-all-three', label: 'All 3 above!', icon: 'all-tools', onSelect: identifyAllThreeAtContextLocation },
+      { id: 'measure-distance', label: 'Measure distance', icon: 'measure', onSelect: startMeasurementAtContextLocation },
       {
         id: 'clear-all-temporary',
         label: 'Clear all temporary',
+        icon: 'clear',
         disabled: !identifiedWatershed && !identifiedUpstreamRivers && !identifiedFlowpath && !measurementStart && !measurementResult,
         onSelect: clearAllTemporaryLayers,
       },

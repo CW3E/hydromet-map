@@ -254,7 +254,7 @@ export default function MapHud({
                     <svg aria-hidden="true" viewBox="0 0 24 24">
                       <path d="M9 4.5h6" />
                       <path d="M10 3.3h4v2.4h-4z" />
-                      <rect x="4" y="4.5" width="16" height="15" rx="2" ry="2" />
+                      <rect x="5" y="4.5" width="14" height="15" rx="2" ry="2" />
                       <path d="M8.5 12.5 11.3 15.3 16.5 9.3" />
                     </svg>
                   </button>
@@ -339,7 +339,7 @@ export default function MapHud({
                     <svg aria-hidden="true" viewBox="0 0 24 24">
                       <path d="M9 4.5h6" />
                       <path d="M10 3.3h4v2.4h-4z" />
-                      <rect x="4" y="4.5" width="16" height="15" rx="2" ry="2" />
+                      <rect x="5" y="4.5" width="14" height="15" rx="2" ry="2" />
                       <path d="M8.5 12.5 11.3 15.3 16.5 9.3" />
                     </svg>
                   </button>

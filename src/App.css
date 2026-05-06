@@ -994,6 +994,20 @@ button:disabled {
   white-space: nowrap;
 }
 
+.map-context-menu__coords-icon {
+  width: 14px;
+  height: 14px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 14px;
+}
+
+.map-context-menu__coords-icon svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
 .map-context-menu__actions {
   display: grid;
   gap: 0.22rem;
@@ -1003,14 +1017,39 @@ button:disabled {
   width: 100%;
   justify-content: flex-start;
   border-radius: 10px;
-  padding: 0.42rem 0.55rem;
+  padding: 0.34rem 0.45rem;
   background: rgba(244, 249, 252, 0.92);
   color: #244050;
   border: 1px solid rgba(74, 113, 137, 0.16);
   box-shadow: none;
   transform: none;
   text-align: left;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
+}
+
+.map-context-menu__action-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.map-context-menu__action-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 18px;
+}
+
+.map-context-menu__action-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  stroke: currentColor;
+  overflow: visible;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.4;
 }
 
 .map-context-menu__action:disabled {
