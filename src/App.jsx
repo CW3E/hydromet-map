@@ -119,6 +119,18 @@ function buildInitialStatusBoundaryByProjectId() {
   )
 }
 
+function getFirstUrlParam(params, ...keys) {
+  for (const key of keys) {
+    const value = params.get(key)
+
+    if (value !== null) {
+      return value
+    }
+  }
+
+  return null
+}
+
 function applyTemporalModeToFamilyState(familyState, layerFamily) {
   if (!familyState || !layerFamily) {
     return familyState
@@ -307,9 +319,9 @@ function App() {
   useEffect(() => {
     const abortController = new AbortController()
     const params = new URLSearchParams(window.location.search)
-    const bookmarkedProjectId = getProjectDefinition(params.get('project'))?.id ?? DEFAULT_PROJECT_ID
-    const hasExplicitBookmarkedDate = params.has('date')
-    const hasExplicitBookmarkedDateTime = params.has('datetime')
+    const bookmarkedProjectId = getProjectDefinition(getFirstUrlParam(params, 'prj', 'project'))?.id ?? DEFAULT_PROJECT_ID
+    const hasExplicitBookmarkedDate = params.has('d') || params.has('date')
+    const hasExplicitBookmarkedDateTime = params.has('dt') || params.has('datetime')
 
     async function loadStatusDefaults() {
       const projectIds = Object.keys(PROJECTS)
@@ -578,7 +590,7 @@ function App() {
   }
 
   function refreshBookmarkUrl() {
-    const nextBookmarkUrl = writeStateToUrl(appState)
+    const nextBookmarkUrl = writeStateToUrl(appState, { selectedStation })
     setBookmarkUrl(nextBookmarkUrl)
     return nextBookmarkUrl
   }

@@ -38,7 +38,7 @@ export default function BookmarkControl({
                 <div className="bookmark-popup__header">
                   <div>
                     <p className="map-canvas__eyebrow">Bookmark</p>
-                    <strong>Share map view</strong>
+                    <strong>Share this map/popup view</strong>
                   </div>
                   <button className="bookmark-popup__close" type="button" onClick={onClose}>
                     x
@@ -50,7 +50,7 @@ export default function BookmarkControl({
                     <div className="bookmark-popup__qr-code" aria-label="QR code for current map bookmark">
                       <QRCodeSVG
                         value={bookmarkUrl}
-                        size={200}
+                        size={220}
                         marginSize={1}
                         level="M"
                         includeMargin={false}

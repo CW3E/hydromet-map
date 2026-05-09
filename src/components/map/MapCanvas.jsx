@@ -3,7 +3,7 @@ import Map, { NavigationControl, ScaleControl } from 'react-map-gl/maplibre'
 import { BASEMAP_STYLES, PROJECT_OPTIONS } from '../../config/mapConfig'
 import CnrfcStreamflowPopup from '../../features/cnrfcStreamflowPopup/CnrfcStreamflowPopup'
 import GlobalReachPopup from '../../features/globalReachPopup/GlobalReachPopup'
-import { formatCoordinate, formatViewValue } from '../../lib/appState'
+import { formatCoordinate, formatViewValue, readPopupStateFromUrl } from '../../lib/appState'
 import { MAP_LAYER_MODULES } from '../../layers'
 import BookmarkControl from './BookmarkControl'
 import FamilyStatusDialog from './FamilyStatusDialog'
@@ -89,6 +89,7 @@ export default function MapCanvas({
   const mouseReadoutRef = useRef(null)
   const isDraggingRef = useRef(false)
   const projectSelectorRef = useRef(null)
+  const popupRestoreAttemptedRef = useRef(false)
   const availableLayerIdSet = new Set(activeProject?.availableLayerIds ?? [])
 
   const layerContext = {
@@ -215,6 +216,59 @@ export default function MapCanvas({
       document.removeEventListener('pointerdown', handleDocumentPointerDown)
     }
   }, [projectSelectorOpen])
+
+  useEffect(() => {
+    if (!mapInstance || selectedStation || popupRestoreAttemptedRef.current) {
+      return undefined
+    }
+
+    const bookmarkPopup = readPopupStateFromUrl()
+
+    if (!bookmarkPopup) {
+      popupRestoreAttemptedRef.current = true
+      return undefined
+    }
+
+    const layerModule = visibleLayerModules.find((item) => item.id === bookmarkPopup.ownerLayerId)
+
+    if (!layerModule?.restorePopupFromBookmark) {
+      popupRestoreAttemptedRef.current = true
+      return undefined
+    }
+
+    let isCancelled = false
+    let timeoutId = null
+
+    function tryRestorePopup() {
+      if (isCancelled || popupRestoreAttemptedRef.current) {
+        return
+      }
+
+      const didRestore = layerModule.restorePopupFromBookmark({
+        bookmarkPopup,
+        mapInstance,
+        setSelectedStation,
+        statusBoundary,
+      })
+
+      if (didRestore) {
+        popupRestoreAttemptedRef.current = true
+      }
+    }
+
+    mapInstance.once('idle', tryRestorePopup)
+    timeoutId = window.setTimeout(() => {
+      tryRestorePopup()
+      popupRestoreAttemptedRef.current = true
+    }, 5000)
+
+    return () => {
+      isCancelled = true
+      if (timeoutId) {
+        window.clearTimeout(timeoutId)
+      }
+    }
+  }, [mapInstance, selectedStation, setSelectedStation, statusBoundary, visibleLayerModules])
 
   return (
     <section className="map-canvas">

@@ -4,6 +4,7 @@ import {
   GRADES_HYDRODL_PMTILES_URL,
   MERIT_BASINS_SOURCE_LAYER,
 } from '../config/mapConfig'
+import { applyBookmarkedPopupTab, findBookmarkFeatureAtPoint } from './bookmarkRestore'
 
 const GRADES_HYDRODL_LINE_WIDTH = [
   'interpolate',
@@ -155,6 +156,33 @@ const gradesHydroDlStaticLayer = {
         longitude: event.lngLat.lng,
         latitude: event.lngLat.lat,
       }),
+    )
+
+    return true
+  },
+  restorePopupFromBookmark({ bookmarkPopup, mapInstance, setSelectedStation }) {
+    const feature = findBookmarkFeatureAtPoint({
+      bookmarkPopup,
+      getFeatureId: (item) => item.properties?.COMID ?? item.properties?.feature_id,
+      layerIds: ['grades-hydrodl-line'],
+      mapInstance,
+    })
+
+    if (!feature || feature.geometry.type !== 'LineString') {
+      return false
+    }
+
+    setSelectedStation(
+      applyBookmarkedPopupTab(
+        createSelectedGlobalReachPopupState(feature, {
+          layerId: 'gradesHydroDlStatic',
+          popupOwnerId: 'gradesHydroDlStatic',
+          hydrography: 'MERIT',
+          longitude: bookmarkPopup.longitude,
+          latitude: bookmarkPopup.latitude,
+        }),
+        bookmarkPopup,
+      ),
     )
 
     return true

@@ -5,6 +5,7 @@ import {
   loadCnrfcPointPopupTabData,
 } from '../features/cnrfcPointPopup/cnrfcPointPopupData'
 import { getDefaultCnrfcPointPopupTabId } from '../features/cnrfcPointPopup/cnrfcPointPopupConfig'
+import { applyBookmarkedPopupTab, findBookmarkFeatureAtPoint } from './bookmarkRestore'
 
 const CNRFC_POINTS_GEOJSON_URL = 'https://cw3e.ucsd.edu/hydro/cnrfc/csv/fcst_points.geojson'
 
@@ -48,12 +49,48 @@ const cnrfcPointsLayer = {
       return false
     }
 
-    const station = createSelectedCnrfcPointPopupState(clickedFeature, {
-      statusTimestamp: statusBoundary?.statusTimestamp ?? null,
-    })
+    const station = {
+      ...createSelectedCnrfcPointPopupState(clickedFeature, {
+        statusTimestamp: statusBoundary?.statusTimestamp ?? null,
+      }),
+      layerId: 'cnrfcPoints',
+      popupOwnerId: 'cnrfcPoints',
+    }
 
     setSelectedStation(station)
     loadCnrfcPointPopupTabData(setSelectedStation, station, getDefaultCnrfcPointPopupTabId())
+
+    return true
+  },
+  restorePopupFromBookmark({ bookmarkPopup, mapInstance, setSelectedStation, statusBoundary }) {
+    const feature = findBookmarkFeatureAtPoint({
+      bookmarkPopup,
+      getFeatureId: (item) => item.properties?.ID,
+      layerIds: ['stations-hit-layer'],
+      mapInstance,
+    })
+
+    if (!feature || feature.geometry.type !== 'Point') {
+      return false
+    }
+
+    const station = applyBookmarkedPopupTab(
+      {
+        ...createSelectedCnrfcPointPopupState(feature, {
+          statusTimestamp: statusBoundary?.statusTimestamp ?? null,
+        }),
+        layerId: 'cnrfcPoints',
+        popupOwnerId: 'cnrfcPoints',
+      },
+      bookmarkPopup,
+    )
+
+    setSelectedStation(station)
+    loadCnrfcPointPopupTabData(
+      setSelectedStation,
+      station,
+      station.popup?.activeTabId ?? getDefaultCnrfcPointPopupTabId(),
+    )
 
     return true
   },

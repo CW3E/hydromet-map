@@ -47,7 +47,27 @@ Each project state contains:
 
 The current bookmark URL stores the active project's state.
 
-Encoded fields include:
+New bookmark URLs use compact readable keys to keep QR codes smaller:
+
+- `prj`: project
+- `bm`: basemap
+- `proj`: projection
+- `ter`: terrain
+- `c`: center
+- `z`: zoom
+- `brg`: bearing
+- `pit`: pitch
+- `var`: variable
+- `prod`: product
+- `ens`: ensemble
+- `tm`: temporal mode
+- `d`: date
+- `dt`: datetime
+- `lyr`: enabled layers
+- `pop`: selected popup feature as `layerId|featureId|longitude|latitude`
+- `tab`: active popup tab
+
+Older long-form bookmark keys are still accepted when reading URLs:
 
 - `project`
 - `basemap`
@@ -64,10 +84,14 @@ Encoded fields include:
 - `date`
 - `datetime`
 - `layers`
+- `popup`
+- `popupTab`
 
 Important detail:
 
 The bookmark stores the active project and that active project's visible state. It does not currently serialize the remembered states of other inactive projects.
+
+Selected popup restore is intentionally compact. The URL stores a stable layer id, feature id, popup anchor coordinate, and active tab id. On load, the app recreates the popup from the rendered map feature near that coordinate instead of storing feature attributes or plot data in the URL.
 
 ## Read/write helpers
 

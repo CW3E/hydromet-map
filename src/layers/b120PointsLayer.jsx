@@ -3,6 +3,7 @@ import B120PointPopup from '../features/b120PointPopup/B120PointPopup'
 import {
   createSelectedB120PointPopupState,
 } from '../features/b120PointPopup/b120PointPopupData'
+import { applyBookmarkedPopupTab, findBookmarkFeatureAtPoint } from './bookmarkRestore'
 
 const B120_POINTS_GEOJSON_URL = 'https://cw3e.ucsd.edu/hydro/b120/csv/b120_stations_24.geojson'
 const B120_POINT_RADIUS = ['interpolate', ['linear'], ['zoom'], 0, 4, 5, 4, 6, 6, 12, 10]
@@ -50,9 +51,38 @@ const b120PointsLayer = {
       return false
     }
 
-    const station = createSelectedB120PointPopupState(clickedFeature)
+    const station = {
+      ...createSelectedB120PointPopupState(clickedFeature),
+      layerId: 'b120Points',
+      popupOwnerId: 'b120Points',
+    }
 
     setSelectedStation(station)
+
+    return true
+  },
+  restorePopupFromBookmark({ bookmarkPopup, mapInstance, setSelectedStation }) {
+    const feature = findBookmarkFeatureAtPoint({
+      bookmarkPopup,
+      getFeatureId: (item) => item.properties?.Station_ID,
+      layerIds: ['b120-points-hit-layer'],
+      mapInstance,
+    })
+
+    if (!feature || feature.geometry.type !== 'Point') {
+      return false
+    }
+
+    setSelectedStation(
+      applyBookmarkedPopupTab(
+        {
+          ...createSelectedB120PointPopupState(feature),
+          layerId: 'b120Points',
+          popupOwnerId: 'b120Points',
+        },
+        bookmarkPopup,
+      ),
+    )
 
     return true
   },

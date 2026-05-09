@@ -1,6 +1,7 @@
 import { Layer, Popup, Source } from 'react-map-gl/maplibre'
 import YampaPointPopup from '../features/yampaPointPopup/YampaPointPopup'
 import { createSelectedYampaPointPopupState } from '../features/yampaPointPopup/yampaPointPopupData'
+import { applyBookmarkedPopupTab, findBookmarkFeatureAtPoint } from './bookmarkRestore'
 
 const YAMPA_POINTS_GEOJSON_URL = 'https://cw3e.ucsd.edu/hydro/yampa/csv/yampa_points.geojson'
 const YAMPA_POINT_RADIUS = ['interpolate', ['linear'], ['zoom'], 0, 3, 5, 3, 6, 4, 12, 6]
@@ -43,9 +44,38 @@ const yampaPointsLayer = {
       return false
     }
 
-    const station = createSelectedYampaPointPopupState(clickedFeature)
+    const station = {
+      ...createSelectedYampaPointPopupState(clickedFeature),
+      layerId: 'yampaPoints',
+      popupOwnerId: 'yampaPoints',
+    }
 
     setSelectedStation(station)
+
+    return true
+  },
+  restorePopupFromBookmark({ bookmarkPopup, mapInstance, setSelectedStation }) {
+    const feature = findBookmarkFeatureAtPoint({
+      bookmarkPopup,
+      getFeatureId: (item) => item.properties?.station_id,
+      layerIds: ['yampa-points-hit-layer'],
+      mapInstance,
+    })
+
+    if (!feature || feature.geometry.type !== 'Point') {
+      return false
+    }
+
+    setSelectedStation(
+      applyBookmarkedPopupTab(
+        {
+          ...createSelectedYampaPointPopupState(feature),
+          layerId: 'yampaPoints',
+          popupOwnerId: 'yampaPoints',
+        },
+        bookmarkPopup,
+      ),
+    )
 
     return true
   },

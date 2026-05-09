@@ -15,6 +15,57 @@ function getDefaultFamilyState(projectId = DEFAULT_PROJECT_ID) {
   return getDefaultProjectState(projectId)?.family ?? null
 }
 
+function getFirstParam(params, ...keys) {
+  for (const key of keys) {
+    const value = params.get(key)
+
+    if (value !== null) {
+      return value
+    }
+  }
+
+  return null
+}
+
+function getSelectedStationBookmarkId(selectedStation) {
+  return selectedStation?.id
+    ?? selectedStation?.stationId
+    ?? selectedStation?.reachId
+    ?? selectedStation?.featureId
+    ?? null
+}
+
+function formatBookmarkCoordinate(value) {
+  const parsedValue = Number.parseFloat(value)
+  return Number.isFinite(parsedValue) ? parsedValue.toFixed(5) : ''
+}
+
+export function readPopupStateFromUrl() {
+  const params = new URLSearchParams(window.location.search)
+  const popupText = getFirstParam(params, 'pop', 'popup')
+  const tabId = getFirstParam(params, 'tab', 'popupTab')
+
+  if (!popupText) {
+    return null
+  }
+
+  const [ownerLayerId, featureId, longitudeText, latitudeText] = popupText.split('|')
+  const longitude = Number.parseFloat(longitudeText)
+  const latitude = Number.parseFloat(latitudeText)
+
+  if (!ownerLayerId || !featureId || !Number.isFinite(longitude) || !Number.isFinite(latitude)) {
+    return null
+  }
+
+  return {
+    ownerLayerId,
+    featureId,
+    longitude,
+    latitude,
+    tabId: tabId || null,
+  }
+}
+
 export function readStateFromUrl() {
   const params = new URLSearchParams(window.location.search)
 
@@ -23,7 +74,7 @@ export function readStateFromUrl() {
   }
 
   const nextState = createDefaultAppState()
-  const projectParam = params.get('project')
+  const projectParam = getFirstParam(params, 'prj', 'project')
 
   if (getProjectDefinition(projectParam)?.id) {
     nextState.activeProjectId = getProjectDefinition(projectParam).id
@@ -35,20 +86,20 @@ export function readStateFromUrl() {
   const familyVariables = layerFamily?.raster?.variables ?? {}
   const familyProducts = layerFamily?.selectors?.products ?? []
   const familyEnsembleTraces = layerFamily?.selectors?.ensembleTraces ?? []
-  const basemapId = params.get('basemap')
-  const projection = params.get('projection')
-  const terrain = params.get('terrain')
-  const center = params.get('center')
-  const zoom = params.get('zoom')
-  const bearing = params.get('bearing')
-  const pitch = params.get('pitch')
-  const variable = params.get('variable')
-  const product = params.get('product')
-  const ensemble = params.get('ensemble')
-  const temporalMode = params.get('temporalMode')
-  const date = params.get('date')
-  const datetime = params.get('datetime')
-  const layers = params.get('layers')
+  const basemapId = getFirstParam(params, 'bm', 'basemap')
+  const projection = getFirstParam(params, 'proj', 'projection')
+  const terrain = getFirstParam(params, 'ter', 'terrain')
+  const center = getFirstParam(params, 'c', 'center')
+  const zoom = getFirstParam(params, 'z', 'zoom')
+  const bearing = getFirstParam(params, 'brg', 'bearing')
+  const pitch = getFirstParam(params, 'pit', 'pitch')
+  const variable = getFirstParam(params, 'var', 'variable')
+  const product = getFirstParam(params, 'prod', 'product')
+  const ensemble = getFirstParam(params, 'ens', 'ensemble')
+  const temporalMode = getFirstParam(params, 'tm', 'temporalMode')
+  const date = getFirstParam(params, 'd', 'date')
+  const datetime = getFirstParam(params, 'dt', 'datetime')
+  const layers = getFirstParam(params, 'lyr', 'layers')
 
   if (BASEMAPS.some((item) => item.id === basemapId)) {
     activeProjectState.basemapId = basemapId
@@ -114,36 +165,62 @@ export function readStateFromUrl() {
   return nextState
 }
 
-export function writeStateToUrl(state) {
+export function writeStateToUrl(state, { selectedStation = null } = {}) {
   const params = new URLSearchParams()
   const activeProjectId = state.activeProjectId ?? DEFAULT_PROJECT_ID
   const activeProjectState = state.projectStateById?.[activeProjectId] ?? getDefaultProjectState(activeProjectId)
 
-  params.set('project', activeProjectId)
-  params.set('basemap', activeProjectState.basemapId)
-  params.set('projection', activeProjectState.projection)
-  params.set('terrain', String(activeProjectState.terrainEnabled))
-  params.set('center', activeProjectState.view.center)
-  params.set('zoom', activeProjectState.view.zoom)
-  params.set('bearing', activeProjectState.view.bearing)
-  params.set('pitch', activeProjectState.view.pitch)
+  params.set('prj', activeProjectId)
+  params.set('bm', activeProjectState.basemapId)
+  params.set('proj', activeProjectState.projection)
+  params.set('ter', String(activeProjectState.terrainEnabled))
+  params.set('c', activeProjectState.view.center)
+  params.set('z', activeProjectState.view.zoom)
+  params.set('brg', activeProjectState.view.bearing)
+  params.set('pit', activeProjectState.view.pitch)
 
   if (activeProjectState.family) {
-    params.set('variable', activeProjectState.family.variable || getDefaultFamilyState(activeProjectId)?.variable || '')
-    params.set('product', activeProjectState.family.product)
-    params.set('ensemble', activeProjectState.family.ensemble)
-    params.set('temporalMode', activeProjectState.family.temporalMode)
-    params.set('date', activeProjectState.family.date)
-    params.set('datetime', activeProjectState.family.datetime)
+    params.set('var', activeProjectState.family.variable || getDefaultFamilyState(activeProjectId)?.variable || '')
+    params.set('prod', activeProjectState.family.product)
+    params.set('ens', activeProjectState.family.ensemble)
+    params.set('tm', activeProjectState.family.temporalMode)
+    params.set('d', activeProjectState.family.date)
+    params.set('dt', activeProjectState.family.datetime)
   }
 
   params.set(
-    'layers',
+    'lyr',
     getProjectMapLayers(activeProjectId)
       .filter((layer) => activeProjectState.layers[layer.id])
       .map((layer) => layer.id)
       .join(','),
   )
+
+  const selectedStationBookmarkId = getSelectedStationBookmarkId(selectedStation)
+  const selectedStationLayerId = selectedStation?.popupOwnerId ?? selectedStation?.layerId ?? null
+  const selectedStationLongitude = formatBookmarkCoordinate(selectedStation?.longitude)
+  const selectedStationLatitude = formatBookmarkCoordinate(selectedStation?.latitude)
+
+  if (
+    selectedStationLayerId
+    && selectedStationBookmarkId != null
+    && selectedStationLongitude
+    && selectedStationLatitude
+  ) {
+    params.set(
+      'pop',
+      [
+        selectedStationLayerId,
+        selectedStationBookmarkId,
+        selectedStationLongitude,
+        selectedStationLatitude,
+      ].join('|'),
+    )
+
+    if (selectedStation?.popup?.activeTabId) {
+      params.set('tab', selectedStation.popup.activeTabId)
+    }
+  }
 
   return `${window.location.origin}${window.location.pathname}?${params.toString()}`
 }

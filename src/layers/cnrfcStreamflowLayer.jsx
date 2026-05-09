@@ -6,6 +6,7 @@ import {
   RIVER_NETWORK_PMTILES_URL,
   RIVER_NETWORK_SOURCE_LAYER,
 } from '../config/mapConfig'
+import { applyBookmarkedPopupTab, findBookmarkFeatureAtPoint } from './bookmarkRestore'
 
 const STREAMFLOW_LINE_WIDTH = [
   'interpolate',
@@ -303,6 +304,32 @@ const cnrfcStreamflowLayer = {
         longitude: event.lngLat.lng,
         latitude: event.lngLat.lat,
       }),
+    )
+
+    return true
+  },
+  restorePopupFromBookmark({ bookmarkPopup, mapInstance, setSelectedStation }) {
+    const feature = findBookmarkFeatureAtPoint({
+      bookmarkPopup,
+      getFeatureId: (item) => item.properties?.feature_id,
+      layerIds: ['cnrfc-streamflow-line'],
+      mapInstance,
+    })
+
+    if (!feature || feature.geometry.type !== 'LineString') {
+      return false
+    }
+
+    setSelectedStation(
+      applyBookmarkedPopupTab(
+        createSelectedCnrfcStreamflowPopupState(feature, {
+          layerId: 'cnrfcStreamflow',
+          popupOwnerId: 'cnrfcStreamflow',
+          longitude: bookmarkPopup.longitude,
+          latitude: bookmarkPopup.latitude,
+        }),
+        bookmarkPopup,
+      ),
     )
 
     return true

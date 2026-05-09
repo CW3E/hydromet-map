@@ -4,6 +4,7 @@ import {
   SWORD_REACHES_PMTILES_URL,
   SWORD_REACHES_SOURCE_LAYER,
 } from '../config/mapConfig'
+import { applyBookmarkedPopupTab, findBookmarkFeatureAtPoint } from './bookmarkRestore'
 
 const SWORD_REACHES_LINE_COLOR = [
   'case',
@@ -102,6 +103,33 @@ const swordReachesLayer = {
         longitude: event.lngLat.lng,
         latitude: event.lngLat.lat,
       }),
+    )
+
+    return true
+  },
+  restorePopupFromBookmark({ bookmarkPopup, mapInstance, setSelectedStation }) {
+    const feature = findBookmarkFeatureAtPoint({
+      bookmarkPopup,
+      getFeatureId: (item) => item.properties?.reach_id,
+      layerIds: ['sword-reaches-line'],
+      mapInstance,
+    })
+
+    if (!feature || feature.geometry.type !== 'LineString') {
+      return false
+    }
+
+    setSelectedStation(
+      applyBookmarkedPopupTab(
+        createSelectedGlobalReachPopupState(feature, {
+          layerId: 'swordReaches',
+          popupOwnerId: 'swordReaches',
+          hydrography: 'SWORD',
+          longitude: bookmarkPopup.longitude,
+          latitude: bookmarkPopup.latitude,
+        }),
+        bookmarkPopup,
+      ),
     )
 
     return true

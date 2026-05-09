@@ -5,6 +5,7 @@ import {
   createSelectedSnowStationPopupState,
   loadSnowStationPopupTabData,
 } from '../features/snowStationPopup/snowStationPopupData'
+import { applyBookmarkedPopupTab, findBookmarkFeatureAtPoint } from './bookmarkRestore'
 
 const SNOW_POINT_RADIUS = ['interpolate', ['linear'], ['zoom'], 0, 2, 5, 2, 6, 3, 12, 6]
 const SNOW_POINT_HIGHLIGHT_RADIUS = ['interpolate', ['linear'], ['zoom'], 0, 3, 5, 3, 6, 4, 12, 7]
@@ -58,9 +59,13 @@ export default function createSnowStationLayer({
         return false
       }
 
-      const station = createSelectedSnowStationPopupState(clickedFeature, popupDefinition, {
-        statusTimestamp: statusBoundary?.statusTimestamp ?? null,
-      })
+      const station = {
+        ...createSelectedSnowStationPopupState(clickedFeature, popupDefinition, {
+          statusTimestamp: statusBoundary?.statusTimestamp ?? null,
+        }),
+        layerId: id,
+        popupOwnerId: id,
+      }
 
       setSelectedStation(station)
       loadSnowStationPopupTabData(
@@ -68,6 +73,39 @@ export default function createSnowStationLayer({
         station,
         popupDefinition,
         getDefaultSnowPopupTabId(popupDefinition),
+      )
+
+      return true
+    },
+    restorePopupFromBookmark({ bookmarkPopup, mapInstance, setSelectedStation, statusBoundary }) {
+      const feature = findBookmarkFeatureAtPoint({
+        bookmarkPopup,
+        getFeatureId: (item) => item.properties?.STA,
+        layerIds: [hitLayerId],
+        mapInstance,
+      })
+
+      if (!feature || feature.geometry.type !== 'Point') {
+        return false
+      }
+
+      const station = applyBookmarkedPopupTab(
+        {
+          ...createSelectedSnowStationPopupState(feature, popupDefinition, {
+            statusTimestamp: statusBoundary?.statusTimestamp ?? null,
+          }),
+          layerId: id,
+          popupOwnerId: id,
+        },
+        bookmarkPopup,
+      )
+
+      setSelectedStation(station)
+      loadSnowStationPopupTabData(
+        setSelectedStation,
+        station,
+        popupDefinition,
+        station.popup?.activeTabId ?? getDefaultSnowPopupTabId(popupDefinition),
       )
 
       return true
