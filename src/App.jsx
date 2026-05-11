@@ -242,7 +242,7 @@ function App() {
   const [appState, setAppState] = useState(() => readStateFromUrl())
   const [bookmarkUrl, setBookmarkUrl] = useState('')
   const [copyStatus, setCopyStatus] = useState('Copy URL')
-  const [selectedStation, setSelectedStation] = useState(null)
+  const [selectedStationByProjectId, setSelectedStationByProjectId] = useState({})
   const [bookmarkOpen, setBookmarkOpen] = useState(false)
   const [basemapMenuOpen, setBasemapMenuOpen] = useState(false)
   const [layerMenuOpen, setLayerMenuOpen] = useState(false)
@@ -254,6 +254,7 @@ function App() {
   )
 
   const activeProjectId = appState.activeProjectId ?? DEFAULT_PROJECT_ID
+  const selectedStation = selectedStationByProjectId[activeProjectId] ?? null
   const activeProject = getProjectDefinition(activeProjectId)
   const activeProjectState =
     appState.projectStateById?.[activeProjectId] ?? createProjectState(activeProjectId)
@@ -573,12 +574,44 @@ function App() {
     )
   }
 
+  function setSelectedStation(nextValue) {
+    const projectId = activeProjectId
+
+    setSelectedStationByProjectId((current) => {
+      const currentSelectedStation = current[projectId] ?? null
+      const nextSelectedStation =
+        typeof nextValue === 'function'
+          ? nextValue(currentSelectedStation)
+          : nextValue
+
+      if (nextSelectedStation === currentSelectedStation) {
+        return current
+      }
+
+      if (!nextSelectedStation) {
+        if (!Object.hasOwn(current, projectId)) {
+          return current
+        }
+
+        const {
+          [projectId]: _removedSelectedStation,
+          ...remainingSelectedStations
+        } = current
+        return remainingSelectedStations
+      }
+
+      return {
+        ...current,
+        [projectId]: nextSelectedStation,
+      }
+    })
+  }
+
   function changeProject(nextProjectId) {
     if (nextProjectId === activeProjectId) {
       return
     }
 
-    setSelectedStation(null)
     setAppState((current) => ({
       ...current,
       activeProjectId: nextProjectId,

@@ -200,13 +200,15 @@ function GradesHydroDlDynamicLayers({ appState, interactionState, layerFamily, m
 
     return () => {
       mapInstance.off('idle', handleMapIdle)
-      appliedFeatureIdsRef.current.forEach((featureId) => {
-        mapInstance.removeFeatureState({
-          source: 'grades-hydrodl-geometry-source',
-          sourceLayer: MERIT_BASINS_SOURCE_LAYER,
-          id: featureId,
+      if (mapInstance.getSource('grades-hydrodl-dynamic-geometry-source')) {
+        appliedFeatureIdsRef.current.forEach((featureId) => {
+          mapInstance.removeFeatureState({
+            source: 'grades-hydrodl-dynamic-geometry-source',
+            sourceLayer: MERIT_BASINS_SOURCE_LAYER,
+            id: featureId,
+          })
         })
-      })
+      }
       appliedFeatureIdsRef.current = new Set()
     }
   }, [dataPmtilesUrl, mapInstance])

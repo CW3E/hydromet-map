@@ -3,6 +3,7 @@ import Map, { NavigationControl, ScaleControl } from 'react-map-gl/maplibre'
 import { BASEMAP_STYLES, PROJECT_OPTIONS } from '../../config/mapConfig'
 import CnrfcStreamflowPopup from '../../features/cnrfcStreamflowPopup/CnrfcStreamflowPopup'
 import GlobalReachPopup from '../../features/globalReachPopup/GlobalReachPopup'
+import GshaPopup from '../../features/gshaPopup/GshaPopup'
 import { formatCoordinate, formatViewValue, readPopupStateFromUrl } from '../../lib/appState'
 import { MAP_LAYER_MODULES } from '../../layers'
 import BookmarkControl from './BookmarkControl'
@@ -320,6 +321,14 @@ export default function MapCanvas({
 
         {selectedStation?.popupType === 'cnrfc-streamflow' ? (
           <CnrfcStreamflowPopup
+            ownerLayerId={selectedStation.popupOwnerId}
+            selectedStation={selectedStation}
+            setSelectedStation={setSelectedStation}
+          />
+        ) : null}
+
+        {selectedStation?.popupType === 'gsha' ? (
+          <GshaPopup
             ownerLayerId={selectedStation.popupOwnerId}
             selectedStation={selectedStation}
             setSelectedStation={setSelectedStation}

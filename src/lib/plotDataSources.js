@@ -7,6 +7,7 @@ import {
   loadGradesPercentilesSource,
   loadGradesSeriesSource,
 } from './gradesBinaryData'
+import { loadGshaSeriesSource } from './gshaBinaryData'
 
 function findTimeAxisField(fields) {
   const preferredField = fields.find((field) => /^(date|time|datetime|timestamp)$/i.test(field))
@@ -138,6 +139,22 @@ async function loadCnrfcPercentiles(sourceDefinition, context) {
   return normalizeSourceRecord(sourceDefinition, loadedSource, context)
 }
 
+async function loadGshaSeries(sourceDefinition, context) {
+  const request = sourceDefinition.buildRequest
+    ? await sourceDefinition.buildRequest({
+      station: context.station,
+      popupState: context.station?.popup,
+    })
+    : {}
+  const loadedSource = await loadGshaSeriesSource({
+    frequency: request.frequency,
+    dindex: request.dindex,
+    columnNames: request.columnNames,
+  })
+
+  return normalizeSourceRecord(sourceDefinition, loadedSource, context)
+}
+
 export async function loadConfiguredSource(sourceDefinition, context) {
   const loader = sourceDefinition.loader ?? 'csv'
 
@@ -159,6 +176,10 @@ export async function loadConfiguredSource(sourceDefinition, context) {
 
   if (loader === 'cnrfcPercentiles') {
     return loadCnrfcPercentiles(sourceDefinition, context)
+  }
+
+  if (loader === 'gshaSeries') {
+    return loadGshaSeries(sourceDefinition, context)
   }
 
   throw new Error(`Unsupported source loader "${loader}".`)

@@ -1,5 +1,10 @@
 import { Layer, Popup, Source } from 'react-map-gl/maplibre'
 import { GSHA_PMTILES_URL, GSHA_SOURCE_LAYER } from '../config/mapConfig'
+import { createSelectedGshaPopupState } from '../features/gshaPopup/gshaPopupData'
+import {
+  applyBookmarkedPopupTab,
+  findBookmarkFeatureAtPoint,
+} from './bookmarkRestore'
 
 const GSHA_CIRCLE_RADIUS = [
   'interpolate',
@@ -78,6 +83,50 @@ const gshaLayer = {
   },
   getPointerLeaveState() {
     return { hoveredGsha: null }
+  },
+  handleClick({ event, setSelectedStation }) {
+    const clickedFeature = event.features?.find((feature) => feature.layer.id === 'gsha-hit-layer')
+
+    if (!clickedFeature || clickedFeature.geometry.type !== 'Point') {
+      return false
+    }
+
+    setSelectedStation(
+      createSelectedGshaPopupState(clickedFeature, {
+        layerId: 'gsha',
+        popupOwnerId: 'gsha',
+        longitude: event.lngLat.lng,
+        latitude: event.lngLat.lat,
+      }),
+    )
+
+    return true
+  },
+  restorePopupFromBookmark({ bookmarkPopup, mapInstance, setSelectedStation }) {
+    const feature = findBookmarkFeatureAtPoint({
+      bookmarkPopup,
+      getFeatureId: (item) => item.properties?.dindex,
+      layerIds: ['gsha-hit-layer'],
+      mapInstance,
+    })
+
+    if (!feature || feature.geometry.type !== 'Point') {
+      return false
+    }
+
+    setSelectedStation(
+      applyBookmarkedPopupTab(
+        createSelectedGshaPopupState(feature, {
+          layerId: 'gsha',
+          popupOwnerId: 'gsha',
+          longitude: bookmarkPopup.longitude,
+          latitude: bookmarkPopup.latitude,
+        }),
+        bookmarkPopup,
+      ),
+    )
+
+    return true
   },
   renderLayers({ interactionState }) {
     return (

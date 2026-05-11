@@ -199,13 +199,15 @@ function CnrfcStreamflowLayers({ appState, interactionState, layerFamily, mapIns
 
     return () => {
       mapInstance.off('idle', handleMapIdle)
-      appliedFeatureIdsRef.current.forEach((featureId) => {
-        mapInstance.removeFeatureState({
-          source: 'cnrfc-streamflow-geometry-source',
-          sourceLayer: RIVER_NETWORK_SOURCE_LAYER,
-          id: featureId,
+      if (mapInstance.getSource('cnrfc-streamflow-geometry-source')) {
+        appliedFeatureIdsRef.current.forEach((featureId) => {
+          mapInstance.removeFeatureState({
+            source: 'cnrfc-streamflow-geometry-source',
+            sourceLayer: RIVER_NETWORK_SOURCE_LAYER,
+            id: featureId,
+          })
         })
-      })
+      }
       appliedFeatureIdsRef.current = new Set()
     }
   }, [dataPmtilesUrl, mapInstance])
