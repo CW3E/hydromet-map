@@ -188,6 +188,7 @@ export default function B120PointPopup({
       anchor="top"
       closeButton
       closeOnClick={false}
+      closeOnMove={false}
       latitude={selectedStation.latitude}
       longitude={selectedStation.longitude}
       maxWidth={B120_POINT_POPUP_WIDTH}

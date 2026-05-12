@@ -1,5 +1,4 @@
 import { Layer, Popup, Source } from 'react-map-gl/maplibre'
-import B120PointPopup from '../features/b120PointPopup/B120PointPopup'
 import {
   createSelectedB120PointPopupState,
 } from '../features/b120PointPopup/b120PointPopupData'
@@ -127,16 +126,11 @@ const b120PointsLayer = {
       </>
     )
   },
-  renderPopups({ interactionState, selectedStation, setSelectedStation }) {
+  renderPopups({ interactionState }) {
     const hoveredB120Point = interactionState.hoveredB120Point
 
     return (
       <>
-        <B120PointPopup
-          selectedStation={selectedStation}
-          setSelectedStation={setSelectedStation}
-        />
-
         {hoveredB120Point ? (
           <Popup
             anchor="bottom"

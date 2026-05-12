@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import Map, { NavigationControl, ScaleControl } from 'react-map-gl/maplibre'
 import { BASEMAP_STYLES, PROJECT_OPTIONS } from '../../config/mapConfig'
+import B120PointPopup from '../../features/b120PointPopup/B120PointPopup'
+import CnrfcPointPopup from '../../features/cnrfcPointPopup/CnrfcPointPopup'
 import CnrfcStreamflowPopup from '../../features/cnrfcStreamflowPopup/CnrfcStreamflowPopup'
 import GlobalReachPopup from '../../features/globalReachPopup/GlobalReachPopup'
 import GshaPopup from '../../features/gshaPopup/GshaPopup'
+import YampaPointPopup from '../../features/yampaPointPopup/YampaPointPopup'
 import { formatCoordinate, formatViewValue, readPopupStateFromUrl } from '../../lib/appState'
 import { MAP_LAYER_MODULES } from '../../layers'
 import BookmarkControl from './BookmarkControl'
@@ -52,6 +55,25 @@ function hasInteractionStateChanges(currentState, patch) {
   return Object.entries(patch).some(([key, value]) => currentState[key] !== value)
 }
 
+function isMapViewCloseToState(mapInstance, viewState) {
+  if (!mapInstance) {
+    return true
+  }
+
+  const center = mapInstance.getCenter()
+  const zoom = mapInstance.getZoom()
+  const bearing = mapInstance.getBearing()
+  const pitch = mapInstance.getPitch()
+
+  return (
+    Math.abs(center.lng - viewState.longitude) < 0.000001
+    && Math.abs(center.lat - viewState.latitude) < 0.000001
+    && Math.abs(zoom - viewState.zoom) < 0.0001
+    && Math.abs(bearing - viewState.bearing) < 0.0001
+    && Math.abs(pitch - viewState.pitch) < 0.0001
+  )
+}
+
 export default function MapCanvas({
   activeProject,
   activeProjectId,
@@ -85,6 +107,7 @@ export default function MapCanvas({
   const [interactionState, setInteractionState] = useState(INITIAL_INTERACTION_STATE)
   const [mapInstance, setMapInstance] = useState(null)
   const [familyStatusOpen, setFamilyStatusOpen] = useState(false)
+  const [isMapDragging, setIsMapDragging] = useState(false)
   const [projectSelectorOpen, setProjectSelectorOpen] = useState(false)
   const mapRef = useRef(null)
   const mouseReadoutRef = useRef(null)
@@ -119,14 +142,19 @@ export default function MapCanvas({
     setSelectedStation,
   })
 
-  function handleMapMove(event) {
-    const nextView = event.viewState
+  function commitMapView(nextView) {
     updateTopLevel('view', {
       center: `${formatCoordinate(nextView.longitude)},${formatCoordinate(nextView.latitude)}`,
       zoom: formatViewValue(nextView.zoom, 2),
       bearing: formatViewValue(nextView.bearing, 1),
       pitch: formatViewValue(nextView.pitch, 1),
     })
+  }
+
+  function handleMapMoveEnd(event) {
+    if (event.viewState) {
+      commitMapView(event.viewState)
+    }
   }
 
   function handlePointerMove(event) {
@@ -189,12 +217,14 @@ export default function MapCanvas({
 
   function handleDragStart() {
     isDraggingRef.current = true
+    setIsMapDragging(true)
     mapTools.handleDragStart()
   }
 
   function handleDragEnd() {
     window.requestAnimationFrame(() => {
       isDraggingRef.current = false
+      setIsMapDragging(false)
     })
   }
 
@@ -217,6 +247,26 @@ export default function MapCanvas({
       document.removeEventListener('pointerdown', handleDocumentPointerDown)
     }
   }, [projectSelectorOpen])
+
+  useEffect(() => {
+    if (!mapInstance || isDraggingRef.current || isMapViewCloseToState(mapInstance, viewState)) {
+      return
+    }
+
+    mapInstance.jumpTo({
+      center: [viewState.longitude, viewState.latitude],
+      zoom: viewState.zoom,
+      bearing: viewState.bearing,
+      pitch: viewState.pitch,
+    })
+  }, [
+    mapInstance,
+    viewState.bearing,
+    viewState.latitude,
+    viewState.longitude,
+    viewState.pitch,
+    viewState.zoom,
+  ])
 
   useEffect(() => {
     if (!mapInstance || selectedStation || popupRestoreAttemptedRef.current) {
@@ -272,10 +322,10 @@ export default function MapCanvas({
   }, [mapInstance, selectedStation, setSelectedStation, statusBoundary, visibleLayerModules])
 
   return (
-    <section className="map-canvas">
+    <section className={isMapDragging ? 'map-canvas is-map-dragging' : 'map-canvas'}>
       <Map
-        {...viewState}
         attributionControl={false}
+        initialViewState={viewState}
         interactiveLayerIds={interactiveLayerIds}
         mapStyle={BASEMAP_STYLES[appState.basemapId]}
         projection={appState.projection}
@@ -287,7 +337,7 @@ export default function MapCanvas({
         onDragEnd={handleDragEnd}
         onMouseLeave={handlePointerLeave}
         onMouseMove={handlePointerMove}
-        onMove={handleMapMove}
+        onMoveEnd={handleMapMoveEnd}
         style={{ width: '100%', height: '100%' }}
       >
         <MapToolOverlays mapTools={mapTools} />
@@ -330,6 +380,27 @@ export default function MapCanvas({
         {selectedStation?.popupType === 'gsha' ? (
           <GshaPopup
             ownerLayerId={selectedStation.popupOwnerId}
+            selectedStation={selectedStation}
+            setSelectedStation={setSelectedStation}
+          />
+        ) : null}
+
+        {selectedStation?.popupType === 'b120-points' ? (
+          <B120PointPopup
+            selectedStation={selectedStation}
+            setSelectedStation={setSelectedStation}
+          />
+        ) : null}
+
+        {selectedStation?.popupType === 'yampa-points' ? (
+          <YampaPointPopup
+            selectedStation={selectedStation}
+            setSelectedStation={setSelectedStation}
+          />
+        ) : null}
+
+        {selectedStation?.popupType === 'cnrfc-points' ? (
+          <CnrfcPointPopup
             selectedStation={selectedStation}
             setSelectedStation={setSelectedStation}
           />

@@ -1508,6 +1508,10 @@ button:disabled {
   z-index: 2;
 }
 
+.map-canvas.is-map-dragging .maplibregl-popup {
+  pointer-events: none;
+}
+
 .map-canvas .maplibregl-ctrl-top-right {
   top: 4.97rem !important;
 }

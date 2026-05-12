@@ -188,6 +188,7 @@ export default function YampaPointPopup({
       anchor="top"
       closeButton
       closeOnClick={false}
+      closeOnMove={false}
       latitude={selectedStation.latitude}
       longitude={selectedStation.longitude}
       maxWidth={YAMPA_POINT_POPUP_WIDTH}

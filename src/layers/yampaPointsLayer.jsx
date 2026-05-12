@@ -1,5 +1,4 @@
 import { Layer, Popup, Source } from 'react-map-gl/maplibre'
-import YampaPointPopup from '../features/yampaPointPopup/YampaPointPopup'
 import { createSelectedYampaPointPopupState } from '../features/yampaPointPopup/yampaPointPopupData'
 import { applyBookmarkedPopupTab, findBookmarkFeatureAtPoint } from './bookmarkRestore'
 
@@ -120,16 +119,11 @@ const yampaPointsLayer = {
       </>
     )
   },
-  renderPopups({ interactionState, selectedStation, setSelectedStation }) {
+  renderPopups({ interactionState }) {
     const hoveredYampaPoint = interactionState.hoveredYampaPoint
 
     return (
       <>
-        <YampaPointPopup
-          selectedStation={selectedStation}
-          setSelectedStation={setSelectedStation}
-        />
-
         {hoveredYampaPoint ? (
           <Popup
             anchor="bottom"

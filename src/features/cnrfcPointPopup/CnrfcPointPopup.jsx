@@ -88,6 +88,7 @@ export default function CnrfcPointPopup({
       anchor="top"
       closeButton
       closeOnClick={false}
+      closeOnMove={false}
       latitude={selectedStation.latitude}
       longitude={selectedStation.longitude}
       maxWidth={CNRFC_POINT_POPUP_WIDTH}

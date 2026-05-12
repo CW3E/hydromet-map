@@ -1,5 +1,4 @@
 import { Layer, Popup, Source } from 'react-map-gl/maplibre'
-import CnrfcPointPopup from '../features/cnrfcPointPopup/CnrfcPointPopup'
 import {
   createSelectedCnrfcPointPopupState,
   loadCnrfcPointPopupTabData,
@@ -138,14 +137,9 @@ const cnrfcPointsLayer = {
       </>
     )
   },
-  renderPopups({ interactionState, selectedStation, setSelectedStation }) {
+  renderPopups({ interactionState }) {
     return (
       <>
-        <CnrfcPointPopup
-          selectedStation={selectedStation}
-          setSelectedStation={setSelectedStation}
-        />
-
         {interactionState.hoveredCnrfcPoint ? (
           <Popup
             anchor="bottom"
