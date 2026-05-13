@@ -1,0 +1,32 @@
+{
+  "defaults": {
+    "baseUrl": "http://localhost:5173/",
+    "params": {
+      "prj": "b120",
+      "bm": "flat",
+      "proj": "mercator",
+      "ter": "false",
+      "c": "-119.2752,38.4483",
+      "z": "4",
+      "brg": "0.0",
+      "pit": "0.0",
+      "prod": "NRT",
+      "ens": "Mean",
+      "tm": "date",
+      "d": "2026-03-01",
+      "dt": "2026-03-01T16:00",
+      "lyr": "b120Points"
+    },
+    "popupSelects": {
+      "Update": "2026-04-14",
+      "Post-Processing": "cdfm"
+    },
+    "map": false,
+    "plot": true,
+    "waitMs": 6000,
+    "viewport": {
+      "width": 1100,
+      "height": 900
+    }
+  }
+}

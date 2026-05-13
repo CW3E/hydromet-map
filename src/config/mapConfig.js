@@ -1024,7 +1024,7 @@ export const PROJECTS = {
 }
 
 export const PROJECT_OPTIONS = Object.values(PROJECTS).map(({ id, label }) => ({ id, label }))
-export const DEFAULT_PROJECT_ID = 'cnrfc'
+export const DEFAULT_PROJECT_ID = 'global'
 
 export function getProjectDefinition(projectId = DEFAULT_PROJECT_ID) {
   return PROJECTS[projectId] ?? PROJECTS[DEFAULT_PROJECT_ID]

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Popup } from 'react-map-gl/maplibre'
 import TimeSeriesPlot from '../cnrfcPointPopup/TimeSeriesPlot'
 import PopupCsvDownloadButton from '../../components/PopupCsvDownloadButton'
@@ -71,6 +71,7 @@ export default function YampaPointPopup({
 }) {
   const [forecastUpdateOptions, setForecastUpdateOptions] = useState(YAMPA_POINT_FORECAST_UPDATE_OPTIONS)
   const [isDownloadingCsv, setIsDownloadingCsv] = useState(false)
+  const didUserSelectForecastUpdateRef = useRef(false)
   const tabs = getYampaPointPopupTabs()
   const activeTabId = selectedStation?.popup?.activeTabId ?? tabs[0]?.id ?? 'nrt-forecast'
   const forecastUpdateDate = selectedStation?.popup?.forecastUpdateDate ?? ''
@@ -146,6 +147,10 @@ export default function YampaPointPopup({
   }, [])
 
   useEffect(() => {
+    didUserSelectForecastUpdateRef.current = false
+  }, [selectedStation?.stationId])
+
+  useEffect(() => {
     if (!selectedStation || selectedStation.popupType !== 'yampa-points') {
       return
     }
@@ -156,7 +161,15 @@ export default function YampaPointPopup({
       return
     }
 
-    if (forecastUpdateOptions.includes(forecastUpdateDate)) {
+    if (
+      didUserSelectForecastUpdateRef.current
+      && forecastUpdateOptions.includes(forecastUpdateDate)
+    ) {
+      loadYampaPointPopupTabData(setSelectedStation, selectedStation, activeTabId)
+      return
+    }
+
+    if (forecastUpdateDate === nextForecastUpdateDate) {
       loadYampaPointPopupTabData(setSelectedStation, selectedStation, activeTabId)
       return
     }
@@ -225,6 +238,7 @@ export default function YampaPointPopup({
                 }
 
                 const nextForecastUpdateDate = event.target.value
+                didUserSelectForecastUpdateRef.current = true
                 const nextStation = {
                   ...selectedStation,
                   popup: {

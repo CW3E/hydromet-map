@@ -39,3 +39,5 @@
   [docs/how-to/README.md](./docs/how-to/README.md)
 - Future app-user guide:
   [docs/user-guide/README.md](./docs/user-guide/README.md)
+- Sidecar utility tools:
+  [tools/README.md](./tools/README.md)

@@ -1,0 +1,27 @@
+{
+  "defaults": {
+    "baseUrl": "http://localhost:5173/",
+    "params": {
+      "prj": "b120",
+      "bm": "flat",
+      "proj": "mercator",
+      "ter": "true",
+      "c": "-119.2752,38.4483",
+      "z": "4.85",
+      "brg": "0.0",
+      "pit": "0.0",
+      "prod": "NRT",
+      "ens": "Mean",
+      "tm": "date",
+      "lyr": "cnrfcRaster,cnrfcRegion,b120Basins"
+    },
+    "map": true,
+    "plot": false,
+    "cropMap": true,
+    "waitMs": 5000,
+    "viewport": {
+      "width": 600,
+      "height": 744
+    }
+  }
+}

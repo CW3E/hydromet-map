@@ -331,7 +331,10 @@ export default function MapCanvas({
         projection={appState.projection}
         ref={mapRef}
         reuseMaps
-        onLoad={(event) => setMapInstance(event.target)}
+        onLoad={(event) => {
+          setMapInstance(event.target)
+          window.__hydrometMap = event.target
+        }}
         onClick={handleMapClick}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
