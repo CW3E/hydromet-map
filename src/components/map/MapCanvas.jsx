@@ -36,6 +36,7 @@ const INITIAL_INTERACTION_STATE = {
   hoveredOcwdBoundary: null,
   hoveredOcwdWetland: null,
   hoveredOcwdWell: null,
+  hoveredPradoBasin: null,
   hoveredRiver: null,
   hoveredSnowCourseStation: null,
   hoveredSnowPillowStation: null,
