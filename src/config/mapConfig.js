@@ -892,6 +892,9 @@ export const PROJECTS = {
     label: 'CNRFC',
     documentTitle: 'CW3E River Forecasting (CNRFC Region)',
     statusButtonEnabled: true,
+    logoUrl: 'https://cw3e.ucsd.edu/images/CW3E_Logo_Only.png',
+    logoAlt: 'Center for Western Weather and Water Extremes (CW3E)',
+    logoHref: 'https://cw3e.ucsd.edu',
     layerFamilyId: 'cnrfc',
     defaultFamily: {
       variable: 'soilMoistureDaily',
@@ -926,6 +929,9 @@ export const PROJECTS = {
       pitch: '0',
     },
     defaultBasemapId: 'flat',
+    logoUrl: 'https://cw3e.ucsd.edu/images/CW3E_Logo_Only.png',
+    logoAlt: 'Center for Western Weather and Water Extremes (CW3E)',
+    logoHref: 'https://cw3e.ucsd.edu',
     layerFamilyId: 'cnrfc',
     defaultFamily: {
       variable: 'precipitationDaily',
@@ -959,6 +965,9 @@ export const PROJECTS = {
     label: 'B120',
     documentTitle: 'CW3E B120 Forecasting',
     statusButtonEnabled: false,
+    logoUrl: 'https://cw3e.ucsd.edu/images/CW3E_Logo_Only.png',
+    logoAlt: 'Center for Western Weather and Water Extremes (CW3E)',
+    logoHref: 'https://cw3e.ucsd.edu',
     defaultView: {
       center: '-119,39',
       zoom: '5.6',
@@ -992,6 +1001,9 @@ export const PROJECTS = {
     label: 'Yampa',
     documentTitle: 'CW3E Yampa Forecasting',
     statusButtonEnabled: false,
+    logoUrl: 'https://cw3e.ucsd.edu/images/CW3E_Logo_Only.png',
+    logoAlt: 'Center for Western Weather and Water Extremes (CW3E)',
+    logoHref: 'https://cw3e.ucsd.edu',
     layerFamilyId: 'ucrb',
     defaultFamily: {
       variable: 'sweDaily',

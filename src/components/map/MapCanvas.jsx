@@ -116,6 +116,7 @@ export default function MapCanvas({
   const projectSelectorRef = useRef(null)
   const popupRestoreAttemptedRef = useRef(false)
   const availableLayerIdSet = new Set(activeProject?.availableLayerIds ?? [])
+  const projectLogoLabel = activeProject?.logoAlt ?? `${activeProject?.label ?? 'Project'} logo`
 
   const layerContext = {
     appState,
@@ -456,6 +457,25 @@ export default function MapCanvas({
             }
           }}
         />
+      ) : null}
+
+      {activeProject?.logoUrl ? (
+        activeProject.logoHref ? (
+          <a
+            className="project-logo"
+            href={activeProject.logoHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={projectLogoLabel}
+            title={projectLogoLabel}
+          >
+            <img src={activeProject.logoUrl} alt={projectLogoLabel} title={projectLogoLabel} />
+          </a>
+        ) : (
+          <div className="project-logo" aria-label={projectLogoLabel} title={projectLogoLabel}>
+            <img src={activeProject.logoUrl} alt={projectLogoLabel} title={projectLogoLabel} />
+          </div>
+        )
       ) : null}
 
       <MouseReadout ref={mouseReadoutRef} />
