@@ -35,6 +35,7 @@ Typical shape:
 myProject: {
   id: 'myProject',
   label: 'My Project',
+  documentTitle: 'My Project Map',
   layerFamilyId: 'cnrfc',
   defaultFamily: {
     variable: 'soilMoistureDaily',
@@ -48,6 +49,9 @@ myProject: {
   defaultBasemapId: 'terrain',
   defaultTerrainEnabled: true,
   defaultProjection: 'mercator',
+  logoUrl: 'https://example.com/logo.png',
+  logoAlt: 'Example organization logo',
+  logoHref: 'https://example.com',
   availableLayerIds: [
     'cnrfcRaster',
     'cnrfcRegion',
@@ -131,7 +135,18 @@ Examples already in the app:
   - `globe`
 - `b120` and `yampa` use custom extents
 
-## 7. Verify project selector behavior
+## 7. Add optional project branding
+
+Project-level branding is optional. Add these fields only when a project needs them:
+
+- `documentTitle` changes the browser tab title when the project is active.
+- `logoUrl` displays a logo in the lower-right corner of the map.
+- `logoAlt` provides accessible text and the browser hover tooltip.
+- `logoHref` makes the logo clickable.
+
+If `logoUrl` is not set, no logo is shown.
+
+## 8. Verify project selector behavior
 
 Projects automatically appear in the project selector because:
 
@@ -139,7 +154,7 @@ Projects automatically appear in the project selector because:
 
 No separate registration is needed.
 
-## 8. Remember the per-project state model
+## 9. Remember the per-project state model
 
 Each project gets its own runtime state in:
 
@@ -158,7 +173,7 @@ That means users can switch between projects without losing:
 
 This is one of the biggest advantages of the current architecture.
 
-## 9. Test checklist
+## 10. Test checklist
 
 After adding a project, test:
 
@@ -168,6 +183,7 @@ After adding a project, test:
 - default visible layers are correct
 - the intended family selectors appear or do not appear
 - default basemap, terrain, and projection are correct
+- project title and logo appear only where intended
 - bookmarks restore the project correctly
 - switching away and back preserves project-specific state
 

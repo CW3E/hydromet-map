@@ -118,10 +118,14 @@ Definition is static configuration:
 {
   id,
   label,
+  documentTitle,
   layerFamilyId,
   availableLayerIds,
   defaultVisibleLayerIds,
   defaultFamily,
+  logoUrl,
+  logoAlt,
+  logoHref,
 }
 ```
 
@@ -183,10 +187,14 @@ Minimal example:
 myProject: {
   id: 'myProject',
   label: 'My Project',
+  documentTitle: 'My Project Map',
   layerFamilyId: 'cnrfc',
   defaultFamily: {
     variable: 'precipitationDaily',
   },
+  logoUrl: 'https://example.com/logo.png',
+  logoAlt: 'Example organization logo',
+  logoHref: 'https://example.com',
   availableLayerIds: [
     'cnrfcRaster',
     'cnrfcRegion',
@@ -198,6 +206,17 @@ myProject: {
   ],
 }
 ```
+
+## Optional branding
+
+Projects can define light branding without changing map components:
+
+- `documentTitle` sets the browser tab title while the project is active.
+- `logoUrl` shows a project-specific logo in the lower-right corner of the map.
+- `logoAlt` is used for accessibility and hover tooltip text.
+- `logoHref` is optional; when set, clicking the logo opens that URL.
+
+If `logoUrl` is omitted, no logo is shown.
 
 ## Recommended conventions
 
