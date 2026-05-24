@@ -639,6 +639,24 @@ button:disabled {
   strokeWidth: 2;
 }
 
+.scene-icon-button__about-icon {
+  width: 23px !important;
+  height: 23px !important;
+  stroke-width: 2.25 !important;
+}
+
+.scene-icon-button__about-icon circle:last-child {
+  fill: currentColor;
+  stroke: none;
+}
+
+.project-about-button {
+  position: absolute;
+  top: 0.85rem;
+  right: 10px;
+  z-index: 4;
+}
+
 .layer-toggle {
   position: relative;
 }
@@ -1094,6 +1112,10 @@ button:disabled {
   width: min(840px, calc(100vw - 2rem));
 }
 
+.map-tool-dialog--about {
+  width: min(720px, calc(100vw - 2rem));
+}
+
 .map-tool-dialog__header {
   display: flex;
   align-items: start;
@@ -1155,6 +1177,52 @@ button:disabled {
 
 .family-status {
   color: #244050;
+}
+
+.project-about {
+  color: #244050;
+}
+
+.project-about h1,
+.project-about h2,
+.project-about h3 {
+  margin: 0.8rem 0 0.35rem;
+  color: #10222f;
+  line-height: 1.18;
+}
+
+.project-about h1:first-child,
+.project-about h2:first-child,
+.project-about h3:first-child {
+  margin-top: 0;
+}
+
+.project-about p,
+.project-about ul,
+.project-about ol {
+  margin: 0.35rem 0;
+}
+
+.project-about ul,
+.project-about ol {
+  padding-left: 1.1rem;
+}
+
+.project-about li + li {
+  margin-top: 0.18rem;
+}
+
+.project-about a {
+  color: #1d6996;
+  font-weight: 600;
+}
+
+.project-about__message p {
+  margin: 0.2rem 0;
+}
+
+.project-about__message--error {
+  color: #b42318;
 }
 
 .family-status__message p {

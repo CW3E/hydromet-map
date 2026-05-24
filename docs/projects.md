@@ -126,6 +126,7 @@ Definition is static configuration:
   logoUrl,
   logoAlt,
   logoHref,
+  about,
 }
 ```
 
@@ -195,6 +196,10 @@ myProject: {
   logoUrl: 'https://example.com/logo.png',
   logoAlt: 'Example organization logo',
   logoHref: 'https://example.com',
+  about: {
+    title: 'About My Project',
+    markdownUrl: 'about/my-project.md',
+  },
   availableLayerIds: [
     'cnrfcRaster',
     'cnrfcRegion',
@@ -217,6 +222,25 @@ Projects can define light branding without changing map components:
 - `logoHref` is optional; when set, clicking the logo opens that URL.
 
 If `logoUrl` is omitted, no logo is shown.
+
+## Optional about pages
+
+Projects can also define an about page:
+
+```js
+about: {
+  title: 'About My Project',
+  markdownUrl: 'about/my-project.md',
+}
+```
+
+When `about.markdownUrl` is set, the app shows an info button in the map controls. Clicking it opens a modal and renders the Markdown file with `react-markdown`.
+
+Recommended location:
+
+- `public/about/<project-id>.md`
+
+Use about pages for project credits, source product links, map tool API providers, basemap providers, source code links, licenses, and project-specific caveats.
 
 ## Recommended conventions
 

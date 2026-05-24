@@ -52,6 +52,10 @@ myProject: {
   logoUrl: 'https://example.com/logo.png',
   logoAlt: 'Example organization logo',
   logoHref: 'https://example.com',
+  about: {
+    title: 'About My Project',
+    markdownUrl: 'about/my-project.md',
+  },
   availableLayerIds: [
     'cnrfcRaster',
     'cnrfcRegion',
@@ -146,7 +150,25 @@ Project-level branding is optional. Add these fields only when a project needs t
 
 If `logoUrl` is not set, no logo is shown.
 
-## 8. Verify project selector behavior
+## 8. Add an optional about page
+
+Project about pages are authored as Markdown and shown from an info button in the map controls.
+
+1. Create a Markdown file under `public/about/`, for example `public/about/my-project.md`.
+2. Add an `about` block to the project config:
+
+```js
+about: {
+  title: 'About My Project',
+  markdownUrl: 'about/my-project.md',
+}
+```
+
+Use this page for contributors, source products, data providers, basemap providers, map tool APIs, source code links, license notes, and caveats.
+
+If `about.markdownUrl` is not set, no about button is shown.
+
+## 9. Verify project selector behavior
 
 Projects automatically appear in the project selector because:
 
@@ -154,7 +176,7 @@ Projects automatically appear in the project selector because:
 
 No separate registration is needed.
 
-## 9. Remember the per-project state model
+## 10. Remember the per-project state model
 
 Each project gets its own runtime state in:
 
@@ -173,7 +195,7 @@ That means users can switch between projects without losing:
 
 This is one of the biggest advantages of the current architecture.
 
-## 10. Test checklist
+## 11. Test checklist
 
 After adding a project, test:
 
@@ -184,6 +206,7 @@ After adding a project, test:
 - the intended family selectors appear or do not appear
 - default basemap, terrain, and projection are correct
 - project title and logo appear only where intended
+- project about button appears only where intended
 - bookmarks restore the project correctly
 - switching away and back preserves project-specific state
 

@@ -15,6 +15,7 @@ import GlobeProjectionControl from './GlobeProjectionControl'
 import MapContextMenu from './MapContextMenu'
 import MapHud from './MapHud'
 import MapLegend from './MapLegend'
+import ProjectAboutDialog from './ProjectAboutDialog'
 import MapToolDialogs from './MapToolDialogs'
 import MapToolOverlays from './MapToolOverlays'
 import MouseReadout from './MouseReadout'
@@ -109,6 +110,7 @@ export default function MapCanvas({
   const [mapInstance, setMapInstance] = useState(null)
   const [familyStatusOpen, setFamilyStatusOpen] = useState(false)
   const [isMapDragging, setIsMapDragging] = useState(false)
+  const [projectAboutOpen, setProjectAboutOpen] = useState(false)
   const [projectSelectorOpen, setProjectSelectorOpen] = useState(false)
   const mapRef = useRef(null)
   const mouseReadoutRef = useRef(null)
@@ -117,6 +119,7 @@ export default function MapCanvas({
   const popupRestoreAttemptedRef = useRef(false)
   const availableLayerIdSet = new Set(activeProject?.availableLayerIds ?? [])
   const projectLogoLabel = activeProject?.logoAlt ?? `${activeProject?.label ?? 'Project'} logo`
+  const projectAboutLabel = activeProject?.documentTitle ?? activeProject?.label ?? 'This project'
 
   const layerContext = {
     appState,
@@ -447,6 +450,22 @@ export default function MapCanvas({
         }}
       />
 
+      {activeProject?.about?.markdownUrl ? (
+        <button
+          className="scene-icon-button project-about-button"
+          type="button"
+          aria-label={`About ${projectAboutLabel}`}
+          title={`About ${projectAboutLabel}`}
+          onClick={() => setProjectAboutOpen(true)}
+        >
+          <svg className="scene-icon-button__about-icon" aria-hidden="true" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8.5" />
+            <path d="M12 10v6" />
+            <circle cx="12" cy="7.2" r="0.95" />
+          </svg>
+        </button>
+      ) : null}
+
       {selectedBasemap.terrainAvailable ? (
         <TerrainToggleControl
           enabled={terrainEnabled}
@@ -498,6 +517,13 @@ export default function MapCanvas({
         layerFamily={layerFamily}
         onClose={() => setFamilyStatusOpen(false)}
         open={familyStatusOpen}
+      />
+
+      <ProjectAboutDialog
+        about={activeProject?.about}
+        onClose={() => setProjectAboutOpen(false)}
+        open={projectAboutOpen}
+        projectLabel={activeProject?.label}
       />
 
       <div
