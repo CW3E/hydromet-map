@@ -1,3 +1,0 @@
-display_name: Hydromet Map Layers
-short_description: Add and maintain hydromet map layers and layer families.
-default_prompt: Use this skill when adding or changing hydromet map layers, raster families, legends, hover/click behavior, or bookmarkable layer state.

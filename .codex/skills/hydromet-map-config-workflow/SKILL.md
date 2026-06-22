@@ -1,33 +1,42 @@
 ---
-name: hydromet-map-layer-workflow
-description: Project-specific workflow for adding, modifying, or debugging hydromet-map map layers and layer families. Use when Codex works on GeoJSON/vector layers, vector tile layers, raster tile overlays, raster families across variables/dates/products/ensembles, MapLibre rendering style, layer source registration, layer controls, hover/click feature info, legends/colormaps, time-series popup hooks, or bookmarkable layer state in the hydromet-map repository.
+name: hydromet-map-config-workflow
+description: Project-specific workflow for adding, modifying, or debugging hydromet-map map configuration. Use when Codex works on projects, GeoJSON/vector layers, vector tile layers, raster tile overlays, raster families across variables/dates/products/ensembles, MapLibre rendering style, layer source registration, layer controls, hover/click popups, legends/colormaps, time-series popup hooks, project defaults, or bookmarkable map state in the hydromet-map repository.
 ---
 
-# Hydromet Map Layer Workflow
+# Hydromet Map Config Workflow
 
-Use this skill to make layer changes in the `hydromet-map` repository consistent across map rendering, controls, legends, interactions, and bookmark state.
+Use this skill to make map configuration changes in the `hydromet-map` repository consistent across projects, map rendering, controls, legends, interactions, and bookmark state.
 
 ## Start Here
 
 1. Inspect the current implementation before editing:
    - `src/config/mapConfig.js`
    - `src/components/map/MapCanvas.jsx`
-   - components that own layer controls, raster selectors, legends, popups, or bookmark URLs
+   - components that own project selection, layer controls, raster selectors, legends, popups, or bookmark URLs
 2. Identify whether the request is for:
+   - a project or project default
    - a single GeoJSON/vector source
    - a vector tile source/layer
    - a single raster/raster tile overlay
    - a raster family with variable/date/product/ensemble dimensions
    - interaction-only changes such as hover, click, popup, or time-series behavior
-3. Preserve existing naming, grouping, and config conventions. Add new abstractions only when they reduce repeated layer-family logic or match an existing local pattern.
+3. Preserve existing naming, grouping, and config conventions. Add new abstractions only when they reduce repeated configuration logic or match an existing local pattern.
 
 ## File Discovery
 
 Use fast local search first:
 
-- Search layer IDs, source IDs, family IDs, and visible UI labels with `rg`.
-- Search for `sources`, `layers`, `raster`, `legend`, `colormap`, `hover`, `popup`, `bookmark`, `projection`, and `terrain` when the exact owning file is unclear.
+- Search project IDs, layer IDs, source IDs, family IDs, and visible UI labels with `rg`.
+- Search for `project`, `sources`, `layers`, `raster`, `legend`, `colormap`, `hover`, `popup`, `bookmark`, `projection`, and `terrain` when the exact owning file is unclear.
 - Read surrounding config objects before assuming shape or defaults.
+
+## Add or Modify a Project
+
+1. Locate the project registry, selector config, and any project-specific defaults.
+2. Add or update the project ID, label, description, default view, basemap, projection, terrain setting, and default layer visibility using existing conventions.
+3. Assign layers and layer families to the project through the current grouping mechanism.
+4. Check whether project switching should reset, preserve, or adapt raster selections, selected popups, legends, and bookmark state.
+5. Read `references/project-patterns.md` before adding a new project or changing project defaults.
 
 ## Add or Modify a Single Layer
 
@@ -60,6 +69,7 @@ For hover/click behavior:
 - Do not fetch time-series data on hover.
 - For click-driven time series, identify the clicked feature ID/properties, build the remote CSV request from config, parse with the repo's existing CSV/parser path, and display multiple series as tabs if the data source provides more than one series.
 - Preserve existing behavior for layers that do not opt into hover/click handlers.
+- Read `references/popup-patterns.md` before adding or refactoring vector-layer popups.
 
 ## Legends and Colormaps
 
@@ -74,11 +84,13 @@ For hover/click behavior:
 When a change adds user-controlled map state, update bookmark load/save paths for:
 
 - map view: center, zoom, bearing, pitch
+- project
 - basemap style
 - terrain enabled/disabled
 - projection mode: globe or mercator
 - layer visibility
 - raster family selections: variable, date, product, ensemble, and other dimensions
+- selected popup state when the app supports popup restoration
 - any new opacity or styling control exposed to users
 
 Use compact, stable query parameter keys and preserve backward compatibility with existing shared URLs when possible.
@@ -89,10 +101,14 @@ Before finishing:
 
 1. Run the repo's relevant validation command, usually `npm run build` when available.
 2. Confirm no unrelated user edits were reverted.
-3. Check that toggles, layer order, opacity, hover/click behavior, legends, and bookmark restoration still work for affected layers.
+3. Check that project switching, toggles, layer order, opacity, hover/click behavior, legends, and bookmark restoration still work for affected configuration.
 4. For raster-family work, test at least two variables or products when config allows it.
 5. For UI changes, check a narrow/mobile viewport for selector wrapping and map control overlap.
 
-## Optional Reference
+## Optional References
+
+Read `references/project-patterns.md` when the task adds a new project, changes project defaults, assigns layers to projects, or updates project-specific bookmark behavior.
 
 Read `references/layer-patterns.md` when the task needs a more detailed checklist for choosing IDs, organizing config, or reviewing raster-family dimensions.
+
+Read `references/popup-patterns.md` when the task adds hover popups, clicked feature popups, tabbed time-series popups, CSV downloads, or bookmark-restored popups.
