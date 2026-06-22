@@ -19,6 +19,7 @@ import ProjectAboutDialog from './ProjectAboutDialog'
 import MapToolDialogs from './MapToolDialogs'
 import MapToolOverlays from './MapToolOverlays'
 import MouseReadout from './MouseReadout'
+import OcwdWellPopup from '../../features/ocwdWellPopup/OcwdWellPopup'
 import TerrainToggleControl from './TerrainToggleControl'
 import useMapTools from './useMapTools'
 
@@ -387,6 +388,14 @@ export default function MapCanvas({
 
         {selectedStation?.popupType === 'gsha' ? (
           <GshaPopup
+            ownerLayerId={selectedStation.popupOwnerId}
+            selectedStation={selectedStation}
+            setSelectedStation={setSelectedStation}
+          />
+        ) : null}
+
+        {selectedStation?.popupType === 'ocwd-well' ? (
+          <OcwdWellPopup
             ownerLayerId={selectedStation.popupOwnerId}
             selectedStation={selectedStation}
             setSelectedStation={setSelectedStation}

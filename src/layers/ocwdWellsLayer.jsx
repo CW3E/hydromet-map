@@ -1,5 +1,10 @@
 import { Layer, Popup, Source } from 'react-map-gl/maplibre'
 import { OCWD_WELLS_PMTILES_URL, OCWD_WELLS_SOURCE_LAYER } from '../config/mapConfig'
+import { createSelectedOcwdWellPopupState } from '../features/ocwdWellPopup/ocwdWellPopupData'
+import {
+  applyBookmarkedPopupTab,
+  findBookmarkFeatureAtPoint,
+} from './bookmarkRestore'
 
 const OCWD_WELLS_RADIUS = ['interpolate', ['linear'], ['zoom'], 0, 1, 2, 3, 3, 4, 4, 4]
 const OCWD_WELLS_COLOR = ['case', ['==', ['get', 'STATUSNM'], 'ACTIVE'], 'orange', 'darkgray']
@@ -34,6 +39,50 @@ const ocwdWellsLayer = {
   },
   getPointerLeaveState() {
     return { hoveredOcwdWell: null }
+  },
+  handleClick({ event, setSelectedStation }) {
+    const clickedFeature = event.features?.find((feature) => feature.layer.id === 'ocwd-wells-hit-layer')
+
+    if (!clickedFeature || clickedFeature.geometry.type !== 'Point') {
+      return false
+    }
+
+    setSelectedStation(
+      createSelectedOcwdWellPopupState(clickedFeature, {
+        layerId: 'ocwdWells',
+        popupOwnerId: 'ocwdWells',
+        longitude: event.lngLat.lng,
+        latitude: event.lngLat.lat,
+      }),
+    )
+
+    return true
+  },
+  restorePopupFromBookmark({ bookmarkPopup, mapInstance, setSelectedStation }) {
+    const feature = findBookmarkFeatureAtPoint({
+      bookmarkPopup,
+      getFeatureId: (item) => item.properties?.STAID1,
+      layerIds: ['ocwd-wells-hit-layer'],
+      mapInstance,
+    })
+
+    if (!feature || feature.geometry.type !== 'Point') {
+      return false
+    }
+
+    setSelectedStation(
+      applyBookmarkedPopupTab(
+        createSelectedOcwdWellPopupState(feature, {
+          layerId: 'ocwdWells',
+          popupOwnerId: 'ocwdWells',
+          longitude: bookmarkPopup.longitude,
+          latitude: bookmarkPopup.latitude,
+        }),
+        bookmarkPopup,
+      ),
+    )
+
+    return true
   },
   renderLayers({ interactionState }) {
     return (

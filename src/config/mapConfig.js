@@ -954,6 +954,7 @@ export const PROJECTS = {
       'cnrfcPoints',
       'cnrfcRegion',
       'cnrfcRivers',
+      'ocwdWells',
     ],
   },
   b120: {
@@ -1051,7 +1052,7 @@ export const PROJECTS = {
 }
 
 export const PROJECT_OPTIONS = Object.values(PROJECTS).map(({ id, label }) => ({ id, label }))
-export const DEFAULT_PROJECT_ID = 'global'
+export const DEFAULT_PROJECT_ID = 'cnrfc'
 
 export function getProjectDefinition(projectId = DEFAULT_PROJECT_ID) {
   return PROJECTS[projectId] ?? PROJECTS[DEFAULT_PROJECT_ID]
