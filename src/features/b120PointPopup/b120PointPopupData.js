@@ -1,5 +1,6 @@
 import { fetchAndParseCsv } from '../../lib/csvData'
 import { buildGeneratedCsvDownloadFiles, buildRawSourceDownloadFiles, buildTableDownloadFiles } from '../../lib/csvExport'
+import { fetchJsonNoCache } from '../../lib/network'
 import {
   B120_POINT_POPUP_TABS,
   DEFAULT_B120_POINT_FORECAST_UPDATE_DATE,
@@ -270,16 +271,6 @@ async function fetchPlotSources(plotDefinition, station) {
   return Object.fromEntries(sourceEntries)
 }
 
-async function fetchJson(url) {
-  const response = await fetch(url)
-
-  if (!response.ok) {
-    throw new Error(`Failed to load JSON from ${url}.`)
-  }
-
-  return response.json()
-}
-
 function buildXAxisLayout(plotDefinition, station) {
   if (typeof plotDefinition.xAxis === 'function') {
     return plotDefinition.xAxis({
@@ -448,7 +439,13 @@ async function buildTablePlotState(plotDefinition, station) {
 }
 
 async function buildChoroplethMapPlotState(plotDefinition, station) {
-  const geojson = await fetchJson(plotDefinition.basinGeoJsonUrl)
+  const geojsonResponse = await fetchJsonNoCache(plotDefinition.basinGeoJsonUrl)
+
+  if (!geojsonResponse.ok) {
+    throw new Error(`Failed to load JSON from ${plotDefinition.basinGeoJsonUrl}.`)
+  }
+
+  const geojson = await geojsonResponse.json()
   const stationIds = plotDefinition.stationIds ?? []
   const forecastRows = await Promise.all(
     stationIds.map(async (stationId) => {

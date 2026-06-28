@@ -28,7 +28,7 @@ export function findBookmarkFeatureAtPoint({
 }
 
 export function applyBookmarkedPopupTab(station, bookmarkPopup) {
-  if (!station || !bookmarkPopup?.tabId) {
+  if (!station) {
     return station
   }
 
@@ -36,7 +36,12 @@ export function applyBookmarkedPopupTab(station, bookmarkPopup) {
     ...station,
     popup: {
       ...station.popup,
-      activeTabId: bookmarkPopup.tabId,
+      ...(bookmarkPopup?.tabId ? { activeTabId: bookmarkPopup.tabId } : {}),
+      ...(bookmarkPopup?.forecastProduct ? { forecastProduct: bookmarkPopup.forecastProduct } : {}),
+      ...(bookmarkPopup?.forecastUpdateDate ? { forecastUpdateDate: bookmarkPopup.forecastUpdateDate } : {}),
+      ...(bookmarkPopup?.forecastPostProcessing
+        ? { forecastPostProcessing: bookmarkPopup.forecastPostProcessing }
+        : {}),
     },
   }
 }

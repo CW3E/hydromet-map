@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Popup } from 'react-map-gl/maplibre'
 import TimeSeriesPlot from '../cnrfcPointPopup/TimeSeriesPlot'
 import PopupCsvDownloadButton from '../../components/PopupCsvDownloadButton'
@@ -70,8 +70,8 @@ export default function B120PointPopup({
   setSelectedStation,
 }) {
   const [forecastUpdateOptions, setForecastUpdateOptions] = useState(B120_POINT_FORECAST_UPDATE_OPTIONS)
+  const [forecastUpdateOptionsLoaded, setForecastUpdateOptionsLoaded] = useState(false)
   const [isDownloadingCsv, setIsDownloadingCsv] = useState(false)
-  const didUserSelectForecastUpdateRef = useRef(false)
   const tabs = getB120PointPopupTabs()
   const activeTabId = selectedStation?.popup?.activeTabId ?? tabs[0]?.id ?? 'nrt-forecast'
   const forecastUpdateDate = selectedStation?.popup?.forecastUpdateDate ?? ''
@@ -119,15 +119,19 @@ export default function B120PointPopup({
         const response = await fetchJsonNoCache(B120_POINT_FORECAST_UPDATES_URL)
 
         if (!response.ok) {
-          return
+          throw new Error(`Failed to load B120 forecast update options (${response.status}).`)
         }
 
         const json = await response.json()
-        const nextOptions = Array.isArray(json?.tupdates)
+        const rawOptions = Array.isArray(json?.tupdates)
           ? json.tupdates
-            .map((value) => normalizeB120ForecastUpdateDate(value))
-            .filter(Boolean)
+          : Array.isArray(json)
+          ? json
           : []
+        const nextOptions = rawOptions
+          .map((value) => normalizeB120ForecastUpdateDate(value))
+          .filter(Boolean)
+          .sort()
 
         if (!isCancelled && nextOptions.length > 0) {
           setForecastUpdateOptions(nextOptions)
@@ -135,6 +139,10 @@ export default function B120PointPopup({
       } catch {
         if (!isCancelled) {
           setForecastUpdateOptions(B120_POINT_FORECAST_UPDATE_OPTIONS)
+        }
+      } finally {
+        if (!isCancelled) {
+          setForecastUpdateOptionsLoaded(true)
         }
       }
     }
@@ -147,11 +155,11 @@ export default function B120PointPopup({
   }, [])
 
   useEffect(() => {
-    didUserSelectForecastUpdateRef.current = false
-  }, [selectedStation?.stationId])
-
-  useEffect(() => {
     if (!selectedStation || selectedStation.popupType !== 'b120-points') {
+      return
+    }
+
+    if (!forecastUpdateOptionsLoaded) {
       return
     }
 
@@ -161,15 +169,7 @@ export default function B120PointPopup({
       return
     }
 
-    if (
-      didUserSelectForecastUpdateRef.current
-      && forecastUpdateOptions.includes(forecastUpdateDate)
-    ) {
-      loadB120PointPopupTabData(setSelectedStation, selectedStation, activeTabId)
-      return
-    }
-
-    if (forecastUpdateDate === nextForecastUpdateDate) {
+    if (forecastUpdateDate) {
       loadB120PointPopupTabData(setSelectedStation, selectedStation, activeTabId)
       return
     }
@@ -187,8 +187,11 @@ export default function B120PointPopup({
   }, [
     activeTabId,
     forecastUpdateDate,
+    forecastPostProcessing,
     forecastUpdateOptions,
-    selectedStation,
+    forecastUpdateOptionsLoaded,
+    selectedStation?.popupType,
+    selectedStation?.stationId,
     setSelectedStation,
   ])
 
@@ -238,7 +241,6 @@ export default function B120PointPopup({
                 }
 
                 const nextForecastUpdateDate = event.target.value
-                didUserSelectForecastUpdateRef.current = true
                 const nextStation = {
                   ...selectedStation,
                   popup: {
@@ -251,7 +253,12 @@ export default function B120PointPopup({
                 loadB120PointPopupTabData(setSelectedStation, nextStation, activeTabId)
               }}
             >
-              {forecastUpdateOptions.map((option) => (
+              {[
+                ...(forecastUpdateDate && !forecastUpdateOptions.includes(forecastUpdateDate)
+                  ? [forecastUpdateDate]
+                  : []),
+                ...forecastUpdateOptions,
+              ].map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>

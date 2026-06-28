@@ -5,6 +5,7 @@ import {
   fetchFloat32ByteRange,
   generateDateArray,
 } from './gradesBinaryData'
+import { fetchJsonNoCache } from './network'
 
 const CNRFC_BINARY_BASE_URL = 'https://cw3e.ucsd.edu/hydro/cnrfc/bin'
 const CNRFC_CLIMATOLOGY_FILE_URL = `${CNRFC_BINARY_BASE_URL}/streamflow_ydrunpctl.bin`
@@ -36,7 +37,7 @@ export async function fetchCnrfcBinaryDescriptor(product) {
   const normalizedProduct = validateProduct(product)
 
   if (!descriptorPromiseByProduct.has(normalizedProduct)) {
-    const descriptorPromise = fetch(buildDescriptorUrl(normalizedProduct))
+    const descriptorPromise = fetchJsonNoCache(buildDescriptorUrl(normalizedProduct))
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Failed to load CNRFC descriptor for "${normalizedProduct}" (${response.status}).`)

@@ -1,29 +1,27 @@
 # AGENTS.md
 
-## Project Goals
-- Create a web map
-  - Can display various types of hydrometeorological data like vectors, vector tiles, raster (PNG) overlays, raster tiles, and so on
-  - Allow users to turn on and off map layers
-  - Allow users to select between different basemap layers predefined in JSON style files
-  - Allow users to turn on/off terrain (if available in the basemap) and switch between globe and mecator projections
-- For the raster (PNG) overlay layer
-  - Allow users to select the source, which can be raster maps for different variables, different dates, different products, and different ensemble traces
-  - Build UI's for raster selection, for example, dropdowns (for variables, products, ensemble traces), datepicker and day/month forward/backward buttons (for dates)
-  - Display a predefined colormap (list of values and colors) for the variable being shown on the map and change it accordingly when the user changes the variable
-- Bookmark the map
-  - Bookmark any map view: record map view (center, zoom, bearing, pitch, basemap style, terrain on/off status, globe/mecator projection), layers on/off status, and raster data source (variable/date/product/ensemble) in an loadable URL (for example, copy it to clipboard and generate a QR code) and allow users to load the map view from it
-- Display time series data upon feature click
-  - Fetch remote time series data (in CSV format) according to the feature clicked
-  - Display fetched time series data as interactive plots in a popup window
-  - Multiple time series may need to be displayed - create tabs in the popup window for them
-- Additional map gadgets
-  - Display latitude/longitude of current mouse location
-  - Map scale
-- As friendly as possible for mobile devices
+## Purpose
 
-## Major Tools (currently planned and not necessarily the best choices)
-- `react.js` for component building and state management
-- `react-map-gl` and `maplibre-gl` for mapping
-- `react-plotly.js` and `plotly.js` for interactive time series plots
-- `MUI` or a similar library for consistent look of UI's
-- `papaparse` or a similar library for parsing CSV data
+This file provides guidance for coding agents working in this repository. Project goals live in `README.md`; developer documentation lives under `docs/`.
+
+## Working Style
+
+- Prefer small, focused changes that follow existing project patterns.
+- Read nearby implementation before adding new abstractions.
+- Do not revert unrelated user changes.
+- Keep generated URLs, layer IDs, project IDs, and bookmark params stable and backward-compatible when possible.
+- Use the project skill `.codex/skills/hydromet-map-config-workflow` for map configuration work involving projects, layers, popups, legends, raster families, or bookmarkable state.
+
+## Validation
+
+- Run `npm run build` after code changes when feasible.
+- For documentation-only changes, a build is usually unnecessary.
+- When changing map UI behavior, also consider mobile/narrow viewport behavior.
+
+## Project Conventions
+
+- React components use existing local structure and CSS classes before adding new UI patterns.
+- Map rendering is based on `react-map-gl` and `maplibre-gl`.
+- Time-series plots use Plotly through existing popup components/helpers.
+- CSV parsing/export should use existing helpers in `src/lib`.
+- Bookmark state should serialize only active, user-visible map or popup state.

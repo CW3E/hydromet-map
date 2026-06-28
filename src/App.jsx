@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useRef, useState } from 'react'
+import { startTransition, useCallback, useEffect, useRef, useState } from 'react'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import 'react-datepicker/dist/react-datepicker.css'
 import './App.css'
@@ -574,7 +574,7 @@ function App() {
     )
   }
 
-  function setSelectedStation(nextValue) {
+  const setSelectedStation = useCallback((nextValue) => {
     const projectId = activeProjectId
 
     setSelectedStationByProjectId((current) => {
@@ -605,7 +605,7 @@ function App() {
         [projectId]: nextSelectedStation,
       }
     })
-  }
+  }, [activeProjectId])
 
   function changeProject(nextProjectId) {
     if (nextProjectId === activeProjectId) {

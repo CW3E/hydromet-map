@@ -6,6 +6,12 @@ These guides are still developer docs. They are aimed at contributors who edit c
 
 If you are new to the codebase and mostly want to add new content within existing patterns, start here.
 
+## Using an AI Coding Agent
+
+For routine map configuration work, consider using an AI coding agent together with the project skill at `.codex/skills/hydromet-map-config-workflow`.
+
+That skill captures the local workflow for adding or modifying projects, layers, layer families, popups, legends, and bookmarkable map state. It is most useful when the task follows existing app patterns and should touch several coordinated files.
+
 Recommended reading order:
 
 1. [Add a Layer](./add-a-layer.md)

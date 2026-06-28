@@ -71,6 +71,14 @@ When a clicked popup should survive shared URLs:
 - Load the active tab after restoring if the popup normally fetches data.
 - Preserve old bookmark URLs when changing popup state keys.
 
+For popup-specific controls, bookmark only the currently active popup's extra state. Do not serialize settings for inactive popup types. Use compact URL params and restore them through `readPopupStateFromUrl`, `writeStateToUrl`, and `applyBookmarkedPopupTab`.
+
+Current popup-specific bookmark params:
+
+- `fprod`: CNRFC point popup forecast product.
+- `fupd`: B120/Yampa point popup forecast update date.
+- `fpp`: B120/Yampa point popup forecast post-processing.
+
 ## Formatting and Missing Data
 
 - Normalize feature properties once in a builder function instead of formatting raw properties inside JSX.

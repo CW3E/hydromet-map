@@ -3,6 +3,7 @@ import {
   fetchFloat32ByteRange,
   generateDateArray,
 } from './gradesBinaryData'
+import { fetchJsonNoCache } from './network'
 
 export const GSHA_BINARY_BASE_URL = 'https://cw3e.ucsd.edu/hydro/gsha/bin'
 export const GSHA_SERIES_COLUMN_NAMES = [
@@ -58,7 +59,7 @@ export async function fetchGshaBinaryDescriptor(frequency) {
   const normalizedFrequency = normalizeFrequency(frequency)
 
   if (!descriptorPromiseByFrequency.has(normalizedFrequency)) {
-    const descriptorPromise = fetch(buildDescriptorUrl(normalizedFrequency))
+    const descriptorPromise = fetchJsonNoCache(buildDescriptorUrl(normalizedFrequency))
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Failed to load GSHA ${normalizedFrequency} descriptor (${response.status}).`)

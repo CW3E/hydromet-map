@@ -1,3 +1,5 @@
+import { fetchJsonNoCache } from './network'
+
 export const GRADES_BINARY_BASE_URL = 'https://cw3e.ucsd.edu/hydro/grades_hydrodl/bin'
 export const GRADES_BINARY_DESCRIPTOR_URL = `${GRADES_BINARY_BASE_URL}/grades_hydrodl.json`
 const CLIMATOLOGY_COLUMN_NAMES = ['Pctl5', 'Pctl10', 'Pctl20', 'Pctl50', 'Pctl80', 'Pctl90', 'Pctl95']
@@ -44,7 +46,7 @@ const LEAP_YEAR_MONTH_DAY_LOOKUP = buildLeapYearMonthDayLookup()
 
 export async function fetchGradesBinaryDescriptor() {
   if (!gradesDescriptorPromise) {
-    gradesDescriptorPromise = fetch(GRADES_BINARY_DESCRIPTOR_URL)
+    gradesDescriptorPromise = fetchJsonNoCache(GRADES_BINARY_DESCRIPTOR_URL)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Failed to load GRADES descriptor (${response.status}).`)

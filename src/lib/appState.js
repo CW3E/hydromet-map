@@ -44,6 +44,9 @@ export function readPopupStateFromUrl() {
   const params = new URLSearchParams(window.location.search)
   const popupText = getFirstParam(params, 'pop', 'popup')
   const tabId = getFirstParam(params, 'tab', 'popupTab')
+  const forecastProduct = getFirstParam(params, 'fprod', 'forecastProduct')
+  const forecastUpdateDate = getFirstParam(params, 'fupd', 'forecastUpdateDate')
+  const forecastPostProcessing = getFirstParam(params, 'fpp', 'forecastPostProcessing')
 
   if (!popupText) {
     return null
@@ -63,6 +66,9 @@ export function readPopupStateFromUrl() {
     longitude,
     latitude,
     tabId: tabId || null,
+    forecastProduct: forecastProduct || null,
+    forecastUpdateDate: forecastUpdateDate || null,
+    forecastPostProcessing: forecastPostProcessing || null,
   }
 }
 
@@ -219,6 +225,18 @@ export function writeStateToUrl(state, { selectedStation = null } = {}) {
 
     if (selectedStation?.popup?.activeTabId) {
       params.set('tab', selectedStation.popup.activeTabId)
+    }
+
+    if (selectedStation?.popup?.forecastProduct) {
+      params.set('fprod', selectedStation.popup.forecastProduct)
+    }
+
+    if (selectedStation?.popup?.forecastUpdateDate) {
+      params.set('fupd', selectedStation.popup.forecastUpdateDate)
+    }
+
+    if (selectedStation?.popup?.forecastPostProcessing) {
+      params.set('fpp', selectedStation.popup.forecastPostProcessing)
     }
   }
 
