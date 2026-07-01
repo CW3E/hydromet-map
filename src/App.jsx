@@ -103,8 +103,6 @@ function buildInitialStatusBoundaryByProjectId() {
         return [projectId, buildFamilyDateBounds({
           minDate: familySelectors.minDate,
           minDateTime: familySelectors.minDateTime,
-          maxDate: familySelectors.defaultDate,
-          maxDateTime: familySelectors.defaultDateTime,
         })]
       }
 
