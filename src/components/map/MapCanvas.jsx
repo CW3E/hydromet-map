@@ -59,6 +59,50 @@ function hasInteractionStateChanges(currentState, patch) {
   return Object.entries(patch).some(([key, value]) => currentState[key] !== value)
 }
 
+function valuesAreEqualExceptCoordinates(firstValue, secondValue) {
+  const firstComparableEntries = Object.entries(firstValue ?? {})
+    .filter(([key]) => key !== 'longitude' && key !== 'latitude')
+  const secondComparableEntries = Object.entries(secondValue ?? {})
+    .filter(([key]) => key !== 'longitude' && key !== 'latitude')
+
+  if (firstComparableEntries.length !== secondComparableEntries.length) {
+    return false
+  }
+
+  return firstComparableEntries.every(([key, value]) => secondValue?.[key] === value)
+}
+
+function stabilizeHoverPopupCoordinates(currentState, patch) {
+  return Object.fromEntries(
+    Object.entries(patch).map(([key, value]) => {
+      const currentValue = currentState[key]
+
+      if (
+        value
+        && currentValue
+        && typeof value === 'object'
+        && typeof currentValue === 'object'
+        && Number.isFinite(value.longitude)
+        && Number.isFinite(value.latitude)
+        && Number.isFinite(currentValue.longitude)
+        && Number.isFinite(currentValue.latitude)
+        && valuesAreEqualExceptCoordinates(value, currentValue)
+      ) {
+        return [
+          key,
+          {
+            ...value,
+            longitude: currentValue.longitude,
+            latitude: currentValue.latitude,
+          },
+        ]
+      }
+
+      return [key, value]
+    }),
+  )
+}
+
 function isMapViewCloseToState(mapInstance, viewState) {
   if (!mapInstance) {
     return true
@@ -182,14 +226,16 @@ export default function MapCanvas({
     )
 
     if (Object.keys(nextInteractionState).length > 0) {
-      setInteractionState((current) =>
-        hasInteractionStateChanges(current, nextInteractionState)
+      setInteractionState((current) => {
+        const stabilizedInteractionState = stabilizeHoverPopupCoordinates(current, nextInteractionState)
+
+        return hasInteractionStateChanges(current, stabilizedInteractionState)
           ? {
               ...current,
-              ...nextInteractionState,
+              ...stabilizedInteractionState,
             }
-          : current,
-      )
+          : current
+      })
     }
   }
 
