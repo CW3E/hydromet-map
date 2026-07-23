@@ -1116,6 +1116,10 @@ button:disabled {
   width: min(720px, calc(100vw - 2rem));
 }
 
+.map-tool-dialog--project-switcher {
+  width: min(360px, calc(100vw - 2rem));
+}
+
 .map-tool-dialog__header {
   display: flex;
   align-items: start;
@@ -1173,6 +1177,44 @@ button:disabled {
 .map-tool-dialog__button--secondary {
   background: #e4eef3;
   color: #244050;
+}
+
+.project-switcher {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.project-switcher__field {
+  display: grid;
+  gap: 0.32rem;
+  color: #244050;
+}
+
+.project-switcher__field span {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.project-switcher__field input,
+.project-switcher__field select {
+  width: 100%;
+  min-height: 2.1rem;
+  box-sizing: border-box;
+  border: 1px solid rgba(74, 113, 137, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #10222f;
+  font: inherit;
+}
+
+.project-switcher__error {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.76rem;
+}
+
+.project-switcher__submit {
+  justify-self: end;
 }
 
 .family-status {
@@ -1331,53 +1373,6 @@ button:disabled {
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.6;
-}
-
-.project-selector__panel {
-  position: absolute;
-  left: calc(100% + 0.24rem);
-  bottom: 0;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-2px);
-  transition:
-    opacity 160ms ease,
-    transform 160ms ease;
-}
-
-.project-selector.is-open .project-selector__panel {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-}
-
-.project-selector__label {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  min-height: 24px;
-  padding: 0 0.26rem;
-  border-radius: 0;
-  background: rgba(244, 249, 252, 0.72);
-  border: 1px solid rgba(74, 113, 137, 0.1);
-  color: #244050;
-  font-size: 0.68rem;
-  line-height: 1.2;
-}
-
-.project-selector__label span {
-  display: block;
-  white-space: nowrap;
-}
-
-.project-selector__label select {
-  width: auto;
-  min-width: 70px;
-  padding: 0.02rem 0.18rem;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.92);
-  font-size: 0.68rem;
-  min-height: 18px;
 }
 
 .project-logo {

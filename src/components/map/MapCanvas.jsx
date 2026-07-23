@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Map, { NavigationControl, ScaleControl } from 'react-map-gl/maplibre'
-import { BASEMAP_STYLES, PROJECT_OPTIONS } from '../../config/mapConfig'
+import { BASEMAP_STYLES } from '../../config/mapConfig'
 import B120PointPopup from '../../features/b120PointPopup/B120PointPopup'
 import CnrfcPointPopup from '../../features/cnrfcPointPopup/CnrfcPointPopup'
 import CnrfcStreamflowPopup from '../../features/cnrfcStreamflowPopup/CnrfcStreamflowPopup'
@@ -16,6 +16,7 @@ import MapContextMenu from './MapContextMenu'
 import MapHud from './MapHud'
 import MapLegend from './MapLegend'
 import ProjectAboutDialog from './ProjectAboutDialog'
+import ProjectSwitcherDialog from './ProjectSwitcherDialog'
 import MapToolDialogs from './MapToolDialogs'
 import MapToolOverlays from './MapToolOverlays'
 import MouseReadout from './MouseReadout'
@@ -112,11 +113,12 @@ export default function MapCanvas({
   const [familyStatusOpen, setFamilyStatusOpen] = useState(false)
   const [isMapDragging, setIsMapDragging] = useState(false)
   const [projectAboutOpen, setProjectAboutOpen] = useState(false)
-  const [projectSelectorOpen, setProjectSelectorOpen] = useState(false)
+  const [projectSwitcherOpen, setProjectSwitcherOpen] = useState(false)
   const mapRef = useRef(null)
   const mouseReadoutRef = useRef(null)
   const isDraggingRef = useRef(false)
-  const projectSelectorRef = useRef(null)
+  const isCameraMovingRef = useRef(false)
+  const syncedProjectIdRef = useRef(activeProjectId)
   const popupRestoreAttemptedRef = useRef(false)
   const availableLayerIdSet = new Set(activeProject?.availableLayerIds ?? [])
   const projectLogoLabel = activeProject?.logoAlt ?? `${activeProject?.label ?? 'Project'} logo`
@@ -161,13 +163,17 @@ export default function MapCanvas({
     if (event.viewState) {
       commitMapView(event.viewState)
     }
+
+    window.requestAnimationFrame(() => {
+      isCameraMovingRef.current = false
+    })
   }
 
   function handlePointerMove(event) {
     mouseReadoutRef.current?.setCoordinates(event.lngLat.lng, event.lngLat.lat)
     mapTools.handlePointerMove(event.lngLat)
 
-    if (isDraggingRef.current) {
+    if (isDraggingRef.current || isCameraMovingRef.current) {
       return
     }
 
@@ -227,6 +233,10 @@ export default function MapCanvas({
     mapTools.handleDragStart()
   }
 
+  function handleMapMoveStart() {
+    isCameraMovingRef.current = true
+  }
+
   function handleDragEnd() {
     window.requestAnimationFrame(() => {
       isDraggingRef.current = false
@@ -235,30 +245,17 @@ export default function MapCanvas({
   }
 
   useEffect(() => {
-    if (!projectSelectorOpen) {
-      return undefined
-    }
-
-    function handleDocumentPointerDown(event) {
-      if (projectSelectorRef.current?.contains(event.target)) {
-        return
-      }
-
-      setProjectSelectorOpen(false)
-    }
-
-    document.addEventListener('pointerdown', handleDocumentPointerDown)
-
-    return () => {
-      document.removeEventListener('pointerdown', handleDocumentPointerDown)
-    }
-  }, [projectSelectorOpen])
-
-  useEffect(() => {
-    if (!mapInstance || isDraggingRef.current || isMapViewCloseToState(mapInstance, viewState)) {
+    if (!mapInstance || syncedProjectIdRef.current === activeProjectId) {
       return
     }
 
+    syncedProjectIdRef.current = activeProjectId
+
+    if (isMapViewCloseToState(mapInstance, viewState)) {
+      return
+    }
+
+    mapInstance.stop()
     mapInstance.jumpTo({
       center: [viewState.longitude, viewState.latitude],
       zoom: viewState.zoom,
@@ -266,6 +263,7 @@ export default function MapCanvas({
       pitch: viewState.pitch,
     })
   }, [
+    activeProjectId,
     mapInstance,
     viewState.bearing,
     viewState.latitude,
@@ -346,6 +344,7 @@ export default function MapCanvas({
         onDragEnd={handleDragEnd}
         onMouseLeave={handlePointerLeave}
         onMouseMove={handlePointerMove}
+        onMoveStart={handleMapMoveStart}
         onMoveEnd={handleMapMoveEnd}
         style={{ width: '100%', height: '100%' }}
       >
@@ -535,11 +534,15 @@ export default function MapCanvas({
         projectLabel={activeProject?.label}
       />
 
+      <ProjectSwitcherDialog
+        activeProjectId={activeProjectId}
+        onChangeProject={onChangeProject}
+        onClose={() => setProjectSwitcherOpen(false)}
+        open={projectSwitcherOpen}
+      />
+
       <div
-        ref={projectSelectorRef}
-        className={projectSelectorOpen ? 'project-selector is-open' : 'project-selector'}
-        onMouseEnter={() => setProjectSelectorOpen(true)}
-        onMouseLeave={() => setProjectSelectorOpen(false)}
+        className="project-selector"
         onMouseDown={(event) => event.stopPropagation()}
         onPointerDown={(event) => event.stopPropagation()}
         onTouchStart={(event) => event.stopPropagation()}
@@ -549,7 +552,7 @@ export default function MapCanvas({
           type="button"
           aria-label="Project selector"
           title="Project selector"
-          onClick={() => setProjectSelectorOpen((current) => !current)}
+          onClick={() => setProjectSwitcherOpen(true)}
         >
           <svg aria-hidden="true" viewBox="0 0 24 24">
             <rect x="4.5" y="4.5" width="6" height="6" rx="1.2" ry="1.2" />
@@ -558,25 +561,6 @@ export default function MapCanvas({
             <rect x="13.5" y="13.5" width="6" height="6" rx="1.2" ry="1.2" />
           </svg>
         </button>
-
-        <div className="project-selector__panel">
-          <div className="project-selector__label">
-            <span>Project</span>
-            <select
-              value={activeProjectId}
-              onChange={(event) => {
-                onChangeProject(event.target.value)
-                setProjectSelectorOpen(false)
-              }}
-            >
-              {PROJECT_OPTIONS.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
       </div>
 
       <BookmarkControl
