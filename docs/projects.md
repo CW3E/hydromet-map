@@ -172,6 +172,20 @@ So when a user switches from `cnrfc` to `b120` and back, the previous project's:
 
 are preserved in memory.
 
+## Project switching UI
+
+The bottom project switch button opens a lightweight passcode dialog before rendering the project list. This is not security; it is only intended to keep casual visitors from easily discovering other project names through hover or accidental taps.
+
+The passcode-gated switcher lives in:
+
+- [src/components/map/ProjectSwitcherDialog.jsx](../src/components/map/ProjectSwitcherDialog.jsx)
+
+The visible button and dialog mount point live in:
+
+- [src/components/map/MapCanvas.jsx](../src/components/map/MapCanvas.jsx)
+
+Do not reintroduce hover-open project menus. Project names should only be rendered after the switcher dialog is unlocked.
+
 ## Adding a new project
 
 To add a new project:

@@ -207,6 +207,19 @@ For shared popup UIs used by multiple layers, it is reasonable to render the pop
 
 That keeps layer modules smaller and makes popup logic reusable.
 
+## Hover popup anchoring
+
+Many lightweight hover popups are anchored from `event.lngLat` because line and polygon features may not have a single natural point coordinate.
+
+To avoid jitter, `MapCanvas.jsx` stabilizes hover popup coordinates when the hovered feature identity/details are unchanged. A layer can still update the popup anchor by returning a hover object with different non-coordinate properties, such as a different feature id.
+
+When adding a hover popup:
+
+- include stable feature identity fields in the hover object
+- keep `longitude` and `latitude` numeric
+- avoid changing non-coordinate fields on every mouse move unless the popup should intentionally re-anchor
+- keep hover work synchronous and lightweight
+
 ## Map tool dialogs
 
 The context-menu map tools use a similar "shared rendering from `MapCanvas.jsx`" idea, but they are not feature popups.

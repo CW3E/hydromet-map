@@ -38,6 +38,8 @@ Avoid creating a separate feature folder for a tiny static hover popup unless ne
 7. Implement `renderPopups` with `Popup`, `closeButton={false}`, and the existing lightweight class when appropriate.
 8. Keep hover popups synchronous. Do not fetch CSV, remote JSON, or plot data from hover.
 
+`MapCanvas.jsx` stabilizes hover popup coordinates when the hover object is unchanged except for `longitude` and `latitude`. Include stable feature identity/detail fields in hover objects, and avoid changing non-coordinate fields on every mouse move unless the popup should intentionally re-anchor.
+
 ## Clicked Popup Checklist
 
 1. Add `onClick` to locate the clicked feature from the intended layer ID.

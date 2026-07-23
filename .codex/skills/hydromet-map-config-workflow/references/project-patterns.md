@@ -51,6 +51,8 @@ When adding or changing a project, verify how switching projects affects:
 
 Prefer predictable resets for state that is invalid in the new project, and preserve state only when the same layer/family exists in both projects.
 
+The project switcher is intentionally passcode-gated in `src/components/map/ProjectSwitcherDialog.jsx`. Do not expose project names in a hover-open menu or other always-rendered control. The passcode gate is lightweight visitor-facing obscurity, not real security.
+
 ## Bookmark Behavior
 
 When project state is bookmarkable:
