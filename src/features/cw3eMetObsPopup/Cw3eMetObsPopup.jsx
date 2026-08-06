@@ -15,13 +15,13 @@ import {
 
 function renderPlot(plotState, station) {
   if (plotState?.status === 'loading') {
-    return <p className="station-popup__status">Loading precipitation data...</p>
+    return <p className="station-popup__status">Loading observation data...</p>
   }
   if (plotState?.status === 'error') {
     return <p className="station-popup__status station-popup__status--error">{plotState.error}</p>
   }
   if (plotState?.status === 'ready' && plotState.traces.length === 0) {
-    return <p className="station-popup__status">No precipitation data available for this station.</p>
+    return <p className="station-popup__status">No data available for this tab.</p>
   }
   if (plotState?.status === 'ready') {
     return (
@@ -39,6 +39,9 @@ export default function Cw3eMetObsPopup({ selectedStation, setSelectedStation })
   if (!selectedStation || selectedStation.popupType !== 'cw3e-met-obs') return null
 
   const activeTabId = selectedStation.popup?.activeTabId ?? CW3E_MET_OBS_POPUP_TABS[0].id
+  const visibleTabs = CW3E_MET_OBS_POPUP_TABS.filter(
+    (tab) => tab.id !== 'soil' || selectedStation.popup?.hasSoilOrSnowData || activeTabId === 'soil',
+  )
   const activeTab = getCw3eMetObsPopupTabDefinition(activeTabId)
   const activeTabState = selectedStation.popup?.tabDataById?.[activeTabId]
   const downloadFiles = (activeTab?.plots ?? []).flatMap(
@@ -68,7 +71,7 @@ export default function Cw3eMetObsPopup({ selectedStation, setSelectedStation })
       <div className="station-popup station-popup--timeseries">
         <div className="station-popup__header-row">
           <div className="station-popup__tabs" role="tablist" aria-label="CW3E observation tabs">
-            {CW3E_MET_OBS_POPUP_TABS.map((tab) => (
+            {visibleTabs.map((tab) => (
               <button
                 key={tab.id}
                 type="button"

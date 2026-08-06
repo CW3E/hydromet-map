@@ -6,6 +6,24 @@ import {
   getDefaultCw3eMetObsPopupTabId,
 } from './cw3eMetObsPopupConfig'
 
+const MISSING_VALUE_SENTINELS = new Set([-99.99])
+const SOIL_OR_SNOW_COLUMN_PATTERN = /^(?:soil_(?:moisture|temperature)_\d+(?:p\d+)?cm_(?:pct|c)|snow_depth_m)$/
+
+function isUsableNumber(value) {
+  return typeof value === 'number'
+    && Number.isFinite(value)
+    && !MISSING_VALUE_SENTINELS.has(value)
+}
+
+function meetsMinimumValue(value, minimumValue) {
+  return minimumValue == null || value >= minimumValue
+}
+
+function isUsableSoilOrSnowValue(field, value) {
+  const minimumValue = field.startsWith('soil_temperature_') ? -100 : null
+  return isUsableNumber(value) && meetsMinimumValue(value, minimumValue)
+}
+
 function createEmptyPlotState(plotDefinition) {
   return {
     plotId: plotDefinition.id,
@@ -47,14 +65,23 @@ function buildYAxisLayout(plotDefinition, traces) {
   return Object.fromEntries(
     Object.entries(plotDefinition.axes ?? {})
       .filter(([axisId]) => usedAxes.has(axisId))
-      .map(([axisId, config]) => [
-        axisId === 'y' ? 'yaxis' : `yaxis${axisId.slice(1)}`,
-        {
+      .map(([axisId, config]) => {
+        const normalizedConfig = {
           automargin: true,
           ...config,
           ...(config.title ? { title: normalizeAxisTitle(config.title) } : {}),
-        },
-      ]),
+        }
+
+        if (axisId !== 'y' && normalizedConfig.overlaying === 'y') {
+          normalizedConfig.anchor = normalizedConfig.anchor ?? 'free'
+          normalizedConfig.autoshift = normalizedConfig.autoshift ?? true
+        }
+
+        return [
+          axisId === 'y' ? 'yaxis' : `yaxis${axisId.slice(1)}`,
+          normalizedConfig,
+        ]
+      }),
   )
 }
 
@@ -62,20 +89,35 @@ function buildTrace(seriesKey, seriesConfig, sourceRecord) {
   const xValues = sourceRecord.rows.map((row, index) => row[seriesConfig.xField] ?? index)
   const yValues = sourceRecord.rows.map((row) => {
     const value = row[seriesConfig.column ?? seriesKey]
-    return typeof value === 'number' && Number.isFinite(value) ? value : null
+    return isUsableNumber(value) && meetsMinimumValue(value, seriesConfig.minimumValue)
+      ? value
+      : null
   })
 
   if (!yValues.some((value) => value != null)) {
     return null
   }
 
-  return {
+  const trace = {
     type: seriesConfig.type ?? 'scatter',
     name: seriesConfig.label ?? seriesKey,
     x: xValues,
     y: yValues,
     ...(seriesConfig.marker ? { marker: seriesConfig.marker } : {}),
+    ...(seriesConfig.visible ? { visible: seriesConfig.visible } : {}),
   }
+
+  if (seriesConfig.yAxis && seriesConfig.yAxis !== 'y') {
+    trace.yaxis = seriesConfig.yAxis
+  }
+
+  if (trace.type !== 'bar') {
+    trace.mode = seriesConfig.mode ?? 'lines'
+    trace.connectgaps = false
+    trace.line = { width: 2, ...(seriesConfig.line ?? {}) }
+  }
+
+  return trace
 }
 
 async function fetchPlotSource(sourceDefinition, station) {
@@ -100,11 +142,24 @@ async function buildPlotState(plotDefinition, station) {
     }),
   )
   const sourceRecords = Object.fromEntries(sourceEntries)
-  const traces = Object.entries(plotDefinition.series)
+  const generatedSeries = typeof plotDefinition.buildSeries === 'function'
+    ? (plotDefinition.buildSeries({ sourceRecords, station }) ?? {})
+    : {}
+  const seriesDefinitions = {
+    ...generatedSeries,
+    ...(plotDefinition.series ?? {}),
+  }
+  const traces = Object.entries(seriesDefinitions)
     .map(([seriesKey, seriesConfig]) =>
       buildTrace(seriesKey, seriesConfig, sourceRecords[seriesConfig.sourceId]),
     )
     .filter(Boolean)
+  const hasSoilOrSnowData = Object.values(sourceRecords).some((sourceRecord) =>
+    sourceRecord.fields.some((field) =>
+      SOIL_OR_SNOW_COLUMN_PATTERN.test(field)
+      && sourceRecord.rows.some((row) => isUsableSoilOrSnowValue(field, row[field])),
+    ),
+  )
   const titleText = plotDefinition.titleTemplate
     .replaceAll('{stationName}', station.name ?? '')
     .replaceAll('{stationId}', station.id ?? '')
@@ -121,6 +176,7 @@ async function buildPlotState(plotDefinition, station) {
     xAxisLayout: plotDefinition.xAxis,
     yAxesLayout: buildYAxisLayout(plotDefinition, traces),
     hovermode: plotDefinition.hovermode,
+    hasSoilOrSnowData,
     traceFingerprint: traces.length ? traces.map((trace) => `${trace.type}:${trace.name}`).join('|') : 'empty',
     downloadFiles: traces.length
       ? buildRawSourceDownloadFiles({
@@ -193,10 +249,12 @@ export function loadCw3eMetObsPopupTabData(setSelectedStation, station, tabId) {
 
   Promise.all(tabDefinition.plots.map(async (plot) => [plot.id, await buildPlotState(plot, station)]))
     .then((entries) => {
+      const hasSoilOrSnowData = entries.some(([, plotState]) => plotState.hasSoilOrSnowData)
       setSelectedStation((current) => current?.popupOwnerId === station.popupOwnerId && current?.id === station.id ? {
         ...current,
         popup: {
           ...current.popup,
+          hasSoilOrSnowData,
           tabDataById: {
             ...current.popup.tabDataById,
             [tabId]: { plotsById: Object.fromEntries(entries) },
