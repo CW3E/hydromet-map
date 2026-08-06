@@ -220,6 +220,14 @@ export const ALL_MAP_LAYERS = [
     symbolColor: '#2563eb',
   },
   {
+    id: 'cw3eMetObs',
+    label: 'CW3E Met Obs',
+    type: 'vector',
+    description: 'CW3E meteorological observation stations.',
+    symbol: '\u25CF',
+    symbolColor: '#000080',
+  },
+  {
     id: 'b120Basins',
     label: 'B120 Basins',
     type: 'vector',
@@ -916,6 +924,18 @@ export const PROJECTS = {
       'cnrfcBasins',
       'cnrfcPoints',
     ],
+  },
+  cw3eObs: {
+    id: 'cw3eObs',
+    label: 'CW3E Observations',
+    documentTitle: 'CW3E Observations',
+    statusButtonEnabled: false,
+    logoUrl: 'https://cw3e.ucsd.edu/images/CW3E_Logos/5-Vertical-Acronym_Only/Digital/PNG/CW3E-Logo-Vertical-Acronym-FullColor.png',
+    logoAlt: 'Center for Western Weather and Water Extremes (CW3E)',
+    logoHref: 'https://cw3e.ucsd.edu',
+    defaultBasemapId: 'terrain',
+    availableLayerIds: ['cnrfcRivers', 'cw3eMetObs'],
+    defaultVisibleLayerIds: ['cnrfcRivers', 'cw3eMetObs'],
   },
   ocwd: {
     id: 'ocwd',
