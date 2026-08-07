@@ -7,7 +7,7 @@ import {
 import { getDefaultCw3eMetObsPopupTabId } from '../features/cw3eMetObsPopup/cw3eMetObsPopupConfig'
 import { applyBookmarkedPopupTab, findBookmarkFeatureAtPoint } from './bookmarkRestore'
 
-const CW3E_MET_OBS_GEOJSON_URL = 'https://cw3e.ucsd.edu/hydro/cw3e_obs/csv/cdec_cw3e_stations.geojson'
+const CW3E_MET_OBS_GEOJSON_URL = 'https://cw3e.ucsd.edu/hydro/cw3e_obs/csv/cw3e_stations_all.geojson'
 
 function buildHoveredMetObservation(event, feature) {
   const properties = feature?.properties ?? {}
