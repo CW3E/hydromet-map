@@ -949,6 +949,12 @@ export const PROJECTS = {
     logoUrl: 'https://cw3e.ucsd.edu/images/CW3E_Logos/5-Vertical-Acronym_Only/Digital/PNG/CW3E-Logo-Vertical-Acronym-FullColor.png',
     logoAlt: 'Center for Western Weather and Water Extremes (CW3E)',
     logoHref: 'https://cw3e.ucsd.edu',
+    defaultView: {
+      center: '-119.5,39.5',
+      zoom: '4.2',
+      bearing: '0',
+      pitch: '0',
+    },
     defaultBasemapId: 'terrain',
     availableLayerIds: ['conusRivers', 'hucBasins', 'cw3eMetObs'],
     defaultVisibleLayerIds: ['conusRivers', 'cw3eMetObs'],

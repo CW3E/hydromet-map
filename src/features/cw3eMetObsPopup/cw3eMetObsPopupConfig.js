@@ -10,7 +10,9 @@ const CW3E_MET_OBS_CSV_ROOT = 'https://cw3e.ucsd.edu/hydro/cw3e_obs/csv/hourly'
 export const CW3E_MET_OBS_POPUP_WIDTH = TIMESERIES_POPUP_WIDTH
 
 function buildObservationUrl({ stationId }) {
-  return `${CW3E_MET_OBS_CSV_ROOT}/${encodeURIComponent(stationId)}/latest_183d.csv`
+  const url = new URL(`${CW3E_MET_OBS_CSV_ROOT}/${encodeURIComponent(stationId)}/latest_183d.csv`)
+  url.searchParams.set('refresh', Date.now().toString())
+  return url.toString()
 }
 
 function buildDownloadFileName(context) {
