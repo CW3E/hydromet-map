@@ -84,6 +84,22 @@ export const ALL_MAP_LAYERS = [
     symbolColor: '#008b8b',
   },
   {
+    id: 'conusRivers',
+    label: 'NWM Rivers (CONUS)',
+    type: 'vector-tile',
+    description: 'CONUS flowlines and stream segments from tiled vector sources.',
+    symbol: '\uFF5E',
+    symbolColor: '#008b8b',
+  },
+  {
+    id: 'hucBasins',
+    label: 'HUC Basins',
+    type: 'vector-tile',
+    description: 'Watershed Boundary Dataset HUC basin outlines.',
+    symbol: '\u2610',
+    symbolColor: '#4b5563',
+  },
+  {
     id: 'cnrfcStreamflow',
     label: 'CNRFC Streamflow',
     type: 'vector-tile',
@@ -934,8 +950,8 @@ export const PROJECTS = {
     logoAlt: 'Center for Western Weather and Water Extremes (CW3E)',
     logoHref: 'https://cw3e.ucsd.edu',
     defaultBasemapId: 'terrain',
-    availableLayerIds: ['cnrfcRivers', 'cw3eMetObs'],
-    defaultVisibleLayerIds: ['cnrfcRivers', 'cw3eMetObs'],
+    availableLayerIds: ['conusRivers', 'hucBasins', 'cw3eMetObs'],
+    defaultVisibleLayerIds: ['conusRivers', 'cw3eMetObs'],
   },
   ocwd: {
     id: 'ocwd',
@@ -1066,6 +1082,7 @@ export const PROJECTS = {
       'swordReaches',
       'gsha',
       'geodar',
+      'hucBasins',
     ],
     defaultVisibleLayerIds: ['globalRaster', 'gradesHydroDl', 'gsha'],
   },
@@ -1125,6 +1142,11 @@ export const TERRAIN_SOURCE_ID = 'terrain_source'
 export const TERRAIN_SPEC = { source: TERRAIN_SOURCE_ID, exaggeration: 1 }
 export const RIVER_NETWORK_PMTILES_URL =
   'https://cw3e.ucsd.edu/hydro/cnrfc/pmtiles/nwm_reaches_cnrfc_idx.pmtiles'
+export const CONUS_RIVER_NETWORK_PMTILES_URL =
+  'https://cw3e.ucsd.edu/hydro/conus/pmtiles/nwm_reaches_conus.pmtiles'
+export const HUC_BASINS_PMTILES_URL =
+  'https://cw3e.ucsd.edu/hydro/conus/pmtiles/WBDHU.pmtiles'
+export const HUC_BASINS_SOURCE_LAYER = 'WBDHU'
 export const CNRFC_STREAMFLOW_DATA_PMTILES_URL =
   'https://cw3e.ucsd.edu/hydro/cnrfc/pmtiles/nrt/data_cnrfc_idx_20260426.pmtiles'
 export const UCRB_RIVER_NETWORK_PMTILES_URL =

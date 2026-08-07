@@ -5,6 +5,8 @@ import cnrfcRegionLayer from './cnrfcRegionLayer'
 import cnrfcRasterLayer from './cnrfcRasterLayer'
 import cnrfcRiversLayer from './cnrfcRiversLayer'
 import cnrfcStreamflowLayer from './cnrfcStreamflowLayer'
+import conusRiversLayer from './conusRiversLayer'
+import hucBasinsLayer from './hucBasinsLayer'
 import cw3eMetObsLayer from './cw3eMetObsLayer'
 import ucrbRiversLayer from './ucrbRiversLayer'
 import cnrfcPointsLayer from './cnrfcPointsLayer'
@@ -36,6 +38,8 @@ export const MAP_LAYER_MODULES = [
   camaFloodLayer,
   cnrfcRiversLayer,
   cnrfcStreamflowLayer,
+  conusRiversLayer,
+  hucBasinsLayer,
   cw3eMetObsLayer,
   ucrbRiversLayer,
   geodarLayer,

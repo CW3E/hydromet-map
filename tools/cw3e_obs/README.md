@@ -65,6 +65,11 @@ are preferred when more than one candidate exists. Common variables are mapped t
 such as `precipitation_mm`, `temperature_c`, and `wind_speed_ms`. Unknown variables are retained
 with normalized names rather than discarded.
 
+When a station README documents multiple dated formats, the processor selects the schema with
+the most recent start date and skips source files older than that date. This keeps current rolling
+products correct without interpreting legacy columns using a newer layout. Fraction-based soil
+moisture fields are converted to percent so all `soil_moisture_*_pct` outputs use consistent units.
+
 ## Operational notes
 
 - Review `processing_report.json` after every run, especially after station instrumentation or
@@ -73,5 +78,7 @@ with normalized names rather than discarded.
   published to the web server.
 - The utility keeps the last row when duplicate station timestamps are encountered and reports
   the duplicate count.
+- Reports include `files_skipped_before_schema` when older-format files are intentionally omitted.
 - Source values are preserved as text. The processor does not guess which numeric sentinels mean
-  missing data and does not perform scientific quality control.
+  missing data and does not perform scientific quality control. The `-99.99` sentinel is preserved
+  while applying documented unit conversions.

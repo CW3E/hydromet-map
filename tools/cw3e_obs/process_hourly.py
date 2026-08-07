@@ -11,7 +11,7 @@ import re
 import sys
 from collections import Counter
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Iterable
 
@@ -21,6 +21,12 @@ DEFAULT_OUTPUT = Path("cw3e_obs")
 README_COLUMN_PATTERN = re.compile(r"^\s*(\d+)\s*[.)]\s*(.+?)\s*$")
 YEAR_PATTERN = re.compile(r"^\d{4}$")
 DEPTH_PATTERN = re.compile(r"(?P<depth>\d+(?:\.\d+)?)\s*cm", re.IGNORECASE)
+SCHEMA_DATE_RANGE_PATTERN = re.compile(
+    r"(?P<start>\d{4}-\d{2}-\d{2})\s*-\s*(?P<end>\d{4}-\d{2}-\d{2}|current|present)",
+    re.IGNORECASE,
+)
+FILE_DATE_PATTERN = re.compile(r"(?<!\d)(?P<date>\d{8})(?!\d)")
+MISSING_VALUE_SENTINELS = {-99.99}
 
 
 @dataclass
@@ -29,6 +35,7 @@ class StationReport:
     status: str = "ok"
     schema_file: str | None = None
     files_seen: int = 0
+    files_skipped_before_schema: int = 0
     files_loaded: int = 0
     rows_loaded: int = 0
     malformed_rows: int = 0
@@ -102,30 +109,59 @@ def make_unique(columns: Iterable[str]) -> list[str]:
     return unique
 
 
-def parse_hourly_schema(readme_path: Path) -> tuple[list[str], list[dict]]:
-    definitions = []
-    for line in readme_path.read_text(encoding="utf-8", errors="replace").splitlines():
-        match = README_COLUMN_PATTERN.match(line)
+def parse_hourly_schema(readme_path: Path) -> tuple[list[str], list[dict], date | None]:
+    lines = readme_path.read_text(encoding="utf-8", errors="replace").splitlines()
+    dated_sections = []
+    for index, line in enumerate(lines):
+        match = SCHEMA_DATE_RANGE_PATTERN.search(line)
         if match:
-            definitions.append((int(match.group(1)), match.group(2).strip()))
+            dated_sections.append((date.fromisoformat(match.group("start")), index))
+
+    schema_start_date = None
+    section_start = 0
+    section_end = len(lines)
+    if dated_sections:
+        schema_start_date, date_line_index = max(dated_sections)
+        section_start = date_line_index + 1
+        later_date_lines = [index for _, index in dated_sections if index > date_line_index]
+        if later_date_lines:
+            section_end = min(later_date_lines)
+
+    definitions = []
+    expected_position = 1
+    for line in lines[section_start:section_end]:
+        match = README_COLUMN_PATTERN.match(line)
+        if not match:
+            continue
+
+        position = int(match.group(1))
+        if position != expected_position:
+            if definitions:
+                break
+            continue
+        definitions.append((position, match.group(2).strip()))
+        expected_position += 1
 
     if not definitions:
         raise ValueError("No numbered column definitions found")
-
-    definitions.sort()
-    expected_positions = list(range(1, definitions[-1][0] + 1))
-    actual_positions = [position for position, _ in definitions]
-    if actual_positions != expected_positions:
-        raise ValueError(f"Column numbering is not contiguous: {actual_positions}")
 
     canonical = make_unique(
         canonical_column(label, position) for position, label in definitions
     )
     details = [
-        {"position": position, "source_label": label, "column": column}
+        {
+            "position": position,
+            "source_label": label,
+            "column": column,
+            **(
+                {"multiplier": 100}
+                if column.startswith("soil_moisture_") and "frac" in label.lower()
+                else {}
+            ),
+        }
         for (position, label), column in zip(definitions, canonical)
     ]
-    return canonical, details
+    return canonical, details, schema_start_date
 
 
 def find_hourly_readme(station_dir: Path, station_id: str) -> Path | None:
@@ -202,10 +238,32 @@ def build_timestamp(values: dict[str, str]) -> datetime:
     )
 
 
+def extract_hourly_file_date(path: Path) -> date | None:
+    match = FILE_DATE_PATTERN.search(path.stem)
+    if not match:
+        return None
+    try:
+        return datetime.strptime(match.group("date"), "%Y%m%d").date()
+    except ValueError:
+        return None
+
+
+def apply_value_multiplier(value: str, multiplier: float) -> str:
+    try:
+        numeric_value = float(value)
+    except ValueError:
+        return value
+    if numeric_value in MISSING_VALUE_SENTINELS:
+        return value
+    return format(numeric_value * multiplier, ".15g")
+
+
 def load_station_rows(
     station_dir: Path,
     station_id: str,
     columns: list[str],
+    schema_details: list[dict],
+    schema_start_date: date | None,
     report: StationReport,
 ) -> dict[datetime, dict[str, str]]:
     rows_by_timestamp: dict[datetime, dict[str, str]] = {}
@@ -214,9 +272,18 @@ def load_station_rows(
         raise ValueError(
             f"Schema is missing time columns: {sorted(required_time_columns - set(columns))}"
         )
+    value_multipliers = {
+        detail["column"]: detail["multiplier"]
+        for detail in schema_details
+        if "multiplier" in detail
+    }
 
     for source_path in iter_hourly_files(station_dir):
         report.files_seen += 1
+        source_date = extract_hourly_file_date(source_path)
+        if schema_start_date and source_date and source_date < schema_start_date:
+            report.files_skipped_before_schema += 1
+            continue
         loaded_from_file = 0
         relative_source = source_path.relative_to(station_dir).as_posix()
         try:
@@ -242,7 +309,12 @@ def load_station_rows(
                         "source_file": relative_source,
                     }
                     normalized.update(
-                        (column, values[column])
+                        (
+                            column,
+                            apply_value_multiplier(values[column], value_multipliers[column])
+                            if column in value_multipliers
+                            else values[column],
+                        )
                         for column in columns
                         if column not in required_time_columns
                     )
@@ -303,7 +375,7 @@ def process_station(
 
     report.schema_file = readme_path.name
     try:
-        columns, schema_details = parse_hourly_schema(readme_path)
+        columns, schema_details, schema_start_date = parse_hourly_schema(readme_path)
     except (OSError, ValueError) as error:
         report.status = "skipped"
         report.warnings.append(f"Could not parse hourly schema: {error}")
@@ -317,13 +389,21 @@ def process_station(
         "station_id": station_id,
         "source_readme": readme_path.name,
         "timezone": timezone_label,
+        "valid_from": schema_start_date.isoformat() if schema_start_date else None,
         "output_columns": output_fields,
         "source_columns": schema_details,
     }
     write_json(output_dir / "schemas" / f"{station_id}.json", schema_payload)
 
     try:
-        rows_by_timestamp = load_station_rows(station_dir, station_id, columns, report)
+        rows_by_timestamp = load_station_rows(
+            station_dir,
+            station_id,
+            columns,
+            schema_details,
+            schema_start_date,
+            report,
+        )
     except ValueError as error:
         report.status = "skipped"
         report.warnings.append(str(error))
@@ -422,6 +502,11 @@ def main() -> int:
         print(
             f"{report.station_id}: {report.status}; "
             f"{report.rows_loaded} rows from {report.files_loaded}/{report.files_seen} files"
+            + (
+                f"; {report.files_skipped_before_schema} older-format files skipped"
+                if report.files_skipped_before_schema
+                else ""
+            )
         )
 
     stations_payload = {
