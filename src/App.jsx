@@ -99,7 +99,7 @@ function buildInitialStatusBoundaryByProjectId() {
       const layerFamily = getProjectLayerFamily(projectId)
       const familySelectors = layerFamily?.selectors ?? {}
 
-      if (layerFamily?.id === 'globalHydro') {
+      if (layerFamily?.raster?.layerId === 'globalRaster') {
         return [projectId, buildFamilyDateBounds({
           minDate: familySelectors.minDate,
           minDateTime: familySelectors.minDateTime,
@@ -335,7 +335,7 @@ function App() {
           return
         }
 
-        if (layerFamily.id === 'globalHydro') {
+        if (layerFamily.raster?.layerId === 'globalRaster') {
           try {
             const descriptor = await fetchGradesBinaryDescriptor()
             const gradesEndDate = descriptor?.MERIT?.end
@@ -519,18 +519,18 @@ function App() {
 
         const nextFamily = {
           ...activeProjectStateValue.family,
-          [key]: value,
+          ...(typeof key === 'object' ? key : { [key]: value }),
         }
 
-        if (key === 'date') {
+        if (typeof key !== 'object' && key === 'date') {
           nextFamily.datetime = mergeDateIntoDateTime(value, activeProjectStateValue.family.datetime)
         }
 
-        if (key === 'datetime') {
+        if (typeof key !== 'object' && key === 'datetime') {
           nextFamily.date = getDatePartFromDateTime(value, activeProjectStateValue.family.date)
         }
 
-        if (key === 'variable') {
+        if (typeof key !== 'object' && key === 'variable') {
           const nextVariable =
             familyVariablesForProject[value]
             ?? familyVariablesForProject[Object.keys(familyVariablesForProject)[0]]

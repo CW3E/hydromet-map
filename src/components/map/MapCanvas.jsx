@@ -375,6 +375,7 @@ export default function MapCanvas({
     <section className={isMapDragging ? 'map-canvas is-map-dragging' : 'map-canvas'}>
       <Map
         attributionControl={false}
+        canvasContextAttributes={{ antialias: true }}
         initialViewState={viewState}
         interactiveLayerIds={interactiveLayerIds}
         mapStyle={BASEMAP_STYLES[appState.basemapId]}

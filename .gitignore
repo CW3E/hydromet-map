@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 tools/snapshots/output/
+__pycache__/
+*.py[cod]
 
 # Editor directories and files
 .vscode/*

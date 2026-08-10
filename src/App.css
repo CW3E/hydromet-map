@@ -547,6 +547,251 @@ button:disabled {
   gap: 0.2rem;
 }
 
+.ar-recon-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: min(760px, calc(100vw - 1.7rem));
+  padding: 0.2rem;
+  border: 1px solid rgba(181, 118, 20, 0.42);
+  border-radius: 12px;
+  background: rgba(255, 238, 204, 0.9);
+  box-shadow: 0 2px 8px rgba(111, 67, 18, 0.1);
+  color: #173648;
+}
+
+.ar-recon-display-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.22rem;
+  padding: 0.2rem;
+  border: 1px solid rgba(181, 118, 20, 0.42);
+  border-radius: 12px;
+  background: rgba(255, 238, 204, 0.9);
+  box-shadow: 0 2px 8px rgba(111, 67, 18, 0.1);
+}
+
+.ar-recon-display-controls select {
+  width: auto;
+  min-width: 0;
+  min-height: 30px;
+  padding: 0.22rem 0.34rem;
+  border-radius: 10px;
+  background: rgba(255, 252, 245, 0.96);
+  font-size: calc(0.78rem + 1px);
+}
+
+.ar-recon-toolbar__toggle,
+.ar-recon-toolbar__button,
+.ar-recon-toolbar__message,
+.ar-recon-toolbar__notice {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0.22rem 0.45rem;
+  border: 1px solid rgba(23, 54, 72, 0.18);
+  border-radius: 10px;
+  background: rgba(244, 249, 252, 0.92);
+  font-size: calc(0.78rem + 1px);
+  line-height: 1;
+}
+
+.ar-recon-display-controls .ar-recon-toolbar__toggle,
+.ar-recon-toolbar .ar-recon-toolbar__toggle,
+.ar-recon-toolbar .ar-recon-toolbar__button,
+.ar-recon-toolbar .ar-recon-flight-picker > summary {
+  background: rgba(255, 252, 245, 0.96);
+  border-color: rgba(153, 95, 14, 0.28);
+}
+
+.ar-recon-toolbar__toggle {
+  gap: 0.25rem;
+  cursor: pointer;
+}
+
+.ar-recon-toolbar__button {
+  color: #173648;
+  cursor: pointer;
+}
+
+.ar-recon-toolbar__button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.ar-recon-toolbar__button--fit {
+  justify-content: center;
+  width: 31px;
+  min-width: 31px;
+  padding: 0;
+}
+
+.ar-recon-toolbar__button--fit svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.ar-recon-flight-picker {
+  position: relative;
+  color: #173648;
+}
+
+.ar-recon-flight-picker > summary {
+  min-width: 132px;
+  padding: 0.43rem 0.55rem;
+  border: 1px solid rgba(23, 54, 72, 0.18);
+  border-radius: 10px;
+  background: rgba(244, 249, 252, 0.96);
+  cursor: pointer;
+  font-size: calc(0.78rem + 1px);
+  list-style-position: inside;
+}
+
+.ar-recon-flight-picker__menu {
+  position: absolute;
+  z-index: 8;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  width: min(330px, calc(100vw - 1.7rem));
+  max-height: min(520px, calc(100vh - 8rem));
+  overflow: auto;
+  padding: 0.55rem;
+  border: 1px solid rgba(23, 54, 72, 0.2);
+  border-radius: 12px;
+  background: rgba(247, 251, 253, 0.98);
+  box-shadow: 0 10px 28px rgba(11, 35, 49, 0.22);
+}
+
+.ar-recon-flight-picker__actions {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.45rem;
+}
+
+.ar-recon-flight-picker__actions button {
+  padding: 0.28rem 0.48rem;
+  border: 1px solid rgba(23, 54, 72, 0.2);
+  border-radius: 8px;
+  background: #fff;
+  color: #173648;
+  cursor: pointer;
+}
+
+.ar-recon-flight-picker fieldset {
+  margin: 0;
+  padding: 0.38rem 0.3rem 0.25rem;
+  border: 0;
+  border-top: 1px solid rgba(23, 54, 72, 0.12);
+}
+
+.ar-recon-flight-picker legend {
+  padding: 0 0.2rem;
+  color: #567080;
+  font-size: 0.73rem;
+  font-weight: 700;
+}
+
+.ar-recon-flight-picker__option {
+  display: grid;
+  grid-template-columns: auto 10px 1fr;
+  align-items: center;
+  gap: 0.38rem;
+  padding: 0.28rem 0.2rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.ar-recon-flight-picker__swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.ar-recon-flight-label {
+  --flight-color: #ffbd3e;
+  padding: 0.24rem 0.42rem;
+  border: 1px solid color-mix(in srgb, var(--flight-color) 70%, #172f3d);
+  border-left: 5px solid var(--flight-color);
+  border-radius: 7px;
+  background: rgba(10, 30, 42, 0.88);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.32);
+}
+
+.ar-recon-flight-label__title,
+.ar-recon-flight-label__date {
+  display: block;
+}
+
+.ar-recon-flight-label__date {
+  margin-top: 0.2rem;
+  color: color-mix(in srgb, var(--flight-color) 72%, #fff);
+  font-size: 0.66rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.station-popup--timeseries.ar-recon-sonde-popup {
+  width: min(450px, calc(100vw - 3rem));
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.ar-recon-sonde-profile-popup .maplibregl-popup-content {
+  padding: 0.42rem 0.46rem 0.12rem;
+}
+
+.ar-recon-sonde-hover {
+  display: grid;
+  gap: 0.12rem;
+  color: #10222f;
+  font-size: 0.7rem;
+  pointer-events: none;
+}
+
+.ar-recon-sonde-hover-popup {
+  pointer-events: none;
+}
+
+.ar-recon-sonde-hover span {
+  color: #567080;
+}
+
+.station-popup__plot.ar-recon-sonde-popup__plot {
+  width: 100%;
+  max-width: 100%;
+  height: 380px;
+  overflow: hidden;
+}
+
+.ar-recon-sonde-popup__plot .js-plotly-plot,
+.ar-recon-sonde-popup__plot .plot-container,
+.ar-recon-sonde-popup__plot .svg-container {
+  max-width: 100% !important;
+}
+
+.ar-recon-toolbar__toggle input {
+  margin: 0;
+}
+
+.ar-recon-toolbar__notice {
+  color: #6f4312;
+  background: rgba(255, 238, 204, 0.96);
+  border-color: rgba(181, 118, 20, 0.38);
+}
+
 .raster-toolbar select {
   width: auto;
   min-width: 0;
@@ -1696,6 +1941,14 @@ button:disabled {
 
   .raster-toolbar {
     display: none;
+  }
+
+  .raster-toolbar:has(.ar-recon-toolbar) {
+    display: flex;
+  }
+
+  .ar-recon-toolbar {
+    max-width: calc(100vw - 1.1rem);
   }
 
   .date-field {

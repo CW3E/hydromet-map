@@ -159,6 +159,32 @@ export function readStateFromUrl() {
     if (datetime) {
       activeProjectState.family.datetime = datetime
     }
+
+    Object.entries(layerFamily.bookmarkFields ?? {}).forEach(([field, paramKey]) => {
+      const bookmarkedValue = params.get(paramKey)
+
+      if (bookmarkedValue === null) {
+        return
+      }
+
+      const defaultValue = activeProjectState.family[field]
+      if (Array.isArray(defaultValue)) {
+        activeProjectState.family[field] = bookmarkedValue
+          .split(',')
+          .map((value) => value.trim())
+          .filter(Boolean)
+        return
+      }
+
+      if (typeof defaultValue === 'boolean') {
+        if (bookmarkedValue === 'true' || bookmarkedValue === 'false') {
+          activeProjectState.family[field] = bookmarkedValue === 'true'
+        }
+        return
+      }
+
+      activeProjectState.family[field] = bookmarkedValue
+    })
   }
 
   if (layers) {
@@ -186,12 +212,33 @@ export function writeStateToUrl(state, { selectedStation = null } = {}) {
   params.set('pit', activeProjectState.view.pitch)
 
   if (activeProjectState.family) {
-    params.set('var', activeProjectState.family.variable || getDefaultFamilyState(activeProjectId)?.variable || '')
-    params.set('prod', activeProjectState.family.product)
-    params.set('ens', activeProjectState.family.ensemble)
-    params.set('tm', activeProjectState.family.temporalMode)
-    params.set('d', activeProjectState.family.date)
-    params.set('dt', activeProjectState.family.datetime)
+    if (Object.hasOwn(activeProjectState.family, 'variable')) {
+      params.set('var', activeProjectState.family.variable || getDefaultFamilyState(activeProjectId)?.variable || '')
+    }
+    if (Object.hasOwn(activeProjectState.family, 'product')) {
+      params.set('prod', activeProjectState.family.product)
+    }
+    if (Object.hasOwn(activeProjectState.family, 'ensemble')) {
+      params.set('ens', activeProjectState.family.ensemble)
+    }
+    if (Object.hasOwn(activeProjectState.family, 'temporalMode')) {
+      params.set('tm', activeProjectState.family.temporalMode)
+    }
+    if (Object.hasOwn(activeProjectState.family, 'date')) {
+      params.set('d', activeProjectState.family.date)
+    }
+    if (Object.hasOwn(activeProjectState.family, 'datetime')) {
+      params.set('dt', activeProjectState.family.datetime)
+    }
+
+    const layerFamily = getProjectLayerFamily(activeProjectId)
+    Object.entries(layerFamily?.bookmarkFields ?? {}).forEach(([field, paramKey]) => {
+      const value = activeProjectState.family[field]
+      const serializedValue = Array.isArray(value) ? value.join(',') : value
+      if (serializedValue !== undefined && serializedValue !== null && serializedValue !== '') {
+        params.set(paramKey, String(serializedValue))
+      }
+    })
   }
 
   params.set(

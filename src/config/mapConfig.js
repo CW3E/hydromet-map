@@ -23,6 +23,14 @@ export const BASEMAPS = [
 
 export const ALL_MAP_LAYERS = [
   {
+    id: 'arRecon3d',
+    label: 'AR Recon 3D',
+    type: 'custom-3d',
+    description: 'Aircraft tracks and dropsonde trajectories rendered in three dimensions.',
+    symbol: '\u223F',
+    symbolColor: '#f5b942',
+  },
+  {
     id: 'cnrfcRaster',
     label: 'CNRFC Rasters',
     type: 'png-overlay',
@@ -745,7 +753,53 @@ export const GLOBAL_RASTER_VARIABLES = {
   },
 }
 
+const GLOBAL_HYDRO_SELECTORS = {
+  products: ['NRT'],
+  productLabels: {
+    NRT: 'NRT (MSWEP+ERA5)',
+  },
+  ensembleTraces: [],
+  defaultDate: '2025-12-20',
+  defaultDateTime: '2025-12-20T12:00',
+  minDate: '2025-01-01',
+  minDateTime: '2025-01-01T00:00',
+  timeStep: '1day',
+  dateSelector: true,
+}
+
 export const LAYER_FAMILIES = {
+  arRecon: {
+    id: 'arRecon',
+    label: 'AR Recon Flights',
+    kind: 'ar-recon',
+    layerId: 'arRecon3d',
+    catalogUrl: 'https://cw3e.ucsd.edu/hydro/ar_recon/json/index.json',
+    raster: {
+      layerId: 'globalRaster',
+      variables: GLOBAL_RASTER_VARIABLES,
+    },
+    selectors: GLOBAL_HYDRO_SELECTORS,
+    defaultState: {
+      year: '2026',
+      selectedFlights: ['2026-IOP42-NOAA-GIV'],
+      verticalExaggeration: '20',
+      aircraftVisible: true,
+      sondesVisible: true,
+      variable: 'precipitationDaily',
+      product: 'NRT',
+      ensemble: '',
+      temporalMode: 'date',
+      date: '2025-12-20',
+      datetime: '2025-12-20T12:00',
+    },
+    bookmarkFields: {
+      year: 'ary',
+      selectedFlights: 'arf',
+      verticalExaggeration: 'arx',
+      aircraftVisible: 'ara',
+      sondesVisible: 'ars',
+    },
+  },
   cnrfc: {
     id: 'cnrfc',
     label: 'CNRFC Hydro',
@@ -822,19 +876,7 @@ export const LAYER_FAMILIES = {
       layerId: 'globalRaster',
       variables: GLOBAL_RASTER_VARIABLES,
     },
-    selectors: {
-      products: ['NRT'],
-      productLabels: {
-        NRT: 'NRT (MSWEP+ERA5)',
-      },
-      ensembleTraces: [],
-      defaultDate: '2025-12-20',
-      defaultDateTime: '2025-12-20T12:00',
-      minDate: '2025-01-01',
-      minDateTime: '2025-01-01T00:00',
-      timeStep: '1day',
-      dateSelector: true,
-    },
+    selectors: GLOBAL_HYDRO_SELECTORS,
     statusPanel: {
       title: 'Global Hydro Status',
       url: GRADES_BINARY_DESCRIPTOR_URL,
@@ -861,6 +903,10 @@ export const LAYER_FAMILIES = {
 }
 
 function buildDefaultFamilyState(layerFamily) {
+  if (layerFamily?.defaultState) {
+    return { ...layerFamily.defaultState }
+  }
+
   const familyVariables = layerFamily?.raster?.variables ?? {}
   const familySelectors = layerFamily?.selectors ?? {}
   const variableIds = Object.keys(familyVariables)
@@ -911,6 +957,27 @@ function buildDefaultProjectState(projectDefinition) {
 }
 
 export const PROJECTS = {
+  arRecon: {
+    id: 'arRecon',
+    label: 'AR Recon',
+    documentTitle: 'CW3E Atmospheric River Reconnaissance',
+    statusButtonEnabled: false,
+    logoUrl: 'https://cw3e.ucsd.edu/images/CW3E_Logos/5-Vertical-Acronym_Only/Digital/PNG/CW3E-Logo-Vertical-Acronym-FullColor.png',
+    logoAlt: 'Center for Western Weather and Water Extremes (CW3E)',
+    logoHref: 'https://cw3e.ucsd.edu',
+    defaultView: {
+      center: '-140,40',
+      zoom: '2.7',
+      bearing: '0',
+      pitch: '55',
+    },
+    defaultBasemapId: 'satellite',
+    defaultTerrainEnabled: true,
+    defaultProjection: 'mercator',
+    layerFamilyId: 'arRecon',
+    availableLayerIds: ['arRecon3d', 'globalRaster'],
+    defaultVisibleLayerIds: ['arRecon3d'],
+  },
   cnrfc: {
     id: 'cnrfc',
     label: 'CNRFC',

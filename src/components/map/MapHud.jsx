@@ -1,4 +1,5 @@
 import DatePicker from 'react-datepicker'
+import ArReconControls, { ArReconDisplayControls } from '../../features/arRecon3d/ArReconControls'
 import {
   BASEMAPS,
   getProjectMapLayers,
@@ -40,11 +41,17 @@ export default function MapHud({
   const familyProductLabels = layerFamily?.selectors?.productLabels ?? {}
   const ensembleTraces = layerFamily?.selectors?.ensembleTraces ?? []
   const hasStatusPanel = Boolean(activeProject?.statusButtonEnabled && layerFamily?.statusPanel?.url)
-  const hasFamilyDateSelector = Boolean(layerFamily?.selectors?.dateSelector || selectedRasterVariable)
+  const rasterControlsEnabled = layerFamily?.kind !== 'ar-recon'
+    || Boolean(appState.layers[layerFamily?.raster?.layerId])
+  const arReconControlsEnabled = layerFamily?.kind === 'ar-recon'
+    && Boolean(appState.layers.arRecon3d)
+  const hasFamilyDateSelector = rasterControlsEnabled
+    && Boolean(layerFamily?.selectors?.dateSelector || selectedRasterVariable)
   const hasVariableSelector = familyVariableIds.length > 0
   const hasProductSelector = familyProducts.length > 0
   const hasEnsembleSelector = ensembleTraces.length > 1
-  const showFamilyToolbar = hasVariableSelector || hasProductSelector || hasEnsembleSelector
+  const showFamilyToolbar = rasterControlsEnabled
+    && (hasVariableSelector || hasProductSelector || hasEnsembleSelector)
   const isDateTimeMode =
     selectedRasterVariable
       ? getTemporalModeForTimestep(selectedRasterVariable.timestep) === 'datetime'
@@ -166,6 +173,13 @@ export default function MapHud({
             })}
           </div>
         </div>
+
+        {arReconControlsEnabled && appState.family ? (
+          <ArReconDisplayControls
+            familyState={appState.family}
+            updateFamily={updateFamily}
+          />
+        ) : null}
 
         {layerFamily && appState.family && hasFamilyDateSelector ? (
           <div className="date-row date-row--map">
@@ -351,6 +365,13 @@ export default function MapHud({
       </div>
 
       <div className="raster-toolbar">
+        {arReconControlsEnabled && appState.family ? (
+          <ArReconControls
+            familyState={appState.family}
+            projection={appState.projection}
+            updateFamily={updateFamily}
+          />
+        ) : null}
         {layerFamily && appState.family && showFamilyToolbar ? (
           <>
             {hasVariableSelector ? (

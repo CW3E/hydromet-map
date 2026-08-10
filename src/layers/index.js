@@ -1,3 +1,4 @@
+import arRecon3dLayer from './arRecon3dLayer'
 import b120BasinsLayer from './b120BasinsLayer'
 import b120PointsLayer from './b120PointsLayer'
 import camaFloodLayer from './camaFloodLayer'
@@ -32,6 +33,7 @@ import yampaRegionLayer from './yampaRegionLayer'
 import yampaPointsLayer from './yampaPointsLayer'
 
 export const MAP_LAYER_MODULES = [
+  arRecon3dLayer,
   cnrfcBasinsLayer,
   b120PointsLayer,
   b120BasinsLayer,
