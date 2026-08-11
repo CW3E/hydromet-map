@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { getArReconCatalogOptions, loadArReconCatalog } from '../../lib/arReconData'
-import { getArReconFlightColor } from './arReconStyle'
+import { getArReconFlightColor, getArReconFlightDate } from './arReconStyle'
 
 function compareIops(left, right) {
   return (Number.parseInt(right.replace(/\D/g, ''), 10) || 0)
@@ -10,11 +10,15 @@ function compareIops(left, right) {
 function flightOptionLabel(flight, siblingFlights) {
   const sameAircraftCount = siblingFlights.filter((item) => item.aircraft === flight.aircraft).length
   const aircraftLabel = flight.label ?? flight.aircraft
-  if (sameAircraftCount <= 1) return aircraftLabel
-  const start = flight.originTime
-    ? new Date(flight.originTime).toISOString().slice(5, 16).replace('T', ' ')
+  const flightDate = getArReconFlightDate(flight)
+  const labelWithDate = flightDate ? `${aircraftLabel} · ${flightDate}` : aircraftLabel
+  if (sameAircraftCount <= 1) return labelWithDate
+
+  const timestamp = flight.originTime ? new Date(flight.originTime) : null
+  const startTime = timestamp && !Number.isNaN(timestamp.getTime())
+    ? timestamp.toISOString().slice(11, 16)
     : ''
-  return start ? `${aircraftLabel} · ${start}Z` : `${aircraftLabel} · ${flight.id}`
+  return startTime ? `${labelWithDate} ${startTime}Z` : `${labelWithDate} · ${flight.id}`
 }
 
 export function ArReconDisplayControls({ familyState, updateFamily }) {
