@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import maplibregl from 'maplibre-gl'
 import { Popup } from 'react-map-gl/maplibre'
 import * as THREE from 'three'
+import { Line2 } from 'three/addons/lines/Line2.js'
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js'
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { loadArReconCatalog, loadArReconFlight } from '../../lib/arReconData'
 import {
   getArReconFlightColor,
@@ -76,14 +79,18 @@ function addTrajectoryLines(
       positions[target + 2] = (coordinate.z - originCoordinate.z) * verticalExaggeration
     }
 
-    const geometry = new THREE.BufferGeometry()
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-    const line = new THREE.Line(geometry, material)
+    const geometry = new LineGeometry()
+    geometry.setPositions(positions)
+    const line = new Line2(geometry, material)
+    line.computeLineDistances()
+    line.userData.hitPositionAttribute = new THREE.BufferAttribute(positions, 3)
     if (sondeSelection) {
       const key = `${sondeSelection.flight.id}|${sondeSelection.sonde.id}`
       line.userData.sondeSelection = sondeSelection
+      const highlightGeometry = new THREE.BufferGeometry()
+      highlightGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
       const highlight = new THREE.Points(
-        geometry,
+        highlightGeometry,
         new THREE.PointsMaterial({
           color: 0xffffff,
           size: 4,
@@ -179,8 +186,9 @@ function createArReconScene(flightsData, verticalExaggeration) {
     const color = getArReconFlightColor(flightData.flight.id)
     const aircraftGroup = new THREE.Group()
     const sondeGroup = new THREE.Group()
-    const aircraftMaterial = new THREE.LineBasicMaterial({
+    const aircraftMaterial = new LineMaterial({
       color,
+      linewidth: 2.2,
       transparent: true,
       opacity: 0.98,
       depthTest: true,
@@ -193,8 +201,9 @@ function createArReconScene(flightsData, verticalExaggeration) {
       verticalExaggeration,
     )
     flightData.sondes.forEach((sonde) => {
-      const sondeMaterial = new THREE.LineBasicMaterial({
+      const sondeMaterial = new LineMaterial({
         color,
+        linewidth: 1.7,
         transparent: true,
         opacity: 0.58,
         depthTest: true,
@@ -273,8 +282,10 @@ function createCustomLayer(map, flightsData, verticalExaggeration) {
   const projectedEnd = new THREE.Vector3()
   const sondeLines = []
   const sondeHighlights = []
+  const lineMaterials = new Set()
   scene.traverse((object) => {
-    if (object.isLine && object.userData.sondeSelection) sondeLines.push(object)
+    if (object.isLine2) lineMaterials.add(object.material)
+    if (object.isLine2 && object.userData.sondeSelection) sondeLines.push(object)
     if (object.isPoints && object.userData.sondeHighlightKey) sondeHighlights.push(object)
   })
   let renderer = null
@@ -315,7 +326,7 @@ function createCustomLayer(map, flightsData, verticalExaggeration) {
       let closestSelection = null
 
       sondeLines.forEach((line) => {
-        const positions = line.geometry.getAttribute('position')
+        const positions = line.userData.hitPositionAttribute
         if (!positions || positions.count < 2) return
         projectLinePoint(
           positions,
@@ -354,7 +365,7 @@ function createCustomLayer(map, flightsData, verticalExaggeration) {
         const isHovered = `${item.flight.id}|${item.sonde.id}` === hoveredSondeKey
         line.material.color.set(isHovered ? '#ffffff' : getArReconFlightColor(item.flight.id))
         line.material.opacity = isHovered ? 1 : 0.58
-        line.material.linewidth = isHovered ? 4 : 1
+        line.material.linewidth = isHovered ? 3.8 : 1.7
       })
       sondeHighlights.forEach((highlight) => {
         highlight.visible = highlight.userData.sondeHighlightKey === hoveredSondeKey
@@ -363,6 +374,10 @@ function createCustomLayer(map, flightsData, verticalExaggeration) {
     },
     render(_gl, options) {
       if (!renderer) return
+      const canvas = map.getCanvas()
+      lineMaterials.forEach((material) => {
+        material.resolution.set(canvas.clientWidth, canvas.clientHeight)
+      })
       camera.projectionMatrix
         .fromArray(options.defaultProjectionData.mainMatrix)
         .multiply(originTranslation)
@@ -466,7 +481,11 @@ export default function ArRecon3dLayer({
     }
 
     let disposed = false
+    let styleLoadHandler = null
     let styleDataHandler = null
+    let idleHandler = null
+    let retryIntervalId = null
+    let retryTimeoutId = null
     let pointerHandlers = null
 
     function removePointerHandlers() {
@@ -492,17 +511,36 @@ export default function ArRecon3dLayer({
         setLoadedFlightsData(flightsData)
 
         const addLayer = () => {
-          if (disposed || !mapInstance.isStyleLoaded() || mapInstance.getLayer(AR_RECON_CUSTOM_LAYER_ID)) {
+          const styleLayers = mapInstance.getStyle()?.layers
+          if (disposed || !styleLayers?.length) {
             return
           }
+
+          if (mapInstance.getLayer(AR_RECON_CUSTOM_LAYER_ID)) {
+            if (styleLayers.at(-1)?.id !== AR_RECON_CUSTOM_LAYER_ID) {
+              try {
+                mapInstance.moveLayer(AR_RECON_CUSTOM_LAYER_ID)
+              } catch {
+                return
+              }
+            }
+            mapInstance.triggerRepaint()
+            return
+          }
+
           const layer = createCustomLayer(
             mapInstance,
             flightsData,
             Number.parseFloat(familyState.verticalExaggeration) || 1,
           )
           layer.setGroupVisibility(visibilityRef.current)
+          try {
+            mapInstance.addLayer(layer)
+          } catch {
+            layer.onRemove()
+            return
+          }
           customLayerRef.current = layer
-          mapInstance.addLayer(layer)
           labelMarkersRef.current.forEach((marker) => marker.remove())
           labelMarkersRef.current = flightsData.map((flightData) =>
             createFlightLabelMarker(mapInstance, flightData),
@@ -536,9 +574,18 @@ export default function ArRecon3dLayer({
           }
         }
 
-        addLayer()
+        styleLoadHandler = addLayer
         styleDataHandler = addLayer
-        mapInstance.on('styledata', addLayer)
+        idleHandler = addLayer
+        mapInstance.on('style.load', styleLoadHandler)
+        mapInstance.on('styledata', styleDataHandler)
+        mapInstance.on('idle', idleHandler)
+        retryIntervalId = window.setInterval(addLayer, 250)
+        retryTimeoutId = window.setTimeout(() => {
+          if (retryIntervalId) window.clearInterval(retryIntervalId)
+          retryIntervalId = null
+        }, 15000)
+        addLayer()
       } catch (error) {
         console.warn('Could not load AR Recon 3D flights', error)
       }
@@ -548,7 +595,11 @@ export default function ArRecon3dLayer({
 
     return () => {
       disposed = true
+      if (styleLoadHandler) mapInstance.off('style.load', styleLoadHandler)
       if (styleDataHandler) mapInstance.off('styledata', styleDataHandler)
+      if (idleHandler) mapInstance.off('idle', idleHandler)
+      if (retryIntervalId) window.clearInterval(retryIntervalId)
+      if (retryTimeoutId) window.clearTimeout(retryTimeoutId)
       removePointerHandlers()
       mapInstance.getCanvas().style.cursor = ''
       labelMarkersRef.current.forEach((marker) => marker.remove())

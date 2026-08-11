@@ -84,13 +84,13 @@ function buildProfilePlot(flight, sonde, activeTabId) {
     plotId: activeTabId,
     traceFingerprint: traces.map((trace) => `${trace.name}-${trace.x.length}`).join('|'),
     titleText: [
-      `<b>${escapePlotlyText(title)}</b>`,
+      `<span style="font-size:12px;font-weight:400">${escapePlotlyText(title)}</span>`,
       launchTime
         ? `<span style="font-size:11px;color:#567080">Launched ${escapePlotlyText(launchTime)}</span>`
         : '',
     ].filter(Boolean).join('<br>'),
     traces,
-    hovermode: 'closest',
+    hovermode: 'y unified',
     xAxisLayout: { title: xTitle, zeroline: false },
     yAxesLayout: {
       yaxis: {
@@ -101,10 +101,19 @@ function buildProfilePlot(flight, sonde, activeTabId) {
     },
     layout: {
       height: 380,
-      margin: { l: 62, r: 22, t: 68, b: 40 },
+      margin: { l: 62, r: 22, t: 44, b: 34 },
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
-      legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: 1.08 },
+      legend: {
+        orientation: 'v',
+        x: 0.02,
+        xanchor: 'left',
+        y: 0.02,
+        yanchor: 'bottom',
+        bgcolor: 'rgba(255,255,255,0.78)',
+        bordercolor: 'rgba(74,113,137,0.22)',
+        borderwidth: 1,
+      },
     },
     plotlyConfig: {
       displaylogo: false,
