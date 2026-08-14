@@ -658,6 +658,10 @@ button:disabled {
   padding: 0;
 }
 
+.ar-recon-toolbar__toggle--aircraft {
+  display: none;
+}
+
 .ar-recon-toolbar__toggle--icon input {
   position: absolute;
   width: 1px;
@@ -747,7 +751,7 @@ button:disabled {
   z-index: 8;
   top: calc(100% + 0.25rem);
   left: 0;
-  width: min(330px, calc(100vw - 1.7rem));
+  width: min(265px, calc(100vw - 1.7rem));
   max-height: min(520px, calc(100vh - 8rem));
   overflow: auto;
   padding: 0.55rem;
@@ -795,6 +799,7 @@ button:disabled {
   background: #fff;
   color: #173648;
   cursor: pointer;
+  font-size: 0.68rem;
 }
 
 .ar-recon-flight-picker fieldset {

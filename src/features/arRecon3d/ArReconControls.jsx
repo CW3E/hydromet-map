@@ -36,7 +36,7 @@ export function ArReconDisplayControls({ familyState, updateFamily }) {
       </select>
 
       <label
-        className="ar-recon-toolbar__toggle ar-recon-toolbar__toggle--icon"
+        className="ar-recon-toolbar__toggle ar-recon-toolbar__toggle--icon ar-recon-toolbar__toggle--aircraft"
         title="Show aircraft tracks"
         aria-label="Show aircraft tracks"
       >
