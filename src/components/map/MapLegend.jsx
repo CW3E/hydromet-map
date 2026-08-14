@@ -1,10 +1,10 @@
-export default function MapLegend({ palette, units, variableLabel }) {
+export default function MapLegend({ compactUnits = false, palette, units, variableLabel }) {
   const colors = palette.colors.slice().reverse()
   const thresholds = palette.thresholds.slice().reverse()
 
   return (
     <div className="map-legend">
-      <div className="legend-card legend-card--map">
+      <div className={compactUnits ? 'legend-card legend-card--map legend-card--compact-units' : 'legend-card legend-card--map'}>
         <div className="legend-card__header legend-card__header--map">
           <span>{units}</span>
         </div>

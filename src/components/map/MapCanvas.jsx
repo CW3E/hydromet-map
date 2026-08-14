@@ -158,6 +158,7 @@ export default function MapCanvas({
   const [isMapDragging, setIsMapDragging] = useState(false)
   const [projectAboutOpen, setProjectAboutOpen] = useState(false)
   const [projectSwitcherOpen, setProjectSwitcherOpen] = useState(false)
+  const [ivtManifest, setIvtManifest] = useState(null)
   const mapRef = useRef(null)
   const mouseReadoutRef = useRef(null)
   const isDraggingRef = useRef(false)
@@ -167,10 +168,33 @@ export default function MapCanvas({
   const availableLayerIdSet = new Set(activeProject?.availableLayerIds ?? [])
   const projectLogoLabel = activeProject?.logoAlt ?? `${activeProject?.label ?? 'Project'} logo`
   const projectAboutLabel = activeProject?.documentTitle ?? activeProject?.label ?? 'This project'
+  const ivtConfig = layerFamily?.kind === 'ivt-particles' ? layerFamily : layerFamily?.ivt
+
+  useEffect(() => {
+    let cancelled = false
+    if (!ivtConfig?.manifestUrl) {
+      return undefined
+    }
+    fetch(ivtConfig.manifestUrl)
+      .then((response) => {
+        if (!response.ok) throw new Error(`IVT manifest request failed (${response.status})`)
+        return response.json()
+      })
+      .then((manifest) => {
+        if (!cancelled) setIvtManifest(manifest)
+      })
+      .catch(() => {
+        if (!cancelled) setIvtManifest(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [ivtConfig])
 
   const layerContext = {
     appState,
     interactionState,
+    ivtConfig,
     layerFamily,
     mapInstance,
     selectedStation,
@@ -486,6 +510,8 @@ export default function MapCanvas({
         toggleLayer={toggleLayer}
         updateFamily={updateFamily}
         updateTopLevel={updateTopLevel}
+        ivtManifest={ivtManifest}
+        ivtConfig={ivtConfig}
       />
 
       {layerFamily && selectedVariable && appState.layers[layerFamily.raster?.layerId] ? (
@@ -493,6 +519,15 @@ export default function MapCanvas({
           palette={selectedVariable.palette}
           units={selectedVariable.units}
           variableLabel={selectedVariable.label}
+        />
+      ) : null}
+
+      {ivtConfig && appState.layers.gfsIvtParticles ? (
+        <MapLegend
+          compactUnits
+          palette={ivtConfig.palette}
+          units={ivtConfig.units}
+          variableLabel="GFS IVT North Pacific magnitude"
         />
       ) : null}
 

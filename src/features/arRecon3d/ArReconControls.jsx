@@ -35,21 +35,34 @@ export function ArReconDisplayControls({ familyState, updateFamily }) {
         ))}
       </select>
 
-      <label className="ar-recon-toolbar__toggle" title="Show aircraft tracks">
+      <label
+        className="ar-recon-toolbar__toggle ar-recon-toolbar__toggle--icon"
+        title="Show aircraft tracks"
+        aria-label="Show aircraft tracks"
+      >
         <input
           type="checkbox"
           checked={familyState.aircraftVisible}
           onChange={(event) => updateFamily('aircraftVisible', event.target.checked)}
         />
-        Aircraft
+        <span className="ar-recon-toolbar__aircraft-icon" aria-hidden="true">✈︎</span>
       </label>
-      <label className="ar-recon-toolbar__toggle" title="Show dropsonde trajectories">
+      <label
+        className="ar-recon-toolbar__toggle ar-recon-toolbar__toggle--icon"
+        title="Show dropsonde trajectories"
+        aria-label="Show dropsonde trajectories"
+      >
         <input
           type="checkbox"
           checked={familyState.sondesVisible}
           onChange={(event) => updateFamily('sondesVisible', event.target.checked)}
         />
-        Sondes
+        <svg className="ar-recon-toolbar__sonde-icon" aria-hidden="true" viewBox="0 0 24 24">
+          <path className="ar-recon-toolbar__sonde-canopy" d="M3.5 9a8.5 8.5 0 0 1 17 0H3.5Z" />
+          <path d="M4 9h16M4 9l6.1 6.2M20 9l-6.1 6.2M12 9v6" />
+          <rect x="10.4" y="14.2" width="3.2" height="8.7" rx="0.8" />
+          <path d="M10.4 16.6h3.2" />
+        </svg>
       </label>
     </div>
   )
@@ -136,31 +149,46 @@ export default function ArReconControls({ familyState, projection, updateFamily 
 
   return (
     <div className="ar-recon-toolbar">
-      <select
-        aria-label="AR Recon year"
-        title="Year"
-        value={selectedYear ?? ''}
-        onChange={(event) => updateFamily('year', event.target.value)}
-      >
-        {years.map((year) => <option key={year} value={year}>{year}</option>)}
-      </select>
-
       <details ref={flightPickerRef} className="ar-recon-flight-picker">
-        <summary>
-          {selectedFlightIds.length === 1 ? '1 flight selected' : `${selectedFlightIds.length} flights selected`}
+        <summary title={`${selectedFlightIds.length} flights selected across all years`}>
+          {`${selectedFlightIds.length} selected`}
         </summary>
         <div className="ar-recon-flight-picker__menu">
-          <div className="ar-recon-flight-picker__actions">
-            <button
-              type="button"
-              onClick={() => {
-                const yearFlightIds = yearFlights.map((flight) => flight.id)
-                updateFamily('selectedFlights', [...new Set([...selectedFlightIds, ...yearFlightIds])])
-              }}
-            >
-              Select year
-            </button>
-            <button type="button" onClick={() => updateFamily('selectedFlights', [])}>Clear</button>
+          <div className="ar-recon-flight-picker__header">
+            <label className="ar-recon-flight-picker__year">
+              <span>Year</span>
+              <select
+                aria-label="AR Recon year"
+                value={selectedYear ?? ''}
+                onChange={(event) => updateFamily('year', event.target.value)}
+              >
+                {years.map((year) => <option key={year} value={year}>{year}</option>)}
+              </select>
+            </label>
+
+            <div className="ar-recon-flight-picker__actions">
+              <button
+                type="button"
+                onClick={() => {
+                  const yearFlightIds = yearFlights.map((flight) => flight.id)
+                  updateFamily('selectedFlights', [...new Set([...selectedFlightIds, ...yearFlightIds])])
+                }}
+              >
+                {`Select all ${selectedYear}`}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const yearFlightIdSet = new Set(yearFlights.map((flight) => flight.id))
+                  updateFamily(
+                    'selectedFlights',
+                    selectedFlightIds.filter((id) => !yearFlightIdSet.has(id)),
+                  )
+                }}
+              >
+                {`Clear ${selectedYear}`}
+              </button>
+            </div>
           </div>
 
           {iops.map((iop) => {

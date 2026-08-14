@@ -1,5 +1,6 @@
 import DatePicker from 'react-datepicker'
 import ArReconControls, { ArReconDisplayControls } from '../../features/arRecon3d/ArReconControls'
+import GfsIvtControls from '../../features/gfsIvtParticles/GfsIvtControls'
 import {
   BASEMAPS,
   getProjectMapLayers,
@@ -31,6 +32,8 @@ export default function MapHud({
   updateFamily,
   updateTopLevel,
   toggleLayer,
+  ivtManifest,
+  ivtConfig,
 }) {
   const projectLayers = getProjectMapLayers(activeProject?.id)
   const familyVariables = layerFamily?.raster?.variables ?? {}
@@ -175,10 +178,17 @@ export default function MapHud({
         </div>
 
         {arReconControlsEnabled && appState.family ? (
-          <ArReconDisplayControls
-            familyState={appState.family}
-            updateFamily={updateFamily}
-          />
+          <div className="ar-recon-combined-controls">
+            <ArReconControls
+              familyState={appState.family}
+              projection={appState.projection}
+              updateFamily={updateFamily}
+            />
+            <ArReconDisplayControls
+              familyState={appState.family}
+              updateFamily={updateFamily}
+            />
+          </div>
         ) : null}
 
         {layerFamily && appState.family && hasFamilyDateSelector ? (
@@ -365,10 +375,10 @@ export default function MapHud({
       </div>
 
       <div className="raster-toolbar">
-        {arReconControlsEnabled && appState.family ? (
-          <ArReconControls
+        {ivtConfig && appState.layers.gfsIvtParticles && appState.family ? (
+          <GfsIvtControls
             familyState={appState.family}
-            projection={appState.projection}
+            manifest={ivtManifest}
             updateFamily={updateFamily}
           />
         ) : null}

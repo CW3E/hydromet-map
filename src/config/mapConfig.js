@@ -23,6 +23,14 @@ export const BASEMAPS = [
 
 export const ALL_MAP_LAYERS = [
   {
+    id: 'gfsIvtParticles',
+    label: 'GFS IVT North Pacific',
+    type: 'custom-particles',
+    description: 'Animated tracer particles following NOAA GFS integrated vapor transport over the North Pacific.',
+    symbol: '\u224B',
+    symbolColor: '#67e8f9',
+  },
+  {
     id: 'arRecon3d',
     label: 'AR Recon 3D',
     type: 'custom-3d',
@@ -767,12 +775,42 @@ const GLOBAL_HYDRO_SELECTORS = {
   dateSelector: true,
 }
 
+export const GFS_IVT_NORTH_PACIFIC = {
+  manifestUrl: 'https://cw3e.ucsd.edu/hydro/gfs/ivt/north_pacific/20260812/18/manifest.json',
+  units: 'kg m\u207B\u00B9 s\u207B\u00B9',
+  palette: {
+    thresholds: ['0', '250', '500', '750', '1000', '1250', '1500'],
+    colors: [
+      '#dbeafe',
+      '#38bdf8',
+      '#2563eb',
+      '#22c55e',
+      '#facc15',
+      '#f97316',
+      '#be123c',
+    ],
+  },
+}
+
 export const LAYER_FAMILIES = {
+  gfsIvt: {
+    id: 'gfsIvt',
+    label: 'GFS IVT North Pacific',
+    kind: 'ivt-particles',
+    ...GFS_IVT_NORTH_PACIFIC,
+    defaultState: {
+      forecastHour: '0',
+    },
+    bookmarkFields: {
+      forecastHour: 'fh',
+    },
+  },
   arRecon: {
     id: 'arRecon',
     label: 'AR Recon Flights',
     kind: 'ar-recon',
     layerId: 'arRecon3d',
+    ivt: GFS_IVT_NORTH_PACIFIC,
     catalogUrl: 'https://cw3e.ucsd.edu/hydro/ar_recon/json/index.json',
     raster: {
       layerId: 'globalRaster',
@@ -785,6 +823,7 @@ export const LAYER_FAMILIES = {
       verticalExaggeration: '20',
       aircraftVisible: true,
       sondesVisible: true,
+      forecastHour: '0',
       variable: 'precipitationDaily',
       product: 'NRT',
       ensemble: '',
@@ -798,6 +837,7 @@ export const LAYER_FAMILIES = {
       verticalExaggeration: 'arx',
       aircraftVisible: 'ara',
       sondesVisible: 'ars',
+      forecastHour: 'fh',
     },
   },
   cnrfc: {
@@ -957,6 +997,27 @@ function buildDefaultProjectState(projectDefinition) {
 }
 
 export const PROJECTS = {
+  gfsIvt: {
+    id: 'gfsIvt',
+    label: 'GFS IVT North Pacific',
+    documentTitle: 'GFS Integrated Vapor Transport — North Pacific',
+    statusButtonEnabled: false,
+    logoUrl: 'https://cw3e.ucsd.edu/images/CW3E_Logos/5-Vertical-Acronym_Only/Digital/PNG/CW3E-Logo-Vertical-Acronym-FullColor.png',
+    logoAlt: 'Center for Western Weather and Water Extremes (CW3E)',
+    logoHref: 'https://cw3e.ucsd.edu',
+    defaultView: {
+      center: '-160,20',
+      zoom: '1.2',
+      bearing: '0',
+      pitch: '0',
+    },
+    defaultBasemapId: 'terrain',
+    defaultTerrainEnabled: false,
+    defaultProjection: 'mercator',
+    layerFamilyId: 'gfsIvt',
+    availableLayerIds: ['gfsIvtParticles'],
+    defaultVisibleLayerIds: ['gfsIvtParticles'],
+  },
   arRecon: {
     id: 'arRecon',
     label: 'AR Recon',
@@ -975,7 +1036,7 @@ export const PROJECTS = {
     defaultTerrainEnabled: true,
     defaultProjection: 'mercator',
     layerFamilyId: 'arRecon',
-    availableLayerIds: ['arRecon3d', 'globalRaster'],
+    availableLayerIds: ['arRecon3d', 'gfsIvtParticles'],
     defaultVisibleLayerIds: ['arRecon3d'],
   },
   cnrfc: {

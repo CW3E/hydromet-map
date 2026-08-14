@@ -14,6 +14,7 @@ import cnrfcPointsLayer from './cnrfcPointsLayer'
 import geodarLayer from './geodarLayer'
 import gshaLayer from './gshaLayer'
 import globalRasterLayer from './globalRasterLayer'
+import gfsIvtParticlesLayer from './gfsIvtParticlesLayer'
 import gradesHydroDlLayer from './gradesHydroDlLayer'
 import gradesHydroDlStaticLayer from './gradesHydroDlStaticLayer'
 import gritLayer from './gritLayer'
@@ -33,6 +34,7 @@ import yampaRegionLayer from './yampaRegionLayer'
 import yampaPointsLayer from './yampaPointsLayer'
 
 export const MAP_LAYER_MODULES = [
+  gfsIvtParticlesLayer,
   arRecon3dLayer,
   cnrfcBasinsLayer,
   b120PointsLayer,
