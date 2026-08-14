@@ -1,3 +1,3 @@
 display_name: Hydromet Map Config
-short_description: Add and maintain hydromet map projects, layers, popups, and bookmarkable map config.
-default_prompt: Use this skill when adding or changing hydromet map projects, layers, raster families, popups, legends, or bookmarkable map state.
+short_description: Maintain hydromet map projects, layers, tracers, popups, and map config.
+default_prompt: Use this skill when adding or changing hydromet map projects, layers, raster families, particle tracers, popups, legends, or bookmarkable map state.

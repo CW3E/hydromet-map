@@ -18,6 +18,7 @@ These are the structural reference docs for app developers:
 - [Projects](./projects.md)
 - [Layers](./layers.md)
 - [Raster and Layer Families](./raster.md)
+- [Particle Tracer Layers](./particle-tracers.md)
 - [Popups](./popups.md)
 - [State and Bookmarks](./state-and-bookmarks.md)
 - [Known Issues](./known-issues.md)
@@ -44,7 +45,8 @@ If you are changing framework behavior:
 4. [Projects](./projects.md)
 5. [Layers](./layers.md)
 6. [Raster and Layer Families](./raster.md)
-7. [Popups](./popups.md)
+7. [Particle Tracer Layers](./particle-tracers.md)
+8. [Popups](./popups.md)
 
 If you are adding new content within the existing framework:
 
@@ -52,6 +54,7 @@ If you are adding new content within the existing framework:
 2. [Projects](./projects.md)
 3. [Layers](./layers.md)
 4. [Raster and Layer Families](./raster.md)
-5. [Popups](./popups.md)
+5. [Particle Tracer Layers](./particle-tracers.md)
+6. [Popups](./popups.md)
 
 The current docs are intentionally developer-facing. End-user documentation can be added as a separate track without mixing it into the code-oriented material.

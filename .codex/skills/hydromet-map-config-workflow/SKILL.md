@@ -1,6 +1,6 @@
 ---
 name: hydromet-map-config-workflow
-description: Project-specific workflow for adding, modifying, or debugging hydromet-map map configuration. Use when Codex works on projects, GeoJSON/vector layers, vector tile layers, raster tile overlays, raster families across variables/dates/products/ensembles, MapLibre rendering style, layer source registration, layer controls, hover/click popups, legends/colormaps, time-series popup hooks, project defaults, or bookmarkable map state in the hydromet-map repository.
+description: Project-specific workflow for adding, modifying, or debugging hydromet-map map configuration. Use when Codex works on projects, GeoJSON/vector layers, vector tile layers, raster tile overlays, raster families, particle tracer or gridded vector-field layers, MapLibre custom WebGL rendering, layer source registration, controls, popups, legends/colormaps, project defaults, or bookmarkable map state in the hydromet-map repository.
 ---
 
 # Hydromet Map Config Workflow
@@ -19,6 +19,7 @@ Use this skill to make map configuration changes in the `hydromet-map` repositor
    - a vector tile source/layer
    - a single raster/raster tile overlay
    - a raster family with variable/date/product/ensemble dimensions
+   - an animated particle tracer or custom WebGL vector field
    - interaction-only changes such as hover, click, popup, or time-series behavior
 3. Preserve existing naming, grouping, and config conventions. Add new abstractions only when they reduce repeated configuration logic or match an existing local pattern.
 
@@ -71,6 +72,16 @@ For hover/click behavior:
 - Preserve existing behavior for layers that do not opt into hover/click handlers.
 - Read `references/popup-patterns.md` before adding or refactoring vector-layer popups.
 
+## Add or Modify a Particle Tracer Layer
+
+1. Read `docs/particle-tracers.md` and `references/particle-tracer-patterns.md` before editing.
+2. Decide whether the change is a compatible dataset replacement, a new model/variable using the existing published contract, a contract/renderer change, or a second simultaneously visible tracer.
+3. Verify the two components, units, grid order, longitude convention, mask, quantization limit, time steps, and CORS behavior.
+4. Keep dataset metadata declarative: manifest URL, units, palette, family defaults, and bookmark fields belong in configuration.
+5. Generalize GFS- or IVT-specific names before reusing the renderer for a different source or physical field.
+6. Preserve the direct RGBA decoder: its alpha byte carries component data and must not be premultiplied.
+7. Verify custom-layer restoration after basemap style reload, forecast selection, dateline continuity, regional edge behavior, legend correctness, and browser performance.
+
 ## Legends and Colormaps
 
 - For categorical/vector layers, prefer explicit label/color mappings.
@@ -104,6 +115,7 @@ Before finishing:
 3. Check that project switching, toggles, layer order, opacity, hover/click behavior, legends, and bookmark restoration still work for affected configuration.
 4. For raster-family work, test at least two variables or products when config allows it.
 5. For UI changes, check a narrow/mobile viewport for selector wrapping and map control overlap.
+6. For particle tracers, also test a basemap switch without changing time, dateline/world wrapping, at least two time steps, remote CORS loading, and representative browser performance.
 
 ## Optional References
 
@@ -112,3 +124,5 @@ Read `references/project-patterns.md` when the task adds a new project, changes 
 Read `references/layer-patterns.md` when the task needs a more detailed checklist for choosing IDs, organizing config, or reviewing raster-family dimensions.
 
 Read `references/popup-patterns.md` when the task adds hover popups, clicked feature popups, tabbed time-series popups, CSV downloads, or bookmark-restored popups.
+
+Read `references/particle-tracer-patterns.md` when the task adds, replaces, tunes, or debugs animated particle tracers, their manifests/textures, or custom WebGL lifecycle behavior.
