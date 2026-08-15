@@ -158,6 +158,7 @@ export default function MapCanvas({
   const [isMapDragging, setIsMapDragging] = useState(false)
   const [projectAboutOpen, setProjectAboutOpen] = useState(false)
   const [projectSwitcherOpen, setProjectSwitcherOpen] = useState(false)
+  const [ivtCatalog, setIvtCatalog] = useState(null)
   const [ivtManifest, setIvtManifest] = useState(null)
   const mapRef = useRef(null)
   const mouseReadoutRef = useRef(null)
@@ -169,13 +170,59 @@ export default function MapCanvas({
   const projectLogoLabel = activeProject?.logoAlt ?? `${activeProject?.label ?? 'Project'} logo`
   const projectAboutLabel = activeProject?.documentTitle ?? activeProject?.label ?? 'This project'
   const ivtConfig = layerFamily?.kind === 'ivt-particles' ? layerFamily : layerFamily?.ivt
+  const ivtRuns = (ivtCatalog?.runs ?? []).filter(
+    (run) => !ivtConfig?.cycle || run.cycle === ivtConfig.cycle,
+  )
+  const selectedIvtRun = ivtRuns.find(
+    (run) => run.date === appState.family?.initializationDate,
+  )
+  const defaultIvtRun = ivtRuns.find(
+    (run) => run.date === ivtCatalog?.defaultInitializationDate,
+  ) ?? ivtRuns[0]
+  const activeIvtRun = selectedIvtRun ?? defaultIvtRun
+  const ivtManifestUrl = activeIvtRun?.manifest && ivtConfig?.catalogUrl
+    ? new URL(activeIvtRun.manifest, ivtConfig.catalogUrl).toString()
+    : ivtConfig?.manifestUrl
 
   useEffect(() => {
     let cancelled = false
-    if (!ivtConfig?.manifestUrl) {
+    setIvtCatalog(null)
+    if (!ivtConfig?.catalogUrl) {
       return undefined
     }
-    fetch(ivtConfig.manifestUrl)
+    fetch(ivtConfig.catalogUrl, { cache: 'no-cache' })
+      .then((response) => {
+        if (!response.ok) throw new Error(`IVT catalog request failed (${response.status})`)
+        return response.json()
+      })
+      .then((catalog) => {
+        if (!cancelled) setIvtCatalog(catalog)
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          console.warn('Could not load GFS IVT catalog', error)
+          setIvtCatalog(null)
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [ivtConfig?.catalogUrl])
+
+  useEffect(() => {
+    if (
+      activeIvtRun?.date
+      && appState.family?.initializationDate !== activeIvtRun.date
+    ) {
+      updateFamily('initializationDate', activeIvtRun.date)
+    }
+  }, [activeIvtRun?.date, appState.family?.initializationDate, updateFamily])
+
+  useEffect(() => {
+    let cancelled = false
+    setIvtManifest(null)
+    if (!ivtManifestUrl) return undefined
+    fetch(ivtManifestUrl)
       .then((response) => {
         if (!response.ok) throw new Error(`IVT manifest request failed (${response.status})`)
         return response.json()
@@ -183,18 +230,24 @@ export default function MapCanvas({
       .then((manifest) => {
         if (!cancelled) setIvtManifest(manifest)
       })
-      .catch(() => {
-        if (!cancelled) setIvtManifest(null)
+      .catch((error) => {
+        if (!cancelled) {
+          console.warn('Could not load GFS IVT manifest', error)
+          setIvtManifest(null)
+        }
       })
     return () => {
       cancelled = true
     }
-  }, [ivtConfig])
+  }, [ivtManifestUrl])
 
   const layerContext = {
     appState,
     interactionState,
+    ivtCatalog,
     ivtConfig,
+    ivtManifest,
+    ivtManifestUrl,
     layerFamily,
     mapInstance,
     selectedStation,
@@ -511,6 +564,7 @@ export default function MapCanvas({
         updateFamily={updateFamily}
         updateTopLevel={updateTopLevel}
         ivtManifest={ivtManifest}
+        ivtCatalog={ivtCatalog}
         ivtConfig={ivtConfig}
       />
 

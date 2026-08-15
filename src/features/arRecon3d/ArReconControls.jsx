@@ -7,11 +7,13 @@ function compareIops(left, right) {
     - (Number.parseInt(left.replace(/\D/g, ''), 10) || 0)
 }
 
-function flightOptionLabel(flight, siblingFlights) {
+function flightOptionLabel(flight, siblingFlights, includeDate = false) {
   const sameAircraftCount = siblingFlights.filter((item) => item.aircraft === flight.aircraft).length
   const aircraftLabel = flight.label ?? flight.aircraft
   const flightDate = getArReconFlightDate(flight)
-  const labelWithDate = flightDate ? `${aircraftLabel} · ${flightDate}` : aircraftLabel
+  const labelWithDate = includeDate && flightDate
+    ? `${aircraftLabel} · ${flightDate}`
+    : aircraftLabel
   if (sameAircraftCount <= 1) return labelWithDate
 
   const timestamp = flight.originTime ? new Date(flight.originTime) : null
@@ -68,7 +70,13 @@ export function ArReconDisplayControls({ familyState, updateFamily }) {
   )
 }
 
-export default function ArReconControls({ familyState, projection, updateFamily }) {
+export default function ArReconControls({
+  familyState,
+  ivtCatalog,
+  ivtCycle,
+  projection,
+  updateFamily,
+}) {
   const [catalog, setCatalog] = useState(null)
   const flightPickerRef = useRef(null)
 
@@ -109,6 +117,11 @@ export default function ArReconControls({ familyState, projection, updateFamily 
   const selectedFlightIdSet = new Set(selectedFlightIds)
   const validFlightIdSet = new Set(flights.map((flight) => flight.id))
   const validSelectedFlightIds = selectedFlightIds.filter((id) => validFlightIdSet.has(id))
+  const availableIvtDates = new Set(
+    (ivtCatalog?.runs ?? [])
+      .filter((run) => !ivtCycle || run.cycle === ivtCycle)
+      .map((run) => run.date),
+  )
 
   useEffect(() => {
     if (!catalog?.flights.length) return
@@ -137,10 +150,20 @@ export default function ArReconControls({ familyState, projection, updateFamily 
   ])
 
   function toggleFlight(flightId) {
-    const nextSelection = selectedFlightIdSet.has(flightId)
+    const isRemoving = selectedFlightIdSet.has(flightId)
+    const nextSelection = isRemoving
       ? selectedFlightIds.filter((id) => id !== flightId)
       : [...selectedFlightIds, flightId]
-    updateFamily('selectedFlights', nextSelection)
+    if (isRemoving) {
+      updateFamily('selectedFlights', nextSelection)
+      return
+    }
+
+    const flightDate = getArReconFlightDate(flights.find((flight) => flight.id === flightId))
+    updateFamily({
+      selectedFlights: nextSelection,
+      ...(availableIvtDates.has(flightDate) ? { initializationDate: flightDate } : {}),
+    })
   }
 
   if (!catalog) {
@@ -193,9 +216,19 @@ export default function ArReconControls({ familyState, projection, updateFamily 
 
           {iops.map((iop) => {
             const iopFlights = yearFlights.filter((flight) => flight.iop === iop)
+            const iopDates = [
+              ...new Set(iopFlights.map((flight) => getArReconFlightDate(flight)).filter(Boolean)),
+            ]
+            const sharedIopDate = iopDates.length === 1 ? iopDates[0] : ''
+            const hasConflictingDates = iopDates.length > 1
             return (
               <fieldset key={iop}>
-                <legend>{iop}</legend>
+                <legend>
+                  <span>{iop}</span>
+                  {sharedIopDate ? (
+                    <span className="ar-recon-flight-picker__iop-date">{sharedIopDate}</span>
+                  ) : null}
+                </legend>
                 {iopFlights.map((flight) => (
                   <label key={flight.id} className="ar-recon-flight-picker__option">
                     <input
@@ -208,7 +241,7 @@ export default function ArReconControls({ familyState, projection, updateFamily 
                       style={{ backgroundColor: getArReconFlightColor(flight.id) }}
                       aria-hidden="true"
                     />
-                    <span>{flightOptionLabel(flight, iopFlights)}</span>
+                    <span>{flightOptionLabel(flight, iopFlights, hasConflictingDates)}</span>
                   </label>
                 ))}
               </fieldset>

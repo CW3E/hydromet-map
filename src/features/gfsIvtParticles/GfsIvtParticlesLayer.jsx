@@ -1,23 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 const CUSTOM_LAYER_ID = 'gfs-ivt-particle-custom-layer'
 const PARTICLE_COUNT = 6400
 const MAX_AGE = 280
 const HISTORY_LENGTH = 64
-const MANIFEST_CACHE = new Map()
 
 function resolveUrl(relativeUrl, baseUrl) {
   return new URL(relativeUrl, baseUrl).toString()
-}
-
-async function loadManifest(url) {
-  if (!MANIFEST_CACHE.has(url)) {
-    MANIFEST_CACHE.set(url, fetch(url).then((response) => {
-      if (!response.ok) throw new Error(`IVT manifest request failed (${response.status})`)
-      return response.json()
-    }))
-  }
-  return MANIFEST_CACHE.get(url)
 }
 
 function readUint32(bytes, offset) {
@@ -403,24 +392,15 @@ function createParticleLayer(map, field, palette) {
   }
 }
 
-export default function GfsIvtParticlesLayer({ appState, ivtConfig, mapInstance }) {
-  const [manifest, setManifest] = useState(null)
+export default function GfsIvtParticlesLayer({
+  appState,
+  ivtConfig,
+  ivtManifest: manifest,
+  ivtManifestUrl: manifestUrl,
+  mapInstance,
+}) {
   const layerRef = useRef(null)
-  const manifestUrl = ivtConfig?.manifestUrl
   const forecastHour = Number.parseInt(appState.family?.forecastHour ?? '0', 10)
-
-  useEffect(() => {
-    let cancelled = false
-    if (!manifestUrl) return undefined
-    loadManifest(manifestUrl)
-      .then((nextManifest) => {
-        if (!cancelled) setManifest(nextManifest)
-      })
-      .catch((error) => console.warn('Could not load GFS IVT manifest', error))
-    return () => {
-      cancelled = true
-    }
-  }, [manifestUrl])
 
   useEffect(() => {
     if (!mapInstance || !manifest || appState.projection !== 'mercator') return undefined

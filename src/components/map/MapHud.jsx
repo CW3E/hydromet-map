@@ -32,6 +32,7 @@ export default function MapHud({
   updateFamily,
   updateTopLevel,
   toggleLayer,
+  ivtCatalog,
   ivtManifest,
   ivtConfig,
 }) {
@@ -181,6 +182,8 @@ export default function MapHud({
           <div className="ar-recon-combined-controls">
             <ArReconControls
               familyState={appState.family}
+              ivtCatalog={ivtCatalog}
+              ivtCycle={ivtConfig?.cycle}
               projection={appState.projection}
               updateFamily={updateFamily}
             />
@@ -378,6 +381,8 @@ export default function MapHud({
         {ivtConfig && appState.layers.gfsIvtParticles && appState.family ? (
           <GfsIvtControls
             familyState={appState.family}
+            catalog={ivtCatalog}
+            config={ivtConfig}
             manifest={ivtManifest}
             updateFamily={updateFamily}
           />

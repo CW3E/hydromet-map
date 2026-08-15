@@ -776,7 +776,9 @@ const GLOBAL_HYDRO_SELECTORS = {
 }
 
 export const GFS_IVT_NORTH_PACIFIC = {
-  manifestUrl: 'https://cw3e.ucsd.edu/hydro/gfs/ivt/north_pacific/20260812/18/manifest.json',
+  catalogUrl: 'https://cw3e.ucsd.edu/hydro/gfs/ivt/north_pacific/catalog.json',
+  manifestUrl: 'https://cw3e.ucsd.edu/hydro/gfs/ivt/north_pacific/20260312/00/manifest.json',
+  cycle: '00',
   units: 'kg m\u207B\u00B9 s\u207B\u00B9',
   palette: {
     thresholds: ['0', '250', '500', '750', '1000', '1250', '1500'],
@@ -799,9 +801,11 @@ export const LAYER_FAMILIES = {
     kind: 'ivt-particles',
     ...GFS_IVT_NORTH_PACIFIC,
     defaultState: {
+      initializationDate: '2026-03-12',
       forecastHour: '0',
     },
     bookmarkFields: {
+      initializationDate: 'gid',
       forecastHour: 'fh',
     },
   },
@@ -823,6 +827,7 @@ export const LAYER_FAMILIES = {
       verticalExaggeration: '20',
       aircraftVisible: true,
       sondesVisible: true,
+      initializationDate: '2026-03-12',
       forecastHour: '0',
       variable: 'precipitationDaily',
       product: 'NRT',
@@ -837,6 +842,7 @@ export const LAYER_FAMILIES = {
       verticalExaggeration: 'arx',
       aircraftVisible: 'ara',
       sondesVisible: 'ars',
+      initializationDate: 'gid',
       forecastHour: 'fh',
     },
   },

@@ -12,7 +12,13 @@ Read `docs/particle-tracers.md` before changing a particle tracer, its published
 - Map lifecycle: `src/components/map/MapCanvas.jsx`
 - Controls and legend: `src/components/map/MapHud.jsx`
 
-Search these symbols before editing: `GFS_IVT_NORTH_PACIFIC`, `ivt-particles`, `gfsIvtParticles`, `forecastHour`, and `fh`.
+Search these symbols before editing: `GFS_IVT_NORTH_PACIFIC`, `ivt-particles`, `gfsIvtParticles`, `initializationDate`, `forecastHour`, `gid`, and `fh`.
+
+For archived runs, configure a dataset-level `catalogUrl` plus a known-good
+`manifestUrl` fallback. Catalog manifests should be relative URLs so the archive
+can move as one directory tree. Initialization date and forecast hour are
+separate family state fields and both should remain bookmarkable. Generate the
+catalog with `tools/gfs_ivt/build_catalog.py` after publishing new runs.
 
 ## Procedure
 
@@ -43,4 +49,3 @@ Search these symbols before editing: `GFS_IVT_NORTH_PACIFIC`, `ivt-particles`, `
 - Pan through the dateline in both directions.
 - Check the palette, magnitude legend, units, and narrow-screen layout.
 - Inspect performance before increasing density or trail length.
-

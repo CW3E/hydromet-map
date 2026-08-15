@@ -1,8 +1,9 @@
 # GFS IVT WebGL preprocessing
 
-`build_gfs_ivt.py` downloads pressure-level GFS forecast subsets from NOAA
-NOMADS, calculates vertically integrated vapor transport (IVT), and creates
-textures suitable for a WebGL particle-advection layer.
+`build_gfs_ivt.py` downloads pressure-level GFS forecasts from NOAA NOMADS,
+the NOAA Open Data Dissemination AWS bucket, or the NCEI historical archive;
+calculates vertically integrated vapor transport (IVT); and creates textures
+suitable for a WebGL particle-advection layer.
 
 ## Environment
 
@@ -32,6 +33,46 @@ python tools/gfs_ivt/build_gfs_ivt.py \
   --hours 0:48:3 \
   --output /path/to/web-root/gfs-ivt/20260812/18
 ```
+
+The default `--source auto` uses NOMADS for runs no more than ten days old,
+then falls back to AWS and NCEI. For older runs it starts with AWS, avoiding
+predictable retries against NOMADS' short rolling archive. A source can also be
+selected explicitly:
+
+```bash
+python tools/gfs_ivt/build_gfs_ivt.py \
+  --source aws \
+  --date 20230205 --cycle 00 --hours 0:48:3 \
+  --west 100 --east -100 --south 0 --north 70 \
+  --output /path/to/web-root/gfs-ivt/20230205/00
+```
+
+Available values are `auto`, `nomads`, `aws`, and `ncei`.
+
+### Archive sources
+
+NOMADS performs variable, pressure-level, and geographic subsetting on the
+server, so it remains the preferred source for recent runs.
+
+For AWS, the script reads the public object's `.idx` inventory and makes
+parallel HTTP byte-range requests for only SPFH, UGRD, and VGRD at the 17 IVT
+pressure levels plus PRES at the surface. It does not require AWS credentials
+or the AWS CLI. Use `--download-workers` to tune the number of concurrent range
+requests; the default is 8. AWS records are global, so the requested geographic
+domain is cropped locally after decoding.
+
+NCEI is the final historical fallback. The script tries the known current and
+legacy THREDDS file layouts and downloads a complete GRIB file because the
+archive does not expose the same `.idx` record-selection path. Archived files
+may use a coarser grid or a different GFS version. The script warns when NCEI is
+used, derives the actual resolution from the file, and records it rather than
+claiming that the result is 0.25 degree.
+
+Every timestep in `manifest.json` contains a `dataSource` object with the
+provider and source URL. The manifest's top-level `dataSources` list summarizes
+the providers used, and its model label is based on the decoded grid spacing.
+If different forecast hours unexpectedly resolve to incompatible grids, the
+existing grid-consistency check stops the run.
 
 For an explicit set of hours, use `--hours 0,6,12,18,24`. Add
 `--delete-grib` to remove each source GRIB after successful processing.
@@ -130,3 +171,24 @@ using the available pressure levels. When surface pressure exceeds 1000 hPa,
 the script extends the 1000 hPa transport value to the surface. A production
 workflow should compare its output against an independently validated IVT
 product and document the chosen vertical bounds and below-ground treatment.
+
+## Build the published run catalog
+
+After adding or replacing runs, scan the dataset root and write the catalog used
+by the map's initialization-date picker:
+
+```bash
+python tools/gfs_ivt/build_catalog.py \
+  /path/to/web-root/gfs/ivt/north_pacific
+```
+
+The default output is `catalog.json` in that dataset root. The scanner finds
+`YYYYMMDD/HH/manifest.json`, validates that each manifest agrees with its
+directory, checks all referenced texture and mask files, and writes the result
+atomically. A bad or incomplete run stops the update, leaving the existing
+catalog intact. Use `--output` only when the catalog must be staged elsewhere.
+
+The generated catalog lists initialization dates and relative manifest URLs,
+newest first. Rerun the command whenever published runs change, then ensure the
+web server serves `catalog.json` and the manifests with CORS enabled. A short
+cache lifetime for the catalog is helpful; textures can remain long-lived.

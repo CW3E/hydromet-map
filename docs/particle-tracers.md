@@ -10,7 +10,15 @@ The data path is:
 2. The job publishes one RGBA texture and validity mask per time step, plus a manifest.
 3. Layer-family configuration supplies the manifest URL, units, palette, defaults, and bookmark fields.
 4. `GfsIvtParticlesLayer.jsx` loads and decodes the selected time step, advects particles, and draws their trails as a MapLibre custom layer.
-5. `GfsIvtControls.jsx` and `MapHud.jsx` expose forecast-time selection and a magnitude legend.
+5. `GfsIvtControls.jsx` and `MapHud.jsx` expose initialization-date and forecast-time selection plus a magnitude legend.
+
+For a multi-run archive, publish a dataset-level `catalog.json` beside the dated
+run directories. Its `runs` entries provide `date`, `cycle`, and a manifest path
+relative to the catalog URL. The map enables only cataloged initialization dates,
+then loads the selected run manifest to populate forecast lead times. Keep a
+single `manifestUrl` in configuration as a graceful fallback while a catalog is
+temporarily unavailable. `tools/gfs_ivt/build_catalog.py` generates and validates
+this catalog from the published directory tree.
 
 The preprocessor can be model-specific. Keeping its output compatible with the contract below lets the web renderer remain reusable.
 
@@ -131,6 +139,13 @@ The custom layer must be recreated after a basemap style reload. Test this expli
 5. Generalize GFS- or IVT-specific UI text before using the renderer for another source or variable.
 6. Decide whether the new layer replaces an existing tracer or must coexist with it; coexistence requires unique renderer IDs.
 
+For historical GFS runs, `tools/gfs_ivt/build_gfs_ivt.py --source auto` selects
+between recent NOMADS subsets, indexed byte-range downloads from NOAA's public
+AWS bucket, and the NCEI historical archive. Each timestep records its provider
+and source URL. Preserve this provenance when publishing derived datasets, and
+do not silently treat a coarser archived grid or older model version as the
+current 0.25-degree GFS.
+
 ## Validation Checklist
 
 - Compare decoded component and magnitude ranges with the source data.
@@ -143,4 +158,3 @@ The custom layer must be recreated after a basemap style reload. Test this expli
 - Confirm palette thresholds, units, and legend layout.
 - Test a narrow viewport and a representative lower-powered browser.
 - Run `npm run build` after application-code or configuration changes.
-

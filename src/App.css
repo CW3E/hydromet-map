@@ -548,12 +548,26 @@ button:disabled {
 }
 
 .ivt-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.28rem;
   max-width: calc(100vw - 1.7rem);
-  padding: 0.22rem 0.3rem;
+  padding: calc(0.16rem - 1px) 0.3rem;
   border: 1px solid rgba(14, 116, 144, 0.35);
   border-radius: 12px;
   background: rgba(236, 254, 255, 0.92);
   box-shadow: 0 2px 8px rgba(8, 51, 68, 0.12);
+}
+
+.ivt-controls__date {
+  width: 7.35rem;
+}
+
+.ivt-controls__date-field .react-datepicker-wrapper,
+.ivt-controls__date-field .react-datepicker__input-container {
+  display: block;
+  width: 7.35rem;
 }
 
 .ivt-controls label {
@@ -571,7 +585,7 @@ button:disabled {
   align-items: center;
   gap: 0.25rem;
   max-width: min(760px, calc(100vw - 1.7rem));
-  padding: 0.2rem;
+  padding: calc(0.14rem - 1px) 0.2rem;
   border: 1px solid rgba(181, 118, 20, 0.42);
   border-radius: 12px;
   background: rgba(255, 238, 204, 0.9);
@@ -585,7 +599,7 @@ button:disabled {
   align-items: center;
   gap: 0.22rem;
   max-width: min(920px, calc(100vw - 1.7rem));
-  padding: 0.2rem;
+  padding: calc(0.14rem - 1px) 0.2rem;
   border: 1px solid rgba(181, 118, 20, 0.42);
   border-radius: 12px;
   background: rgba(255, 238, 204, 0.9);
@@ -814,6 +828,13 @@ button:disabled {
   color: #567080;
   font-size: 0.73rem;
   font-weight: 700;
+}
+
+.ar-recon-flight-picker__iop-date {
+  margin-left: 0.32rem;
+  color: #718896;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .ar-recon-flight-picker__option {
@@ -1308,10 +1329,14 @@ button:disabled {
 
 .map-legend {
   position: absolute;
-  top: 5.9rem;
+  top: var(--map-legend-top, 5.9rem);
   left: 0.85rem;
   z-index: 2;
   width: fit-content;
+}
+
+.map-legend--compact-units {
+  --map-legend-top: 6.3rem;
 }
 
 .mouse-readout {

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import math
 import re
@@ -21,6 +22,8 @@ from PIL import Image
 
 
 NOMADS_FILTER_URL = "https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl"
+AWS_GFS_ROOT = "https://noaa-gfs-bdp-pds.s3.amazonaws.com"
+NCEI_ROOT = "https://www.ncei.noaa.gov/thredds/fileServer"
 GRAVITY = 9.80665
 PRESSURE_LEVELS_HPA = (
     1000, 975, 950, 925, 900, 850, 800, 750, 700, 650, 600, 550, 500,
@@ -37,6 +40,10 @@ def parse_args() -> argparse.Namespace:
         help="Forecast hours: colon range start:stop:step (inclusive) or comma list",
     )
     parser.add_argument("--output", type=Path, default=Path("gfs-ivt-webgl"))
+    parser.add_argument(
+        "--source", choices=("auto", "nomads", "aws", "ncei"), default="auto",
+        help="Data source; auto tries NOMADS, AWS, then the NCEI archive",
+    )
     parser.add_argument("--north", type=float, default=70.0)
     parser.add_argument("--south", type=float, default=10.0)
     parser.add_argument("--west", type=float, default=-180.0)
@@ -47,6 +54,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--timeout", type=float, default=300.0)
     parser.add_argument("--retries", type=int, default=4)
+    parser.add_argument(
+        "--download-workers", type=int, default=8,
+        help="Parallel HTTP range requests used for AWS indexed downloads",
+    )
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--delete-grib", action="store_true")
     return parser.parse_args()
@@ -89,6 +100,8 @@ def validate_args(args: argparse.Namespace) -> datetime:
         raise ValueError("longitude bounds must describe a positive west-to-east span")
     if args.component_limit <= 0:
         raise ValueError("--component-limit must be positive")
+    if args.download_workers <= 0:
+        raise ValueError("--download-workers must be positive")
     return init_time
 
 
@@ -155,6 +168,221 @@ def download(url: str, destination: Path, timeout: float, retries: int) -> None:
             delay = min(30, 2 ** attempt)
             print(f"  attempt {attempt} failed; retrying in {delay}s: {exc}", file=sys.stderr)
             time.sleep(delay)
+
+
+def aws_object_url(args: argparse.Namespace, forecast_hour: int) -> str:
+    filename = f"gfs.t{args.cycle}z.pgrb2.0p25.f{forecast_hour:03d}"
+    return f"{AWS_GFS_ROOT}/gfs.{args.date}/{args.cycle}/atmos/{filename}"
+
+
+def parse_gfs_index(index_text: str) -> list[dict[str, object]]:
+    records: list[dict[str, object]] = []
+    for line in index_text.splitlines():
+        parts = line.split(":")
+        if len(parts) < 5 or not parts[0].isdigit() or not parts[1].isdigit():
+            continue
+        records.append({
+            "number": int(parts[0]),
+            "offset": int(parts[1]),
+            "variable": parts[3].upper(),
+            "level": parts[4].lower(),
+        })
+    if not records:
+        raise RuntimeError("AWS GFS index contained no recognizable records")
+    for index, record in enumerate(records[:-1]):
+        record["end"] = int(records[index + 1]["offset"]) - 1
+    records[-1]["end"] = None
+    return records
+
+
+def select_ivt_records(
+    records: list[dict[str, object]],
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    wanted_levels = {f"{level} mb" for level in PRESSURE_LEVELS_HPA}
+    pressure = [
+        record for record in records
+        if record["variable"] in {"SPFH", "UGRD", "VGRD"}
+        and record["level"] in wanted_levels
+    ]
+    surface = [
+        record for record in records
+        if record["variable"] in {"PRES", "SP"}
+        and record["level"] == "surface"
+    ]
+    expected = len(PRESSURE_LEVELS_HPA) * 3
+    if len(pressure) != expected:
+        found = {(str(item["variable"]), str(item["level"])) for item in pressure}
+        raise RuntimeError(
+            f"AWS GFS index supplied {len(pressure)} of {expected} required "
+            f"pressure-level records; found {len(found)} unique variable/level pairs",
+        )
+    if not surface:
+        raise RuntimeError("AWS GFS index is missing PRES at the surface")
+    return pressure, [surface[0]]
+
+
+def fetch_range(
+    url: str,
+    record: dict[str, object],
+    timeout: float,
+    retries: int,
+) -> tuple[int, bytes]:
+    start = int(record["offset"])
+    end = record["end"]
+    range_value = f"bytes={start}-{'' if end is None else int(end)}"
+    for attempt in range(1, retries + 1):
+        try:
+            response = requests.get(
+                url,
+                headers={"Range": range_value},
+                timeout=(30, timeout),
+            )
+            response.raise_for_status()
+            if response.status_code != 206:
+                raise RuntimeError(
+                    f"server ignored byte range {range_value} (status {response.status_code})",
+                )
+            payload = response.content
+            if not payload.startswith(b"GRIB"):
+                raise RuntimeError(f"byte range {range_value} is not a GRIB message")
+            return int(record["number"]), payload
+        except (requests.RequestException, RuntimeError) as exc:
+            if attempt == retries:
+                raise RuntimeError(f"range {range_value} failed: {exc}") from exc
+            time.sleep(min(30, 2 ** attempt))
+    raise AssertionError("unreachable")
+
+
+def download_aws_records(
+    url: str,
+    records: list[dict[str, object]],
+    destination: Path,
+    args: argparse.Namespace,
+) -> None:
+    temporary = destination.with_suffix(destination.suffix + ".part")
+    messages: dict[int, bytes] = {}
+    try:
+        with ThreadPoolExecutor(max_workers=args.download_workers) as executor:
+            futures = [
+                executor.submit(
+                    fetch_range, url, record, args.timeout, args.retries,
+                )
+                for record in records
+            ]
+            for future in as_completed(futures):
+                number, payload = future.result()
+                messages[number] = payload
+        with temporary.open("wb") as output:
+            for number in sorted(messages):
+                output.write(messages[number])
+        temporary.replace(destination)
+    except Exception:
+        temporary.unlink(missing_ok=True)
+        raise
+
+
+def download_from_aws(
+    args: argparse.Namespace,
+    forecast_hour: int,
+    pressure_path: Path,
+    surface_path: Path,
+) -> dict[str, str]:
+    object_url = aws_object_url(args, forecast_hour)
+    index_url = object_url + ".idx"
+    response = requests.get(index_url, timeout=(30, args.timeout))
+    response.raise_for_status()
+    pressure_records, surface_records = select_ivt_records(parse_gfs_index(response.text))
+    print(f"  AWS: downloading {len(pressure_records) + 1} indexed GRIB records")
+    download_aws_records(object_url, pressure_records, pressure_path, args)
+    download_aws_records(object_url, surface_records, surface_path, args)
+    return {"source": "aws", "url": object_url, "indexUrl": index_url}
+
+
+def ncei_candidate_urls(args: argparse.Namespace, forecast_hour: int) -> list[str]:
+    month = args.date[:6]
+    time_token = f"{args.cycle}00"
+    hour = f"{forecast_hour:03d}"
+    candidates: list[str] = []
+    for collection, prefix in (
+        ("model-gfs-004-files", "gfs_3"),
+        ("model-gfs-004-files", "gfs_4"),
+        ("model-gfs-004-files-old", "gfs_4"),
+    ):
+        filename = f"{prefix}_{args.date}_{time_token}_{hour}.grb2"
+        candidates.append(f"{NCEI_ROOT}/{collection}/{month}/{args.date}/{filename}")
+    return candidates
+
+
+def download_from_ncei(
+    args: argparse.Namespace,
+    forecast_hour: int,
+    pressure_path: Path,
+) -> dict[str, str]:
+    errors = []
+    for url in ncei_candidate_urls(args, forecast_hour):
+        try:
+            print(f"  NCEI: trying {url}")
+            download(url, pressure_path, args.timeout, max(1, min(args.retries, 2)))
+            print(
+                "  warning: NCEI historical grids may differ from 0.25-degree GFS; "
+                "the actual grid will be recorded in the manifest",
+                file=sys.stderr,
+            )
+            return {"source": "ncei", "url": url}
+        except RuntimeError as exc:
+            errors.append(str(exc))
+    raise RuntimeError("NCEI candidates unavailable: " + "; ".join(errors))
+
+
+def download_inputs(
+    args: argparse.Namespace,
+    forecast_hour: int,
+    pressure_path: Path,
+    surface_path: Path,
+) -> tuple[dict[str, str], Path]:
+    if args.source == "auto":
+        init_time = datetime.strptime(args.date + args.cycle, "%Y%m%d%H").replace(
+            tzinfo=timezone.utc,
+        )
+        # NOMADS is a short rolling archive. Avoid several predictable retries
+        # for historical runs, while retaining its efficient spatial subsetting
+        # for recent data.
+        recent_cutoff = datetime.now(timezone.utc) - timedelta(days=10)
+        sources = (
+            ("nomads", "aws", "ncei")
+            if init_time >= recent_cutoff
+            else ("aws", "ncei")
+        )
+    else:
+        sources = (args.source,)
+    errors = []
+    for source in sources:
+        pressure_path.unlink(missing_ok=True)
+        surface_path.unlink(missing_ok=True)
+        try:
+            if source == "nomads":
+                pressure_url = build_download_url(args, forecast_hour)
+                surface_url = build_download_url(args, forecast_hour, surface_only=True)
+                download(pressure_url, pressure_path, args.timeout, args.retries)
+                download(surface_url, surface_path, args.timeout, args.retries)
+                return {
+                    "source": "nomads",
+                    "url": pressure_url,
+                    "surfaceUrl": surface_url,
+                }, surface_path
+            if source == "aws":
+                return (
+                    download_from_aws(
+                        args, forecast_hour, pressure_path, surface_path,
+                    ),
+                    surface_path,
+                )
+            provenance = download_from_ncei(args, forecast_hour, pressure_path)
+            return provenance, pressure_path
+        except (requests.RequestException, RuntimeError) as exc:
+            errors.append(f"{source}: {exc}")
+            print(f"  {source} unavailable: {exc}", file=sys.stderr)
+    raise RuntimeError("all requested data sources failed: " + " | ".join(errors))
 
 
 def describe_dataset(dataset: xr.Dataset) -> str:
@@ -321,6 +549,25 @@ def orient_grid(
     return latitude, longitude, oriented
 
 
+def crop_grid(
+    latitude: np.ndarray,
+    longitude: np.ndarray,
+    args: argparse.Namespace,
+    *fields: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, list[np.ndarray]]:
+    """Crop full archived grids after normalizing their longitude convention."""
+    latitude_mask = (latitude >= args.south - 1e-8) & (latitude <= args.north + 1e-8)
+    if is_global_domain(args):
+        longitude_mask = np.ones(longitude.shape, dtype=bool)
+    else:
+        east = args.east + 360.0 if crosses_dateline(args) else args.east
+        longitude_mask = (longitude >= args.west - 1e-8) & (longitude <= east + 1e-8)
+    if not latitude_mask.any() or not longitude_mask.any():
+        raise RuntimeError("requested domain does not intersect the downloaded GFS grid")
+    cropped = [field[np.ix_(latitude_mask, longitude_mask)] for field in fields]
+    return latitude[latitude_mask], longitude[longitude_mask], cropped
+
+
 def encode_component(component: np.ndarray, limit: float) -> np.ndarray:
     normalized = np.clip((component + limit) / (2.0 * limit), 0.0, 1.0)
     return np.rint(normalized * 65535.0).astype(np.uint16)
@@ -356,23 +603,39 @@ def process_hour(
     surface_grib_path = raw_dir / f"{stem}_surface.grib2"
     texture_path = texture_dir / f"{stem}_ivt.png"
     mask_path = texture_dir / f"{stem}_mask.png"
-    if not grib_path.exists() or args.overwrite:
-        print(f"Downloading f{forecast_hour:03d}")
-        download(build_download_url(args, forecast_hour), grib_path, args.timeout, args.retries)
+    provenance_path = raw_dir / f"{stem}_source.json"
+    cached_provenance = (
+        json.loads(provenance_path.read_text(encoding="utf-8"))
+        if provenance_path.exists()
+        else None
+    )
+    source_mismatch = (
+        args.source != "auto"
+        and cached_provenance is not None
+        and cached_provenance.get("source") != args.source
+    )
+    if (
+        not grib_path.exists()
+        or (not surface_grib_path.exists() and not provenance_path.exists())
+        or source_mismatch
+        or args.overwrite
+    ):
+        print(f"Downloading f{forecast_hour:03d} (source={args.source})")
+        provenance, actual_surface_path = download_inputs(
+            args, forecast_hour, grib_path, surface_grib_path,
+        )
+        provenance_path.write_text(json.dumps(provenance, indent=2) + "\n", encoding="utf-8")
     else:
         print(f"Using existing {grib_path}")
-    if not surface_grib_path.exists() or args.overwrite:
-        print(f"Downloading f{forecast_hour:03d} surface pressure")
-        download(
-            build_download_url(args, forecast_hour, surface_only=True),
-            surface_grib_path,
-            args.timeout,
-            args.retries,
+        provenance = cached_provenance or {
+            "source": "existing-local",
+            "url": str(grib_path),
+        }
+        actual_surface_path = (
+            surface_grib_path if surface_grib_path.exists() else grib_path
         )
-    else:
-        print(f"Using existing {surface_grib_path}")
 
-    pressure, surface_pressure = open_grib(grib_path, surface_grib_path)
+    pressure, surface_pressure = open_grib(grib_path, actual_surface_path)
     try:
         ivt_u, ivt_v = integrate_ivt(
             pressure.isobaricInhPa.values,
@@ -389,6 +652,9 @@ def process_hour(
             ivt_u,
             ivt_v,
         )
+        latitude, longitude, (ivt_u, ivt_v) = crop_grid(
+            latitude, longitude, args, ivt_u, ivt_v,
+        )
     finally:
         pressure.close()
 
@@ -399,7 +665,8 @@ def process_hour(
     clipped = valid & ((np.abs(ivt_u) > args.component_limit) | (np.abs(ivt_v) > args.component_limit))
     if args.delete_grib:
         grib_path.unlink(missing_ok=True)
-        surface_grib_path.unlink(missing_ok=True)
+        if actual_surface_path != grib_path:
+            actual_surface_path.unlink(missing_ok=True)
 
     return {
         "forecastHour": forecast_hour,
@@ -413,6 +680,7 @@ def process_hour(
         },
         "clippedFraction": float(clipped.sum() / max(1, valid.sum())),
         "validFraction": float(valid.mean()),
+        "dataSource": provenance,
         "grid": {
             "width": int(longitude.size),
             "height": int(latitude.size),
@@ -451,10 +719,13 @@ def main() -> int:
     first_grid = timesteps[0]["grid"]
     if any(item["grid"] != first_grid for item in timesteps[1:]):
         raise RuntimeError("forecast hours produced inconsistent grids")
+    source_names = sorted({str(item["dataSource"]["source"]) for item in timesteps})
+    resolution = float(first_grid["dx"])
     manifest = {
         "schemaVersion": 1,
-        "model": "NOAA GFS 0.25 degree",
+        "model": f"NOAA GFS {resolution:g} degree",
         "initializationTime": init_time.isoformat().replace("+00:00", "Z"),
+        "dataSources": source_names,
         "units": "kg m-1 s-1",
         "integration": {
             "topPressureHpa": min(PRESSURE_LEVELS_HPA),
