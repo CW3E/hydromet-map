@@ -11,6 +11,7 @@ This file provides guidance for coding agents working in this repository. Projec
 - Do not revert unrelated user changes.
 - Keep generated URLs, layer IDs, project IDs, and bookmark params stable and backward-compatible when possible.
 - Use the project skill `.codex/skills/hydromet-map-config-workflow` for map configuration work involving projects, layers, popups, legends, raster families, or bookmarkable state.
+- When helping domain experts propose data or visualization changes, use plain scientific language, welcome incomplete inputs, and keep Git, CI, and application internals in the background unless requested.
 
 ## Validation
 

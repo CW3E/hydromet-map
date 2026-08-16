@@ -1,6 +1,6 @@
 ---
 name: hydromet-map-config-workflow
-description: Project-specific workflow for adding, modifying, or debugging hydromet-map map configuration. Use when Codex works on projects, GeoJSON/vector layers, vector tile layers, raster tile overlays, raster families, particle tracer or gridded vector-field layers, MapLibre custom WebGL rendering, layer source registration, controls, popups, legends/colormaps, project defaults, or bookmarkable map state in the hydromet-map repository.
+description: Project-specific workflow for adding, modifying, or debugging hydromet-map map configuration and for guiding meteorology or hydrology domain experts from a data idea to a reviewed map contribution. Use when Codex works on projects, GeoJSON/vector layers, vector tile layers, raster tile overlays, raster families, particle tracer or gridded vector-field layers, MapLibre custom WebGL rendering, layer source registration, controls, popups, legends/colormaps, project defaults, bookmarkable map state, or scientist-led layer and project proposals in the hydromet-map repository.
 ---
 
 # Hydromet Map Config Workflow
@@ -9,11 +9,16 @@ Use this skill to make map configuration changes in the `hydromet-map` repositor
 
 ## Start Here
 
-1. Inspect the current implementation before editing:
+1. Determine whether the requester is providing scientific intent or directing
+   implementation. For a domain-expert proposal, incomplete request, sample
+   dataset, or visualization idea, read `references/domain-contributor-intake.md`
+   before asking questions or editing. Keep Git, CI, and framework mechanics in
+   the background unless the requester wants them.
+2. Inspect the current implementation before editing:
    - `src/config/mapConfig.js`
    - `src/components/map/MapCanvas.jsx`
    - components that own project selection, layer controls, raster selectors, legends, popups, or bookmark URLs
-2. Identify whether the request is for:
+3. Identify whether the request is for:
    - a project or project default
    - a single GeoJSON/vector source
    - a vector tile source/layer
@@ -21,7 +26,7 @@ Use this skill to make map configuration changes in the `hydromet-map` repositor
    - a raster family with variable/date/product/ensemble dimensions
    - an animated particle tracer or custom WebGL vector field
    - interaction-only changes such as hover, click, popup, or time-series behavior
-3. Preserve existing naming, grouping, and config conventions. Add new abstractions only when they reduce repeated configuration logic or match an existing local pattern.
+4. Preserve existing naming, grouping, and config conventions. Add new abstractions only when they reduce repeated configuration logic or match an existing local pattern.
 
 ## File Discovery
 
@@ -118,6 +123,11 @@ Before finishing:
 6. For particle tracers, also test a basemap switch without changing time, dateline/world wrapping, at least two time steps, remote CORS loading, and representative browser performance.
 
 ## Optional References
+
+Read `references/domain-contributor-intake.md` when a meteorologist,
+hydrologist, data producer, or other domain expert describes data or intended
+map behavior without specifying implementation details. Also read it when an
+agent is turning a GitHub layer/project proposal into an implementation.
 
 Read `references/project-patterns.md` when the task adds a new project, changes project defaults, assigns layers to projects, or updates project-specific bookmark behavior.
 

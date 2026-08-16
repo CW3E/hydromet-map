@@ -1,3 +1,4 @@
-display_name: Hydromet Map Config
-short_description: Maintain hydromet map projects, layers, tracers, popups, and map config.
-default_prompt: Use this skill when adding or changing hydromet map projects, layers, raster families, particle tracers, popups, legends, or bookmarkable map state.
+interface:
+  display_name: "Hydromet Map Contributions"
+  short_description: "Guide domain experts and maintain hydromet maps."
+  default_prompt: "Use $hydromet-map-config-workflow to turn my scientific data or map idea into a validated hydromet-map contribution."

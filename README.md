@@ -27,6 +27,9 @@
 - `papaparse` or a similar library for parsing CSV data
 
 ## Documentation
+- Contribution guide: [CONTRIBUTING.md](./CONTRIBUTING.md)
+- Domain-expert contribution path:
+  [docs/contributing/README.md](./docs/contributing/README.md)
 - Documentation index: [docs/README.md](./docs/README.md)
 - Developer reference:
   [docs/architecture.md](./docs/architecture.md),

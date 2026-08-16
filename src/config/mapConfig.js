@@ -795,20 +795,6 @@ export const GFS_IVT_NORTH_PACIFIC = {
 }
 
 export const LAYER_FAMILIES = {
-  gfsIvt: {
-    id: 'gfsIvt',
-    label: 'GFS IVT North Pacific',
-    kind: 'ivt-particles',
-    ...GFS_IVT_NORTH_PACIFIC,
-    defaultState: {
-      initializationDate: '2026-03-12',
-      forecastHour: '0',
-    },
-    bookmarkFields: {
-      initializationDate: 'gid',
-      forecastHour: 'fh',
-    },
-  },
   arRecon: {
     id: 'arRecon',
     label: 'AR Recon Flights',
@@ -1003,27 +989,6 @@ function buildDefaultProjectState(projectDefinition) {
 }
 
 export const PROJECTS = {
-  gfsIvt: {
-    id: 'gfsIvt',
-    label: 'GFS IVT North Pacific',
-    documentTitle: 'GFS Integrated Vapor Transport — North Pacific',
-    statusButtonEnabled: false,
-    logoUrl: 'https://cw3e.ucsd.edu/images/CW3E_Logos/5-Vertical-Acronym_Only/Digital/PNG/CW3E-Logo-Vertical-Acronym-FullColor.png',
-    logoAlt: 'Center for Western Weather and Water Extremes (CW3E)',
-    logoHref: 'https://cw3e.ucsd.edu',
-    defaultView: {
-      center: '-160,20',
-      zoom: '1.2',
-      bearing: '0',
-      pitch: '0',
-    },
-    defaultBasemapId: 'terrain',
-    defaultTerrainEnabled: false,
-    defaultProjection: 'mercator',
-    layerFamilyId: 'gfsIvt',
-    availableLayerIds: ['gfsIvtParticles'],
-    defaultVisibleLayerIds: ['gfsIvtParticles'],
-  },
   arRecon: {
     id: 'arRecon',
     label: 'AR Recon',

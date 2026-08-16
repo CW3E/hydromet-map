@@ -29,6 +29,15 @@ These are the task-oriented guides for project developers:
 
 - [How-To Guides](./how-to/README.md)
 
+## Domain Contributors
+
+Meteorologists, hydrologists, data producers, and other domain experts can
+contribute without writing code or using Git:
+
+- [Domain Contributor Guide](./contributing/README.md)
+- [Share Your Data](./contributing/share-your-data.md)
+- [Review a Map Preview](./contributing/review-a-map-preview.md)
+
 ## App-User Guides
 
 This section is not built out yet, but the intended home is:

@@ -1,0 +1,69 @@
+name: Propose a map layer
+description: Share a dataset or visualization idea. No code or Git experience is needed.
+title: "[Layer idea]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for sharing your expertise. A short description is enough to begin.
+        An AI agent or maintainer can inspect samples, ask follow-up questions, and handle the software work.
+
+  - type: textarea
+    id: meaning
+    attributes:
+      label: What do the data represent?
+      description: Describe the phenomenon, product, or scientific question in your own words.
+      placeholder: These data show...
+    validations:
+      required: true
+
+  - type: textarea
+    id: sample
+    attributes:
+      label: Where can we find a sample or documentation?
+      description: Paste a URL, drag in a file, or link to documentation. It is okay if the source is not final.
+      placeholder: Sample URL, documentation link, filename, or attachment
+    validations:
+      required: true
+
+  - type: textarea
+    id: coverage
+    attributes:
+      label: What area and time period do the data cover?
+      description: Approximate answers are welcome. Mention update frequency or forecast lead times if relevant.
+      placeholder: For example, western United States; hourly from 2000 to present
+    validations:
+      required: true
+
+  - type: textarea
+    id: presentation
+    attributes:
+      label: How should people see or explore the data?
+      description: Describe colors, thresholds, labels, animation, hover/click information, or an example map. Screenshots and sketches are welcome.
+      placeholder: I would like users to...
+    validations:
+      required: true
+
+  - type: input
+    id: scientific_contact
+    attributes:
+      label: Who can confirm the scientific result?
+      description: A GitHub username, name, team, or contact is enough.
+      placeholder: Name or @username
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else we should know?
+      description: Optional units, time conventions, missing-data rules, attribution, caveats, or incomplete questions can go here.
+
+  - type: checkboxes
+    id: expectations
+    attributes:
+      label: Contribution path
+      options:
+        - label: I understand that I can contribute scientific guidance and review without writing code or using Git.
+          required: true
+

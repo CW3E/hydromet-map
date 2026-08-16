@@ -1,0 +1,64 @@
+name: Propose a map project
+description: Describe a map experience for a region, audience, campaign, or scientific purpose.
+title: "[Project idea]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        You do not need to design the software architecture. Tell us who the map is for,
+        what it should communicate, and which data are important.
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: What is the project's purpose and audience?
+      placeholder: This map will help...
+    validations:
+      required: true
+
+  - type: textarea
+    id: region
+    attributes:
+      label: What region and initial map view should it emphasize?
+      description: A place name, bounding box, screenshot, or existing map link is sufficient.
+    validations:
+      required: true
+
+  - type: textarea
+    id: data
+    attributes:
+      label: Which datasets or existing layers should it include?
+      description: List what you know. New dataset proposals can be developed alongside the project.
+    validations:
+      required: true
+
+  - type: textarea
+    id: experience
+    attributes:
+      label: What should users be able to see or do?
+      description: Consider defaults, time controls, legends, comparisons, clicks, plots, animation, 3D, or other interactions.
+    validations:
+      required: true
+
+  - type: input
+    id: scientific_contact
+    attributes:
+      label: Who can review the scientific result?
+      placeholder: Name or @username
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Samples, sketches, branding, attribution, or other context
+      description: Optional links and attachments are welcome. Incomplete ideas are welcome too.
+
+  - type: checkboxes
+    id: expectations
+    attributes:
+      label: Contribution path
+      options:
+        - label: I understand that an AI agent or maintainer can handle the implementation and Git workflow.
+          required: true
+
